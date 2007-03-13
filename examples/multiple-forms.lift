@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<lift lang="en" version="0.8">
+  <!--
+  \lx jɔ̃dẽ̀
+  \lxt ยองเด่ง
+  \dia Ratburi
+  \a jə̀ŋdɐ̃̀ʲ
+  \ps N
+  \gt เอว
+  \ge waist
+  \so lang1.42.6
+  \sd body
+  \dat 21/Feb/2003
+  -->
+  <entry id="jɔ̃dẽ̀">
+    <lex>
+      <form lang="zxx-latn-fonipa">jɔ̃dẽ̀</form>
+      <form lang="zxx-Thai">ยองเด่ง</form>
+    </lex>
+    <var>
+      <trait range="dialects" value="Ratburi"/>
+      <form lang="zxx-latn-fonipa">jə̀ŋdɐ̃̀ʲ</form>
+    </var>
+    <sense id="jɔ̃dẽ̀_" dateCreated="2003-02-21">
+      <grammi value="N"/>
+      <gloss lang="th">เอว</gloss>
+      <gloss lang="en">waist</gloss>
+      <note type="source" lang="en">lang1.42.6</note>
+      <trait range="semantic-domain" value="body"/>
+    </sense>
+  </entry>
+</lift>

@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<lift lang="en" version="0.8">
+  <!--
+  \lx hete
+  \ps vt
+  \ge cut
+  \de cut into sections for
+  use
+  \lf Gen = lata
+  \le cut
+  \pd -k
+  -->
+  <entry id="hete">
+    <lex>hete</lex>
+    <sense id="hete_">
+      <gloss>
+        <form lang="en">cut</form>
+      </gloss>
+      <def lang="en">cut into sectios for use</def>
+      <relation relation="gen" sense="lata_"/>
+    </sense>
+    <var>
+      <trait range="variant-type" value="paradigm"/>
+      <form>hetek</form>
+    </var>
+  </entry>
+</lift>

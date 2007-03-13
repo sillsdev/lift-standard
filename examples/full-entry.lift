@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<lift lang="en" version="0.8">
+  <!-- 
+  \lx abat
+  \ps n
+  \ge grove
+  \gn dusun
+  \rf d2.077.03
+  \xv Kbwai abatke ti ksweruk nurare.
+  \xe I went to the coconut groves to clear the grass.
+  \xn Saya pergi menyiangi dusun kelapa.
+  \rf d4.079.16
+  \xv Kbwa ti ktwan nurke o abatke.
+  \xe I'm going to plant coconut trees in the grove.
+  \xn Saya pergi tanam kelapa di dusun.
+  \ee This is uc:not limited to coconut groves but is used for mangoes, etc.
+  \sg abatke
+  \dt 26/Feb/90
+  -->
+  <entry id="abat" dateModified="1990-02-26">
+    <lex lang="zxx-Latn">abat</lex>
+    <var>
+      <trait range="paradigm" value="sing"/>
+      <form lang="zxx-Latn">abatke</form>
+    </var>
+    <sense id="abat_">
+      <grammi value="n"/>
+      <gloss lang="en">grove</gloss>
+      <gloss lang="id">dusun</gloss>
+      <example source="d2.077.03">
+        <form lang="zxx-Latn">Kbwai abatke to ksweruk nurare.</form>
+        <trans lang="en">I went to the coconut groves to clear the grass.</trans>
+        <trans lang="id">Saya pergi menyiangi dusun kelapa.</trans>
+      </example>
+      <example source="d4.079.16">
+        <form lang="zxx-Latn">Kbwa ti ktwan nurke o abatke.</form>
+        <trans lang="en">I'm going to plant coconut trees in the grove.</trans>
+        <trans lang="id">Saya pergi tanam kelapa di dusun.</trans>
+      </example>
+      <note type="encyclopedic">
+        <form lang="en">This is <span class="emphasis">not</span> limited 
+          to coconut groves but is used for mangoes, etc.</form>
+      </note>
+    </sense>
+  </entry>
+</lift>

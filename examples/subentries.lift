@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<lift lang="en" version="0.8">
+  <!--
+  \lx brush
+  \ps n
+  \ge bristly_instrument
+  \de bristly instrument used for cleaning, arranging or applying 
+  a liquid to something
+  \se hairbrush
+  \ps n
+  \de kind of brush typically with stiff one inch long bristles
+  loosely spaced arranged perpendicularly to the handle
+  for rearranging hair
+  \se paintbrush
+  \ps n
+  \de kind of brush of varying sizes and varying lengths and
+  textures of bristles arranged as an extension of the handle used
+  to apply paint and similar materials
+  -->
+  <entry id="brush">
+    <lex>brush</lex>
+    <sense id="brush_">
+      <grammi value="n"/>
+      <gloss lang="en">bristly instrument</gloss>
+      <def lang="en">
+        bristly instrument used for cleaning, arranging or
+        applying a liquid to something
+      </def>
+      <subentry ref="hairbrush"/>
+      <subentry ref="paintbrush"/>
+    </sense>
+  </entry>
+  <entry id="hairbrush">
+    <lex>hairbrush</lex>
+    <sense id="hairbrush_">
+      <grammi value="n"/>
+      <def lang="en">kind of brush typically with stiff one inch long
+        bristles loosely spaced arranged perpendicularly to the
+        handle for rearranging hair</def>
+    </sense>
+  </entry>
+  <entry id="paintbrush">
+    <lex>paintbrush</lex>
+    <sense id="paintbrush_">
+      <grammi value="n"/>
+      <def lang="en">kind of brush of varying sizes and varying lengths
+        and textures of bristles arranged as an extension of the
+        handle used to apply paint and similar materials</def>
+    </sense>
+  </entry>
+</lift>
