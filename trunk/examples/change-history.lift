@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<lift lang="zxx-Latn" version="0.8">
+  <entry id="test">
+    <lex>
+      <form>test</form>
+    </lex>
+    <!-- other information including <sense> here -->
+    <annotate range="status" value="changed" date="2003-04-05" who="Sally">
+      <comment lang="en">Create the original record</comment>
+    </annotate>
+    <annotate range="status" value="changed" date="2004-05-06" who="Fed">
+      <comment lang="en"> Add quality definitions</comment>
+    </annotate>
+  </entry>
+</lift>

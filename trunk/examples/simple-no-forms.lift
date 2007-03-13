@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<lift lang="zxx-Latn">
+  <!--
+  \lx srapa
+  \ps vt
+  \ge slap
+  \de slap with open hand
+  \dt 27/Aug/91
+  -->
+  <entry id="srapa" dateModified="1991-08-27">
+    <lex lang="zxx-Latn">srapa</lex>
+    <sense id="srapa_">
+      <grammi value="vt"/>
+      <gloss lang="en">slap</gloss>
+      <def lang="en">slap with open hand</def>
+    </sense>
+  </entry>
+</lift>

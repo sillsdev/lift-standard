@@ -1,0 +1,597 @@
+<grammar datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" 
+         xmlns="http://relaxng.org/ns/structure/1.0">
+  <!-- open issues: should there be a defined ordering or can all elements be
+  interleaved -->
+  <!-- I think we should do away with simplified forms. They will cause people
+  to trip up. -->
+  <!-- I think reversals are needlessly complex.-->
+  <!-- variants only exist on entries (not senses) is that right? -->
+
+  <!-- ========================================================= date or dateTime -->
+  <define name="date.or.dateTime">
+    <choice>
+      <data type="date"/>
+      <data type="dateTime"/>
+    </choice>
+  </define>
+  
+  <!-- ===================================================================== span -->
+  <define name="span-required.lang.attribute">
+    <attribute name="lang"/>
+    <!-- rfc 4646 -->
+    <ref name="span-base-content"/>
+  </define>
+
+  <define name="span-base-content">
+    <optional>
+      <attribute name="href">
+        <data type="anyURI"/>
+      </attribute>
+    </optional>
+    <optional>
+      <attribute name="class"/>
+      <!-- problem: how does one associate the class with style info -->
+    </optional>
+    <optional>
+      <attribute name="style"/>
+      <!-- problem: why not omit and use class only?
+           Gives a css1 representation of the formatting of the text -->
+    </optional>
+    <!-- I can see the use of being able to identify the language of a span and 
+    I can see how sometimes you need to highlight some piece say the word in an
+    example sentence but beyond that I really don't like how wide open this is. -->
+    <interleave>
+      <text/>
+      <zeroOrMore>
+        <element name="span">
+          <ref name="span"/>
+          <!-- problem: multiple paragraphs are indicated by multiple span 
+            elements -->
+        </element>
+      </zeroOrMore>
+    </interleave>
+  </define>
+
+  <define name="span">
+    <optional>
+      <attribute name="lang"/>
+      <!-- rfc 4646 -->
+    </optional>
+    <ref name="span-base-content"/>
+  </define>
+
+  <!-- ================================================================ multitext -->
+  <define name="multitext">
+    <choice>
+      <group>
+        <optional>
+          <attribute name="lang"/>
+          <!-- problem: I thought we were going to do away with inheritance of 
+          lang -->
+        </optional>
+        <text/>
+        <!-- problem: I thought we had said there would only be one way to
+                   encode forms and that we weren't going to try to make the
+                   distinction between writing systems of different scripts and
+                   writing systems of different languages. -->
+      </group>
+      <interleave>
+        <text/>
+        <zeroOrMore>
+          <element name="form">
+            <ref name="span"/>
+          </element>
+        </zeroOrMore>
+      </interleave>
+    </choice>
+  </define>
+
+  <!-- ================================================= multitext-lang.required -->
+  <define name="multitext-lang.required">
+    <choice>
+      <group>
+        <attribute name="lang"/>
+        <text/>
+        <!-- problem: I thought we had said there would only be one way to
+                   encode forms and that we weren't going to try to make the
+                   distinction between writing systems of different scripts and
+                   writing systems of different languages. -->
+      </group>
+      <interleave>
+        <text/>
+        <zeroOrMore>
+          <element name="form">
+            <ref name="span-required.lang.attribute"/>
+          </element>
+        </zeroOrMore>
+      </interleave>
+    </choice>
+  </define>
+
+  <!-- =================================================================== URLRef -->
+  <define name="URLRef">
+    <attribute name="loc">
+      <data type="anyURI"/>
+    </attribute>
+    <optional>
+      <element name="label">
+        <ref name="multitext-lang.required"/>
+      </element>
+    </optional>
+  </define>
+
+  <!-- ==================================================================== field -->
+  <define name="field">
+    <!-- problem: the indirection doesn't seem to be necessary or helpful -->
+    <ref name="multitext-lang.required"/>
+    <attribute name="tag"/>
+    <optional>
+      <attribute name="time">
+        <!-- problem: name time isn't really descriptive of the reason for wanting 
+             to store a time. Maybe instead we should have dateModified/dateCreated
+             only-->
+        <ref name="date.or.dateTime"/>
+      </attribute>
+    </optional>
+    <optional>
+      <attribute name="value"/>
+    </optional>
+    <zeroOrMore>
+      <element name="trait">
+        <ref name="flag"/>
+      </element>
+    </zeroOrMore>
+    <zeroOrMore>
+      <element name="form">
+        <ref name="span"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <!-- ===================================================================== flag -->
+  <define name="flag">
+    <attribute name="range"/>
+    <!-- problem: I think this should be called type now-->
+    <attribute name="value"/>
+  </define>
+
+  <!-- =============================================================== annotation -->
+  <define name="annotation">
+    <ref name="flag"/>
+    <!-- problem: spec says inheritance is trait but type is flag-->
+    <optional>
+      <attribute name="who"/>
+    </optional>
+    <optional>
+      <attribute name="date">
+        <!-- problem: why not call this when (parallel to who)-->
+        <ref name="date.or.dateTime"/>
+      </attribute>
+    </optional>
+    <optional>
+      <element name="comment">
+        <ref name="multitext-lang.required"/>
+      </element>
+    </optional>
+  </define>
+
+  <!-- =============================================================== extensible -->
+  <define name="extensible">
+    <optional>
+      <attribute name="dateCreated">
+        <ref name="date.or.dateTime"/>
+      </attribute>
+      </optional>
+    <optional>
+      <attribute name="dateModified">
+        <ref name="date.or.dateTime"/>
+      </attribute>
+    </optional>
+    <zeroOrMore>
+      <element name="field">
+        <ref name="field"/>
+      </element>
+    </zeroOrMore>
+    <zeroOrMore>
+      <element name="trait">
+        <ref name="flag"/>
+      </element>
+    </zeroOrMore>
+    <zeroOrMore>
+      <element name="annotate">
+        <ref name="annotation"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <!-- ===================================================================== note -->
+  <define name="note">
+    <attribute name="type"/>
+    <!-- problem: do we really want to require type?-->
+    <ref name="multitext-lang.required"/>
+    <ref name="extensible"/>
+    <optional>
+      <element name="label">
+        <ref name="multitext"/>
+        <!-- problem: lang not required on this multitext -->
+      </element>
+    </optional>
+  </define>
+
+  <!-- ================================================================= phonetic -->
+  <define name="phonetic">
+    <ref name="multitext"/>
+    <!-- problem: lang not required on this multitext -->
+    <ref name="extensible"/>
+    <zeroOrMore>
+      <element name="media">
+        <ref name="URLRef"/>
+      </element>
+    </zeroOrMore>
+    <zeroOrMore>
+      <element name="form">
+        <ref name="span"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <!-- =============================================================== etymology -->
+  <define name="etymology">
+    <ref name="multitext"/>
+    <!-- problem: lang allowed on this multitext (but source is actually doing
+    the job! -->
+    <ref name="extensible"/>
+    <attribute name="type"/>
+    <attribute name="source"/>
+    <optional>
+      <element name="gloss">
+        <ref name="multitext-lang.required"/>
+      </element>
+    </optional>
+  </define>
+
+  <!-- ================================================================== grammi -->
+  <define name="grammi">
+    <attribute name="value"/>
+    <!-- problem: not extensible -->
+  </define>
+
+  <!-- ================================================================= reversal -->
+  <define name="reversal">
+    <ref name="multitext-lang.required"/>
+    <ref name="extensible"/>
+    <optional>
+      <attribute name="id"/>
+    </optional>
+    <attribute name="type"/>
+    <!-- do we really want this to be required? -->
+    <optional>
+      <element name="main">
+        <!-- problem: main is not a very informative label here of what is a 
+        super category -->
+        <ref name="reversal"/>
+      </element>
+    </optional>
+    <!-- problem: I believe the intent here is to either allow a main or a mainRef-->
+    <!-- problem: seems like normaliztion is not buying us much here and instead
+    increasing the complexity -->
+    <optional>
+      <element name="mainRef">
+        <!-- problem: mainRef is not a very informative label here of what is a
+        reference to a super category -->
+        <ref name="reversalRef"/>
+      </element>
+    </optional>
+  </define>
+
+  <!-- ============================================================= reversalRef -->
+  <define name="reversalRef">
+    <attribute name="type"/>
+    <attribute name="ref"/>
+  </define>
+
+
+  <!-- ================================================================== example -->
+  <define name="example">
+    <ref name="multitext"/>
+    <!-- problem: lang not required on this multitext -->
+    <ref name="extensible"/>
+    <optional>
+      <attribute name="source"/>
+    </optional>
+    <oneOrMore>
+      <!-- problem: should be optional, we can't really enforce this and it 
+      just gets in the way, monolingual dictionaries wouldn't even require-->
+      <element name="trans">
+        <!-- problem: shortened names should be avoided -->
+        <ref name="multitext-lang.required"/>
+      </element>
+    </oneOrMore>
+  </define>
+
+  <!-- ================================================================= relation -->
+  <define name="relation">
+    <ref name="extensible"/>
+    <attribute name="relation"/>
+    <attribute name="sense"/>
+    <optional>
+      <attribute name="order">
+        <data type="integer"/>
+      </attribute>
+    </optional>
+    <optional>
+      <element name="usage">
+        <ref name="multitext-lang.required"/>
+      </element>
+    </optional>
+  </define>
+
+  <!-- ================================================================= refentry -->
+  <define name="refentry">
+    <!-- problem: does double duty for entries and senses, why not split them
+    so it is obvious what you are pointing at-->
+    <attribute name="ref"/>
+  </define>
+
+  <!-- ================================================================== variant -->
+  <define name="variant">
+    <ref name="extensible"/>
+    <ref name="multitext"/>
+    <!-- problem: lang not required -->
+    <zeroOrMore>
+      <element name="ph">
+        <!-- problem short name should be fully specified (pronunciation)-->
+        <ref name="phonetic"/>
+      </element>
+    </zeroOrMore>
+    <zeroOrMore>
+      <element name="relation">
+        <ref name="relation"/>
+      </element>
+    </zeroOrMore>
+    <zeroOrMore>
+      <element name="trait">
+        <ref name="flag"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <!-- ==================================================================== sense -->
+  <define name="sense">
+    <attribute name="id"/>
+    <!-- problem: required-->
+    <optional>
+      <!-- problem: unfortunate definition of required and optional depending
+      on sibling or not. A pain to express. Why not use document order as a fallback
+      if unspecified? -->
+      <attribute name="order">
+        <data type="integer"/>
+        <!-- should this be non-zero positive integer? -->
+      </attribute>
+    </optional>
+
+    <interleave>
+      <ref name="extensible"/>
+      <zeroOrMore>
+        <!-- problem: multiple should not be allowed-->
+        <element name="grammi">
+          <!-- problem: name is shortened. Should use more informative name-->
+          <ref name="grammi"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="gloss">
+          <ref name="multitext-lang.required"/>
+          <!-- problem: should have way to identify this from an analyzed text (id)-->
+          <!-- I thought we did away with the distinction between script and 
+        language here -->
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="def">
+          <!-- problem: shortened from should be definition-->
+          <ref name="multitext-lang.required"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="relation">
+          <ref name="relation"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="etymology">
+          <ref name="etymology"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="note">
+          <ref name="note"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="example">
+          <ref name="example"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="reverse">
+          <!--problem: unfortunate choice of name why not reversal
+          from examples looks like maybe it should be reversal
+          but spec and uml say reverse-->
+          <ref name="reversal"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="reverseRef">
+          <!--problem: unfortunate choice of name why not reversalRef-->
+          <ref name="reversalRef"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="picture">
+          <!-- problem: the technical word here is illustration -->
+          <ref name="URLRef"/>
+          <!-- problem: spec says of type media but media doesn't exist.
+             I think it should be URLRef-->
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="subsense">
+          <ref name="sense"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="subentry">
+          <ref name="refentry"/>
+        </element>
+      </zeroOrMore>
+
+    </interleave>
+  </define>
+
+  <!-- ==================================================================== entry -->
+  <define name="entry">
+    <attribute name="id"/>
+    <!-- problem: do we really want to force every entry to have an id? -->
+    <optional>
+      <attribute name="order">
+        <data type="integer"/>
+        <!-- problem: should this be positive non-zero integer? -->
+      </attribute>
+    </optional>
+
+    <interleave>
+      <ref name="extensible"/>
+      <element name="lex">
+        <!-- problem: does this really need to be required? -->
+        <!-- problem: shortened name, the literature uses lexical unit-->
+        <ref name="multitext"/>
+        <!-- problem: lang not required-->
+      </element>
+      <optional>
+        <element name="citation">
+          <ref name="multitext"/>
+        </element>
+      </optional>
+      <optional>
+        <!-- problem: shouldn't this be multiple?-->
+        <element name="subentry">
+          <ref name="refentry"/>
+          <!-- problem: spec says refid, I think should be refentry -->
+        </element>
+      </optional>
+      <zeroOrMore>
+        <element name="ph">
+          <!-- problem shortened name, should be pronunciation-->
+          <ref name="phonetic"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="sense">
+          <ref name="sense"/>
+        </element>
+      </zeroOrMore>
+      <!--  problem: I thought we got rid of allomorphs as just 
+        another variant. Spec references them here but doesn't define them.
+
+    <zeroOrMore>
+      <element name="allomorph">
+        <ref name="allomorph"/>
+      </element>
+    </zeroOrMore>
+    -->
+      <zeroOrMore>
+        <element name="var">
+          <!-- problem: shortened form should use variant-->
+          <ref name="variant"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="relation">
+          <ref name="relation"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="note">
+          <ref name="note"/>
+        </element>
+      </zeroOrMore>
+    </interleave>
+    <!-- what about summary definition-->
+  </define>
+
+  <define name="field-defn">
+    <attribute name="tag"/>
+    <zeroOrMore>
+      <element name="description">
+        <ref name="multitext-lang.required"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <define name="field-defns">
+    <zeroOrMore>
+      <element name="field">
+        <ref name="field-defn"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <define name="range-ref">
+    <attribute name="id"/>
+    <attribute name="url">
+      <data type="anyURI"/>
+    </attribute>
+    <attribute name="guid"/>
+  </define>
+
+  <define name="range-refs">
+    <zeroOrMore>
+      <element name="range">
+        <ref name="range-ref"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <define name="header">
+    <optional>
+      <element name="ranges">
+        <ref name="range-refs"/>
+      </element>
+    </optional>
+    <optional>
+      <element name="fields">
+        <ref name="field-defns"/>
+      </element>
+    </optional>
+    <!-- here is another place that a defined order makes sense -->
+  </define>
+
+  <define name="lift">
+    <attribute name="lang"/>
+    <!-- problem: I thought we got rid of default lang -->
+    <optional>
+      <!-- problem: here's one place it does make sense to require it-->
+      <attribute name="version">
+        <value>0.8</value>
+      </attribute>
+    </optional>
+    <optional>
+      <element name="header">
+        <ref name="header"/>
+      </element>
+    </optional>
+    <zeroOrMore>
+      <element name="entry">
+        <ref name="entry"/>
+      </element>
+    </zeroOrMore>
+    <!-- here's one place where I think we do want a defined order -->
+  </define>
+
+  <start>
+    <element name="lift">
+      <ref name="lift"/>
+    </element>
+  </start>
+</grammar>

@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<lift lang="en" version="0.8">
+  <!--
+  \lx apu1
+  \ps n
+  \ge lime
+  \re lime; chalk
+  \de lime slaked from burning seashells and used as an 
+  ingredient in chewing betelnut
+  \lf synD = ahul
+  \le Lisela, Rana dialects
+  \et *apuR
+  \eg lime, chalk
+  -->
+  <entry id="apu">
+    <lex>apu</lex>
+    <sense id="apu_">
+      <grammi value="n"/>
+      <gloss lang="en">lime</gloss>
+      <reverse type="eng" lang="en">lime</reverse>
+      <reverse type="eng" lang="en">lime</reverse>
+      <def lang="en">
+        lime slaked from burning seashells and used as an
+        ingredient in chewing betelnut
+      </def>
+      <etymology type="proto" source="proto-ind">
+        <form>apuR</form>
+        <gloss lang="eng">lime, chalk</gloss>
+      </etymology>
+    </sense>
+    <var>
+      <trait range="dialect" value="lisela"/>
+      <trait range="dialect" value="rana"/>
+      <form>ahul</form>
+    </var>
+  </entry>
+</lift>
