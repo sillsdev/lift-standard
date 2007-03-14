@@ -1,15 +1,17 @@
 <?xml version="1.0"?>
-<lift lang="zxx-Latn" version="0.8">
+<lift version="0.9">
   <entry id="test">
-    <lex>
-      <form>test</form>
-    </lex>
+    <lexical-unit>
+      <form lang="zxx-Latn">test</form>
+    </lexical-unit>
     <!-- other information including <sense> here -->
-    <annotate range="status" value="changed" date="2003-04-05" who="Sally">
-      <comment lang="en">Create the original record</comment>
-    </annotate>
-    <annotate range="status" value="changed" date="2004-05-06" who="Fed">
-      <comment lang="en"> Add quality definitions</comment>
-    </annotate>
+    <trait name="status" value="changed">
+      <annotation name="status" value="changed" when="2003-04-05" who="Sally">
+        <form lang="en">Create the original record</form>
+      </annotation>
+      <annotation name="status" value="changed" when="2004-05-06" who="Fred">
+        <form lang="en">Add quality definitions</form>
+      </annotation>
+    </trait>
   </entry>
 </lift>
