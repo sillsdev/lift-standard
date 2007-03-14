@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift lang="en" version="0.8">
+<lift version="0.9">
   <!--
   \lx jɔ̃dẽ̀
   \lxt ยองเด่ง
@@ -13,20 +13,24 @@
   \dat 21/Feb/2003
   -->
   <entry id="jɔ̃dẽ̀">
-    <lex>
+    <lexical-unit>
       <form lang="zxx-latn-fonipa">jɔ̃dẽ̀</form>
       <form lang="zxx-Thai">ยองเด่ง</form>
-    </lex>
-    <var>
-      <trait range="dialects" value="Ratburi"/>
+    </lexical-unit>
+    <variant>
+      <trait name="dialects" value="Ratburi"/>
       <form lang="zxx-latn-fonipa">jə̀ŋdɐ̃̀ʲ</form>
-    </var>
+    </variant>
     <sense id="jɔ̃dẽ̀_" dateCreated="2003-02-21">
-      <grammi value="N"/>
-      <gloss lang="th">เอว</gloss>
-      <gloss lang="en">waist</gloss>
-      <note type="source" lang="en">lang1.42.6</note>
-      <trait range="semantic-domain" value="body"/>
+      <grammatical-info value="N"/>
+      <gloss>
+      <form lang="th">เอว</form>
+        <form lang="en">waist</form>
+      </gloss>
+      <note type="source">
+        <form lang="en">lang1.42.6</form>
+      </note>
+      <trait name="semantic-domain" value="body"/>
     </sense>
   </entry>
 </lift>

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift lang="en" version="0.8">
+<lift version="0.9">
   <!-- 
   \lx abat
   \ps n
@@ -18,24 +18,32 @@
   \dt 26/Feb/90
   -->
   <entry id="abat" dateModified="1990-02-26">
-    <lex lang="zxx-Latn">abat</lex>
-    <var>
-      <trait range="paradigm" value="sing"/>
+    <lexical-unit>
+      <form lang="zxx-Latn">abat</form>
+    </lexical-unit>
+    <variant>
+      <trait name="paradigm" value="singular"/>
       <form lang="zxx-Latn">abatke</form>
-    </var>
+    </variant>
     <sense id="abat_">
-      <grammi value="n"/>
-      <gloss lang="en">grove</gloss>
-      <gloss lang="id">dusun</gloss>
+      <grammatical-info value="n"/>
+      <gloss>
+        <form lang="en">grove</form>
+        <form lang="id">dusun</form>
+      </gloss>
       <example source="d2.077.03">
         <form lang="zxx-Latn">Kbwai abatke to ksweruk nurare.</form>
-        <trans lang="en">I went to the coconut groves to clear the grass.</trans>
-        <trans lang="id">Saya pergi menyiangi dusun kelapa.</trans>
+        <translation>
+          <form lang="en">I went to the coconut groves to clear the grass.</form>
+          <form lang="id">Saya pergi menyiangi dusun kelapa.</form>
+        </translation>
       </example>
       <example source="d4.079.16">
         <form lang="zxx-Latn">Kbwa ti ktwan nurke o abatke.</form>
-        <trans lang="en">I'm going to plant coconut trees in the grove.</trans>
-        <trans lang="id">Saya pergi tanam kelapa di dusun.</trans>
+        <translation>
+          <form lang="en">I'm going to plant coconut trees in the grove.</form>
+          <form lang="id">Saya pergi tanam kelapa di dusun.</form>
+        </translation>
       </example>
       <note type="encyclopedic">
         <form lang="en">This is <span class="emphasis">not</span> limited 

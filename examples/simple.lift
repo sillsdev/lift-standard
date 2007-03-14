@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift lang="zxx-Latn">
+<lift version="0.9">
   <!--
   \lx srapa
   \ps vt
@@ -8,17 +8,17 @@
   \dt 27/Aug/91
   -->
   <entry id="srapa" dateModified="1991-08-27">
-    <lex>
+    <lexical-unit>
       <form lang="zxx-Latn">srapa</form>
-    </lex>
+    </lexical-unit>
     <sense id="srapa_">
-      <grammi value="vt"/>
-      <gloss >
+      <grammatical-info value="vt"/>
+      <gloss>
         <form lang="en">slap</form>
       </gloss>
-      <def>
+      <definition>
         <form lang="en">slap with open hand</form>
-      </def>
+      </definition>
     </sense>
   </entry>
 </lift>

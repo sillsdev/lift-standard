@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<lift version="0.9">
+  <entry id="hugal">
+    <lexical-unit>
+      <form lang="zxx-Latn">hugal</form>
+    </lexical-unit>
+    <sense id="hugal_cards">
+      <grammatical-info value="n"/>
+      <definition>
+        <form lang="en">A <span class="essence">playing card</span>; 
+       a <span class="essence">deck of playing cards</span>.</form>
+      </definition>
+    </sense>
+    <sense id="hugal_gamble">
+      <grammatical-info value="n"/>
+      <definition>
+        <form lang="en">The activity of
+          <span class="essence">playing cards, gambling with cards</span>.</form>
+      </definition>
+      <relation name="subentry" ref="munhugal_gamble"/>
+    </sense>
+    <sense>
+      <relation name="subentry" ref="humugal_win"/>
+      <relation name="subentry" ref="hugálon_win"/>
+    </sense>
+    <sense>
+      <relation name="subentry" ref="munhugal_lose"/>
+      <relation name="subentry" ref="ihugal_lose"/>
+    </sense>
+  </entry>
+  
+  <entry id="hugálon">
+    <lexical-unit>
+      <form lang="zxx-Latn">hugálon</form>
+    </lexical-unit>
+    <sense id="hugálon_win">
+      <grammatical-info value="v"/>
+      <definition>
+        <form lang="en">An opponent's stake
+          <span class="essence">will be won</span> by someone
+          <span class="essence">in gambling with playing cards</span>.
+        </form>
+      </definition>
+    </sense>
+  </entry>
+  
+  <entry id="humugal">
+    <lexical-unit>
+      <form lang="zxx-Latn">humugal</form>
+    </lexical-unit>
+    <sense  id="humugal_win">
+      <grammatical-info value="v"/>
+      <definition>
+        <form lang="en">
+          Someone <span class="essence">will win</span> an
+          opponent's stake <span class="essence">in gambling with playing cards</span>.
+        </form>
+      </definition>
+    </sense>
+  </entry>
+  
+  <entry id="ihugal">
+    <lexical-unit>
+      <form lang="zxx-Latn">ihugal</form>
+    </lexical-unit>
+    <sense id="ihugal_lose">
+      <grammatical-info value="v"/>
+      <definition>
+        <form lang="en">Money, an article of value,
+          <span class="essence">will be lost</span> by someone
+          <span class="essence">in gambling with playing cards</span>.
+        </form>
+      </definition>
+    </sense>
+  </entry>
+  
+  <entry id="munhugal">
+    <lexical-unit>
+      <form lang="zxx-Latn">munhugal</form>
+    </lexical-unit>
+    <sense id="munhugal_gamble">
+      <grammatical-info value="v"/>
+      <definition>
+        <form lang="en">Two or more 
+          <span class="essence">will play cards, gamble with playing cards</span>.
+        </form>
+      </definition>
+    </sense>
+    <sense id="munhugal_lose">
+      <grammatical-info value="v"/>
+      <definition>
+        <form lang="en">
+          Someone <span class="essence">will lose</span> money,
+          an article of value, <span class="essence">in gabling with playing cards</span>.
+        </form>
+      </definition>
+    </sense>
+  </entry>
+</lift>
