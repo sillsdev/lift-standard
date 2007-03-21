@@ -1,0 +1,487 @@
+<grammar datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" 
+         xmlns="http://relaxng.org/ns/structure/1.0"
+         xmlns:sch="http://purl.oclc.org/dsdl/schematron">
+  <!-- variants only exist on entries (not senses) is that right? -->
+
+
+  <!-- ========================================================= date or dateTime -->
+  <define name="date.or.dateTime">
+    <choice>
+      <data type="date"/>
+      <data type="dateTime"/>
+    </choice>
+  </define>
+  
+  <!-- ===================================================================== form -->
+  <define name="form">
+    <attribute name="lang"/>
+    <!-- rfc 4646 -->
+    <optional>
+      <attribute name="traits"/>
+    </optional>
+    <ref name="span"/>
+  </define>
+
+  <define name="span">
+    <interleave>
+      <text/>
+      <zeroOrMore>
+        <element name="span">
+          <optional>
+            <attribute name="lang"/>
+            <!-- rfc 4646 -->
+          </optional>
+          <optional>
+            <attribute name="href">
+              <data type="anyURI"/>
+            </attribute>
+          </optional>
+          <optional>
+            <attribute name="class"/>
+          </optional>
+          <ref name="span"/>
+        </element>
+      </zeroOrMore>
+    </interleave>
+  </define>
+
+  <!-- ================================================================ multitext -->
+  <define name="multitext">
+    <zeroOrMore>
+      <element name="form">
+        <ref name="form"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <!-- =================================================================== URLRef -->
+  <define name="URLRef">
+    <attribute name="href">
+      <data type="anyURI"/>
+    </attribute>
+    <optional>
+      <element name="label">
+        <ref name="multitext"/>
+      </element>
+    </optional>
+  </define>
+
+  <!-- ==================================================================== field -->
+  <define name="field">
+    <ref name="multitext"/>
+    <attribute name="tag"/>
+    <optional>
+      <attribute name="dateCreated">
+        <ref name="date.or.dateTime"/>
+      </attribute>
+    </optional>
+    <optional>
+      <attribute name="dateModified">
+        <ref name="date.or.dateTime"/>
+      </attribute>
+    </optional>
+    <zeroOrMore>
+      <element name="trait">
+        <ref name="flag"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <!-- ===================================================================== flag -->
+  <define name="flag">
+    <attribute name="name"/>
+    <attribute name="value"/>
+    <optional>
+      <attribute name="id"/>
+    </optional>
+    <zeroOrMore>
+      <element name="annotation">
+        <ref name="annotation"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <!-- =============================================================== annotation -->
+  <define name="annotation">
+    <ref name="flag"/>
+    <optional>
+      <attribute name="who"/>
+    </optional>
+    <optional>
+      <attribute name="when">
+        <ref name="date.or.dateTime"/>
+      </attribute>
+    </optional>
+    <optional>
+      <ref name="multitext"/>
+    </optional>
+  </define>
+
+  <!-- =============================================================== extensible -->
+  <define name="extensible">
+    <optional>
+      <attribute name="dateCreated">
+        <ref name="date.or.dateTime"/>
+      </attribute>
+      </optional>
+    <optional>
+      <attribute name="dateModified">
+        <ref name="date.or.dateTime"/>
+      </attribute>
+    </optional>
+    <zeroOrMore>
+      <element name="field">
+        <ref name="field"/>
+      </element>
+    </zeroOrMore>
+    <zeroOrMore>
+      <element name="trait">
+        <ref name="flag"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <!-- ===================================================================== note -->
+  <define name="note">
+    <optional>
+      <attribute name="type"/>
+    </optional>
+    <ref name="multitext"/>
+    <ref name="extensible"/>
+  </define>
+
+  <!-- ================================================================= phonetic -->
+  <define name="phonetic">
+    <ref name="multitext"/>
+    <ref name="extensible"/>
+    <zeroOrMore>
+      <element name="media">
+        <ref name="URLRef"/>
+      </element>
+    </zeroOrMore>
+    <zeroOrMore>
+      <element name="form">
+        <ref name="form"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <!-- =============================================================== etymology -->
+  <define name="etymology">
+    <attribute name="type"/>
+    <attribute name="source"/>
+    <interleave>
+      <optional>
+        <element name="form">
+          <ref name="span"/>
+          <!-- doesn't include lang attribute here since that information is 
+          provided in source attribute-->
+          <!-- maybe we should put source here or use lang but that doesn't 
+          have to meet rfc 4646-->
+        </element>
+      </optional>
+      <optional>
+        <element name="gloss">
+          <ref name="multitext"/>
+        </element>
+      </optional>
+      <ref name="extensible"/>
+
+    </interleave>
+  </define>
+
+  <!-- ================================================================== grammi -->
+  <define name="grammi">
+    <attribute name="value"/>
+  </define>
+
+  <!-- ================================================================= reversal -->
+  <define name="reversal">
+    <ref name="multitext"/>
+    <ref name="extensible"/>
+    <optional>
+      <attribute name="type"/>
+    </optional>
+    <optional>
+      <element name="main">
+        <!-- problem: main is not a very informative label here of what is a 
+        super category -->
+        <ref name="reversal"/>
+        <!-- problem: type shouldn't be specified here-->
+        <sch:rule context="main">
+          <sch:assert test="parent::reversal/form">
+            A main should not exist without a form
+          </sch:assert>
+        </sch:rule>
+      </element>
+    </optional>
+  </define>
+
+  <!-- ================================================================== example -->
+  <define name="example">
+    <ref name="multitext"/>
+    <ref name="extensible"/>
+    <optional>
+      <attribute name="source"/>
+    </optional>
+    <zeroOrMore>
+      <element name="translation">
+        <optional>
+          <attribute name="type"/> <!-- back | free | literal -->
+        </optional>
+        <sch:rule context="translation" >
+          <sch:assert test="not(preceding-sibling::translation[@type=current()/@type])">
+            Translations should be of different types.
+          </sch:assert>
+        </sch:rule>
+        <ref name="multitext"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <!-- ================================================================= relation -->
+  <define name="relation">
+    <!-- @ref is a @name relation of parent-->
+    <ref name="extensible"/>
+    <attribute name="name"/>
+    <ref name="refentry"/>
+    <optional>
+      <attribute name="order">
+        <data type="integer"/>
+      </attribute>
+    </optional>
+    <optional>
+      <element name="usage">
+        <ref name="multitext"/>
+      </element>
+    </optional>
+  </define>
+
+  <!-- ================================================================= refentry -->
+  <define name="refentry">
+    <attribute name="ref"/>
+  </define>
+
+  <!-- ================================================================== variant -->
+  <define name="variant">
+    <ref name="extensible"/>
+    <ref name="multitext"/>
+    <optional>
+      <ref name="refentry"/>
+    </optional>
+    <zeroOrMore>
+      <element name="pronunciation">
+        <ref name="phonetic"/>
+      </element>
+    </zeroOrMore>
+    <zeroOrMore>
+      <element name="relation">
+        <ref name="relation"/>
+      </element>
+    </zeroOrMore>
+    <zeroOrMore>
+      <element name="trait">
+        <ref name="flag"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <!-- ==================================================================== sense -->
+  <define name="sense">
+    <!--Handbook of Lexicography:
+    a sense is a hypothesis that one meaning has derived from a previous meaning
+    (i.e. the meanings are semantically related but have a distinct central meaning).-->
+    <optional>
+      <attribute name="id"/>
+    </optional>
+    <optional>
+      <attribute name="order">
+        <data type="integer"/>
+      </attribute>
+    </optional>
+
+    <interleave>
+      <ref name="extensible"/>
+      <optional>
+        <element name="grammatical-info">
+          <ref name="grammi"/>
+        </element>
+      </optional>
+      <zeroOrMore>
+        <element name="gloss">
+          <ref name="multitext"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <!-- shouldn't this just be optional now-->
+        <element name="definition">
+          <ref name="multitext"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="relation">
+          <ref name="relation"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="etymology">
+          <ref name="etymology"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="note">
+          <ref name="note"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="example">
+          <ref name="example"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="reversal">
+          <ref name="reversal"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="illustration">
+          <ref name="URLRef"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="subsense">
+          <ref name="sense"/>
+        </element>
+      </zeroOrMore>
+    </interleave>
+  </define>
+
+  <!-- ==================================================================== entry -->
+  <define name="entry">
+    <attribute name="id"/>
+    <optional>
+      <attribute name="order">
+        <data type="integer"/>
+      </attribute>
+    </optional>
+    <optional>
+      <attribute name="dateDeleted">
+        <ref name="date.or.dateTime"/>
+      </attribute>
+    </optional>
+
+    <interleave>
+      <ref name="extensible"/>
+      <optional>
+      <element name="lexical-unit">
+        <ref name="multitext"/>
+      </element>
+      </optional>
+      <optional>
+        <element name="citation">
+          <ref name="multitext"/>
+        </element>
+      </optional>
+      <zeroOrMore>
+        <element name="pronunciation">
+          <ref name="phonetic"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="sense">
+          <ref name="sense"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="variant">
+          <ref name="variant"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="relation">
+          <ref name="relation"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="note">
+          <ref name="note"/>
+        </element>
+      </zeroOrMore>
+    </interleave>
+  </define>
+
+  <define name="field-defn">
+    <attribute name="tag"/>
+    <zeroOrMore>
+      <element name="description">
+        <ref name="multitext"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <define name="field-defns">
+    <zeroOrMore>
+      <element name="field">
+        <ref name="field-defn"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <define name="range-ref">
+    <attribute name="id"/>
+    <attribute name="url">
+      <data type="anyURI"/>
+    </attribute>
+    <attribute name="guid"/>
+  </define>
+
+  <define name="range-refs">
+    <zeroOrMore>
+      <element name="range">
+        <ref name="range-ref"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <define name="header">
+    <interleave>
+      <optional>
+        <element name="description">
+          <text/>
+        </element>
+      </optional>
+      <optional>
+        <element name="ranges">
+          <ref name="range-refs"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="fields">
+          <ref name="field-defns"/>
+        </element>
+      </optional>
+    </interleave>
+  </define>
+
+  <define name="lift">
+    <attribute name="version">
+      <value>0.9</value>
+    </attribute>
+    <optional>
+      <element name="header">
+        <ref name="header"/>
+      </element>
+    </optional>
+    <zeroOrMore>
+      <element name="entry">
+        <ref name="entry"/>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <start>
+    <element name="lift">
+      <ref name="lift"/>
+    </element>
+  </start>
+</grammar>
