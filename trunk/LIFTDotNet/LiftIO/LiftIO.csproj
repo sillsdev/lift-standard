@@ -15,7 +15,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\output\Debug\</OutputPath>
+    <OutputPath>..\output\debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -31,7 +31,7 @@
   <ItemGroup>
     <Reference Include="mono.relaxng, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\mono.relaxng.dll</HintPath>
+      <HintPath>..\lib\mono.relaxng.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
