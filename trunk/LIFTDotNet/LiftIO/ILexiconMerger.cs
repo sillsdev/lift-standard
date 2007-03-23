@@ -20,7 +20,8 @@ namespace LiftIO
         void MergeInTranslationForm(TExample example, SimpleMultiText multiText);
         void MergeInDefinition(TSense sense, SimpleMultiText simpleMultiText);
 
- 
+        void FinishEntry(TEntry entry);
+
         /// <summary>
         /// Handle LIFT's "field" entity which can be found on any subclass of "extensible"
         /// </summary>
