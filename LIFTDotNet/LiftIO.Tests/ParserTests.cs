@@ -45,32 +45,6 @@ namespace LiftIO.Tests
 
         }
 
-        [Test]
-        public void GoodLiftValidates()
-        {
-            string contents = "<lift version='0.9'></lift>";
-            Validate(contents, true);
-        }
-        [Test]
-        public void BadLiftDoesNotValidate()
-        {
-            string contents = "<lift version='0.9'><header></header><header></header></lift>";
-            Validate(contents, false);
-        }
-
-        private static void Validate(string contents, bool shouldPass)
-        {
-            string f = Path.GetTempFileName();
-            File.WriteAllText(f, contents);
-            try
-            {
-                Assert.AreEqual(shouldPass, LiftParser<DummyBase, Dummy, Dummy, Dummy>.CheckValidity(f));
-            }
-            finally
-            {
-                File.Delete(f);
-            }
-        }
 
 
         [Test]
@@ -115,7 +89,10 @@ namespace LiftIO.Tests
             DateTime now = DateTime.UtcNow;
             string when = now.ToString(Extensible.LiftTimeFormatNoTimeZone);
             ExpectEntryWasDeleted();            //todo expect more!
-            ParseEntryAndCheck(String.Format("<entry dateDeleted='{0}'/>", when));
+            _doc.LoadXml(String.Format("<entry dateDeleted='{0}'/>", when));
+            _parser.ReadEntry(_doc.FirstChild);
+            _mocks.VerifyAllExpectationsHaveBeenMet();
+
         }
         private void SimpleCheckGetOrMakeEntry(string content, int times)
         {
@@ -150,6 +127,7 @@ namespace LiftIO.Tests
         private void ParseEntryAndCheck(string content, string expectedIdString)
         {
             ExpectGetOrMakeEntry(expectedIdString);
+            ExpectFinishEntry();
             
             _doc.LoadXml(content);
             _parser.ReadEntry(_doc.FirstChild);
@@ -160,6 +138,7 @@ namespace LiftIO.Tests
 
         private void ParseEntryAndCheck(string content)
         {
+            ExpectFinishEntry();
             _doc.LoadXml(content);
             _parser.ReadEntry(_doc.FirstChild);
             _mocks.VerifyAllExpectationsHaveBeenMet();
@@ -217,6 +196,11 @@ namespace LiftIO.Tests
         {
             Expect.Exactly(1).On(_merger)
                 .Method("MergeInLexemeForm");
+        }
+        private void ExpectFinishEntry()
+        {
+            Expect.Exactly(1).On(_merger)
+                .Method("FinishEntry");
         }
         private void ExpectMergeGloss()
         {

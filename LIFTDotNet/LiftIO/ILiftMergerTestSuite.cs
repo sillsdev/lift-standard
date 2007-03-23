@@ -2,7 +2,7 @@ namespace LiftIO
 {
     public interface ILiftMergerTestSuite
     {
-        void NewEntryWithGuid();
+        void NewEntryGetsGuid();
 
         void NewEntryWithTextIdIgnoresIt();
 
@@ -21,8 +21,8 @@ namespace LiftIO
        
         void NewEntryGetsLexemeForm();
 
-       
-        void TryCompleteEntry();
+
+        void EntryWithChildren();
 
         void ModifiedDatesRetained();
 
