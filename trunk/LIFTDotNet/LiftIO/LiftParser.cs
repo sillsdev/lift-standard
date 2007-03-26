@@ -15,6 +15,9 @@ namespace LiftIO
         where TSense : TBase
         where TExample : TBase 
     {
+        public event EventHandler<ErrorArgs> ParsingError;
+        public event EventHandler<StepsArgs> SetTotalNumberSteps;
+        public event EventHandler<ProgressEventArgs> SetStepsCompleted;
 
         private ILexiconMerger<TBase, TEntry, TSense, TExample> _merger;
         protected string _wsAttributeLabel = "lang";
@@ -107,7 +110,7 @@ namespace LiftIO
             if (sense != null)//not been pruned
             {
                 ReadGrammi(sense, node);
-                SimpleMultiText gloss = ProcessMultiText(node, "gloss");
+                SimpleMultiText gloss = LocateAndReadOneElementPerFormData(node, "gloss");
               //no: do it anyways: remember, we may be merging, not just importing  if (!gloss.IsEmpty)
                 {
                     _merger.MergeInGloss(sense, gloss);
@@ -155,10 +158,10 @@ namespace LiftIO
 
            //todo: figure out how to actually look it up:
             //      string flexPrefix = node.OwnerDocument.GetPrefixOfNamespace("http://fieldworks.sil.org");
-            string flexPrefix = "flex";
-            if (flexPrefix != null && flexPrefix != string.Empty)
+//            string flexPrefix = "flex";
+//            if (flexPrefix != null && flexPrefix != string.Empty)
             {
-                string guidString = GetOptionalAttributeString(node, flexPrefix + ":guid");
+                string guidString = GetOptionalAttributeString(node, /*flexPrefix + ":guid"*/"guid");
                 if (guidString != null)
                 {
                     try
@@ -176,7 +179,7 @@ namespace LiftIO
 
             return extensible;
         }
-
+        
         /// <summary>
         /// Once we have the thing we're creating/merging with, we can read in any details,
         /// i.e. traits, fields, and annotations
@@ -295,11 +298,24 @@ namespace LiftIO
             return new SimpleMultiText();
         }
 
+        protected SimpleMultiText LocateAndReadOneElementPerFormData(XmlNode node, string query)
+        {
+            Debug.Assert(query != null);
+            SimpleMultiText text = new SimpleMultiText();
+            ReadFormNodes(node.SelectNodes(query), text);
+            return text;
+        }
 
         public  SimpleMultiText ReadMultiText(XmlNode node)
         {
             SimpleMultiText text = new SimpleMultiText();
-            foreach (XmlNode form in node.SelectNodes("form"))
+            ReadFormNodes(node.SelectNodes("form"), text);
+            return text;
+        }
+
+        private void ReadFormNodes(XmlNodeList nodesWithForms, SimpleMultiText text)
+        {
+            foreach (XmlNode form in nodesWithForms)
             {
                 try
                 {
@@ -309,25 +325,8 @@ namespace LiftIO
                 catch (Exception e)
                 {
                     NotifyError(e);
-                    return text;
                 }
             }
-            //handle case where no <form> element was used (this was allowed before 0.9)
-            if (text.Count == 0)
-            {
-                if (NodeContentIsJustAString(node))
-                {
-                    text.AddOrAppend(_defaultLangId, node.InnerText, "; ");
-                    //review  is default really allowed? Or just
-                                                        //should handle <note  lang="en">
-                }
-                else
-                {
-                    return new SimpleMultiText();
-                }
-            }
-
-            return text;
         }
 
         private static bool NodeContentIsJustAString(XmlNode node)
@@ -409,9 +408,6 @@ namespace LiftIO
                 ParsingError.Invoke(this, e);
             }          
         }
-        public event EventHandler<ErrorArgs> ParsingError;
-         public event EventHandler<StepsArgs> SetTotalNumberSteps;
-       public event EventHandler<ProgressEventArgs> SetStepsCompleted;
 
         public class ProgressEventArgs : EventArgs
         {
