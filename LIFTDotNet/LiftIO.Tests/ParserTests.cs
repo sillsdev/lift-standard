@@ -46,15 +46,16 @@ namespace LiftIO.Tests
         }
 
 
-
         [Test]
         public void MultipleFormsInOneLangAreCombined()
         {
-            _doc.LoadXml("<gloss><form lang='x'>one</form><form lang='z'>zzzz</form><form lang='x'>two</form></gloss>");
+            _doc.LoadXml("<foobar><form lang='x'>one</form><form lang='z'>zzzz</form><form lang='x'>two</form></foobar>");
             SimpleMultiText t = _parser.ReadMultiText(_doc.FirstChild);
             Assert.AreEqual("one; two", t["x"]);
             Assert.AreEqual("zzzz", t["z"]);
         }
+
+
 
         [Test]
         public void FirstValueOfSimpleMultiText()
@@ -273,8 +274,9 @@ namespace LiftIO.Tests
 //            _parser.ReadFile(_doc);
 //
 
-            string s = String.Format("<entry xmlns:flex='http://fieldworks.sil.org' id='-foo' flex:guid='{0}'/>", g);
-           ParseEntryAndCheck(s, string.Format("-foo/{0};;;",g.ToString()));
+           // string s = String.Format("<entry xmlns:flex='http://fieldworks.sil.org' id='-foo' flex:guid='{0}'/>", g);
+             string s = String.Format("<entry id='-foo' guid='{0}'/>", g);
+          ParseEntryAndCheck(s, string.Format("-foo/{0};;;",g.ToString()));
         }
 
         [Test]
@@ -329,14 +331,6 @@ namespace LiftIO.Tests
                            .With(Is.Anything, multiTextMatcher);
         }
 
-        [Test]
-        public void EntryWithLexemeForm_NoFormTag()
-        {
-            ExpectGetOrMakeEntry();
-            ExpectMultiTextMergeIn("LexemeForm", "??=hello|");
-            ParseEntryAndCheck("<entry><lex>hello</lex></entry>");
-            //            ParseEntryAndCheck("<entry><lex>hello</lex></entry>","GetOrMakeEntry(;;;)MergeInLexemeForm(m,??=hello)");
-        }
 
         [Test]
         public void NonLiftDateError()
@@ -411,7 +405,32 @@ namespace LiftIO.Tests
             ExpectGetOrMakeSense();
             ExpectMultiTextMergeIn("Gloss","x=hello|");
             ExpectMergeDefinition();
-            ParseEntryAndCheck(string.Format("<entry><sense><gloss><form lang='x'>hello</form></gloss></sense></entry>"));
+            
+            ParseEntryAndCheck(string.Format("<entry><sense><gloss lang='x'>hello</gloss></sense></entry>"));
+        }
+
+        [Test]
+        public void GlossWithTwoLanguages()
+        {
+            ExpectGetOrMakeEntry();
+            ExpectMergeInLexemeForm();
+            ExpectGetOrMakeSense();
+            ExpectMultiTextMergeIn("Gloss", "x=hello|y=bye|");
+            ExpectMergeDefinition();
+
+            ParseEntryAndCheck(string.Format("<entry><sense><gloss lang='x'>hello</gloss><gloss lang='y'>bye</gloss></sense></entry>"));
+        }
+
+        [Test]
+        public void GlossWithTwoFormsInSameLanguageAreCombined()
+        {
+            ExpectGetOrMakeEntry();
+            ExpectMergeInLexemeForm();
+            ExpectGetOrMakeSense();
+            ExpectMultiTextMergeIn("Gloss", "x=hello; bye|");
+            ExpectMergeDefinition();
+
+            ParseEntryAndCheck(string.Format("<entry><sense><gloss lang='x'>hello</gloss><gloss lang='x'>bye</gloss></sense></entry>"));
         }
         [Test]
         public void SenseWithDefintition()
@@ -453,7 +472,7 @@ namespace LiftIO.Tests
         }
 
         [Test]
-        public void Trait()
+        public void SimpleTraitsAreRead()
         {
             ExpectEmptyEntry();
             ExpectMergeInTrait("color","red",null);
@@ -462,13 +481,6 @@ namespace LiftIO.Tests
             ExpectEmptyEntry();
             ExpectMergeInTrait("color", "red", "myid");
             ParseEntryAndCheck(string.Format("<entry><trait name='color' value='red' id='myid'/></entry>"));
-        }
-
-        [Test, Ignore("Not implemented")]
-        public void SenseWithSemanticDomains()
-        {
-            ParseEntryAndCheck(string.Format("<entry><sense></sense></entry>"),
-                "");
         }
 
         [Test]
