@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.9">
+<lift version="0.9.1">
   <!--
   \lx brush
   \ps n
@@ -23,9 +23,7 @@
     </lexical-unit>
     <sense id="brush_">
       <grammatical-info value="n"/>
-      <gloss>
-        <form lang="en">bristly instrument</form>
-      </gloss>
+      <gloss lang="en">bristly instrument</gloss>
       <definition>
         <form lang="en">
           bristly instrument used for cleaning, arranging or

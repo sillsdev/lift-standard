@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.9">
+<lift version="0.9.1">
   <!-- 
   \lx abat
   \ps n
@@ -27,10 +27,8 @@
     </variant>
     <sense id="abat_">
       <grammatical-info value="n"/>
-      <gloss>
-        <form lang="en">grove</form>
-        <form lang="id">dusun</form>
-      </gloss>
+      <gloss lang="en">grove</gloss>
+      <gloss lang="id">dusun</gloss>
       <example source="d2.077.03">
         <form lang="zxx-Latn">Kbwai abatke to ksweruk nurare.</form>
         <translation>

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.9">
+<lift version="0.9.1">
   <!--
   \lx srapa
   \ps vt
@@ -13,9 +13,7 @@
     </lexical-unit>
     <sense id="srapa_">
       <grammatical-info value="vt"/>
-      <gloss>
-        <form lang="en">slap</form>
-      </gloss>
+      <gloss lang="en">slap</gloss>
       <definition>
         <form lang="en">slap with open hand</form>
       </definition>
