@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.9">
+<lift version="0.9.1">
   <!--
   \lx hete
   \ps vt
@@ -15,9 +15,7 @@
       <form lang="zxx-Latn">hete</form>
     </lexical-unit>
     <sense id="hete_">
-      <gloss>
-        <form lang="en">cut</form>
-      </gloss>
+      <gloss lang="en">cut</gloss>
       <definition>
         <form lang="en">cut into sectios for use</form>
       </definition>

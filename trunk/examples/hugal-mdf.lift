@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.9">
+<lift version="0.9.1">
   <entry id="hugal">
     <lexical-unit>
       <form lang="zxx-Latn">hugal</form>
@@ -18,10 +18,11 @@
           <span class="essence">playing cards, gambling with cards</span>.</form>
       </definition>
     </sense>
-    <subentry ref="munhugal"/>
-    <subentry ref="humugal"/>
-    <subentry ref="ihugal"/>
-    <subentry ref="hugálon"/>
+    <relation name="subentry" ref="munhugal"/>
+    <!-- a better (functional rather than structural) name would be inflection -->
+    <relation name="subentry" ref="humugal"/>
+    <relation name="subentry" ref="ihugal"/>
+    <relation name="subentry" ref="hugálon"/>
   </entry>
   
   <entry id="hugálon">

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.9">
+<lift version="0.9.1">
   <!--
   \lx opon
   \ps n
@@ -19,9 +19,7 @@
     <sense id="opon_1" order="1">
       <subsense id="opon_1a" order="1">
         <grammatical-info value="n"/>
-        <gloss>
-          <form lang="en">grand kin</form>
-        </gloss>
+        <gloss lang="en">grand kin</gloss>
         <definition>
           <form lang="en">
             grandparent, grandchild; reciprocal term of
@@ -31,9 +29,7 @@
       </subsense>
       <subsense id="opon_1b" order="2">
         <grammatical-info value="n"/>
-        <gloss>
-          <form lang="en">ancestor</form>
-        </gloss>
+        <gloss lang="en">ancestor</gloss>
         <definition>
           <form lang="en">ancestor, descendent</form>
         </definition>
@@ -41,9 +37,7 @@
     </sense>
     <sense id="opon_2" order="2">
       <grammatical-info value="n"/>
-      <gloss>
-        <form lang="en">master</form>
-      </gloss>
+      <gloss lang="en">master</gloss>
       <definition>
         <form lang="en">
           master, lord, owner; the one with the say

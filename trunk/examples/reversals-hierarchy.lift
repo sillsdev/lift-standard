@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.9">
+<lift version="0.9.1">
   <!--
   \lx utan
   \ps n
@@ -16,11 +16,9 @@
     <sense id="utan_">
       <grammatical-info value="n"/>
       <trait name="semantic-domain" value="Nplant"/>
-      <gloss>
-        <form lang="en">veg</form>
-        <form lang="id">sayur</form>
-        <form lang="id">jamu</form>
-      </gloss>
+      <gloss lang="en">veg</gloss>
+      <gloss lang="id">sayur</gloss>
+      <gloss lang="id">jamu</gloss>
       <reversal type="eng">
         <form lang="en">mushroom</form>
         <main>

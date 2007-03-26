@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.9">
+<lift version="0.9.1">
   <entry id="hugal">
     <lexical-unit>
       <form lang="zxx-Latn">hugal</form>

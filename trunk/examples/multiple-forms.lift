@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.9">
+<lift version="0.9.1">
   <!--
   \lx jɔ̃dẽ̀
   \lxt ยองเด่ง
@@ -23,10 +23,8 @@
     </variant>
     <sense id="jɔ̃dẽ̀_" dateCreated="2003-02-21">
       <grammatical-info value="N"/>
-      <gloss>
-      <form lang="th">เอว</form>
-        <form lang="en">waist</form>
-      </gloss>
+      <gloss lang="th">เอว</gloss>
+      <gloss lang="en">waist</gloss>
       <note type="source">
         <form lang="en">lang1.42.6</form>
       </note>

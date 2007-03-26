@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.9">
+<lift version="0.9.1">
   <!--
   \lx apu1
   \ps n
@@ -18,9 +18,7 @@
     </lexical-unit>
     <sense>
       <grammatical-info value="n"/>
-      <gloss>
-        <form lang="en">lime</form>
-      </gloss>
+      <gloss lang="en">lime</gloss>
       <reversal>
         <form lang="en">lime</form>
       </reversal>
