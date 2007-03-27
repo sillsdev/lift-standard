@@ -19,6 +19,10 @@
   <!-- ======================================================== form-content -->
   <define name="form-content">
     <attribute name="lang"/>    <!-- rfc 4646 -->
+    <ref name="form-no-lang-content"/>
+  </define>
+
+  <define name="form-no-lang-content">
     <interleave>
       <element name="text">
         <ref name="span-content"/>
@@ -30,7 +34,7 @@
       </zeroOrMore>
     </interleave>
   </define>
-
+  
   <!-- ======================================================== span-content -->
   <define name="span-content">
     <interleave>
@@ -190,7 +194,7 @@
     <interleave>
       <optional>
         <element name="form">
-          <ref name="form-content"/>
+          <ref name="form-no-lang-content"/>
         </element>
       </optional>
       <zeroOrMore>

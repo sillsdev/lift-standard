@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.9.1">
+<lift version="0.10">
   <!-- 
   \lx abat
   \ps n
@@ -19,33 +19,57 @@
   -->
   <entry id="abat" dateModified="1990-02-26">
     <lexical-unit>
-      <form lang="zxx-Latn">abat</form>
+      <form lang="zxx-Latn">
+        <text>abat</text>
+      </form>
     </lexical-unit>
     <variant>
       <trait name="paradigm" value="singular"/>
-      <form lang="zxx-Latn">abatke</form>
+      <form lang="zxx-Latn">
+        <text>abatke</text>
+      </form>
     </variant>
     <sense id="abat_">
       <grammatical-info value="n"/>
-      <gloss lang="en">grove</gloss>
-      <gloss lang="id">dusun</gloss>
+      <gloss lang="en">
+        <text>grove</text>
+      </gloss>
+      <gloss lang="id">
+        <text>dusun</text>
+      </gloss>
       <example source="d2.077.03">
-        <form lang="zxx-Latn">Kbwai abatke to ksweruk nurare.</form>
+        <form lang="zxx-Latn">
+          <text>Kbwai abatke to ksweruk nurare.</text>
+        </form>
         <translation>
-          <form lang="en">I went to the coconut groves to clear the grass.</form>
-          <form lang="id">Saya pergi menyiangi dusun kelapa.</form>
+          <form lang="en">
+            <text>I went to the coconut groves to clear the grass.</text>
+          </form>
+          <form lang="id">
+            <text>Saya pergi menyiangi dusun kelapa.</text>
+          </form>
         </translation>
       </example>
       <example source="d4.079.16">
-        <form lang="zxx-Latn">Kbwa ti ktwan nurke o abatke.</form>
+        <form lang="zxx-Latn">
+          <text>Kbwa ti ktwan nurke o abatke.</text>
+        </form>
         <translation>
-          <form lang="en">I'm going to plant coconut trees in the grove.</form>
-          <form lang="id">Saya pergi tanam kelapa di dusun.</form>
+          <form lang="en">
+            <text>I'm going to plant coconut trees in the grove.</text>
+          </form>
+          <form lang="id">
+            <text>Saya pergi tanam kelapa di dusun.</text>
+          </form>
         </translation>
       </example>
       <note type="encyclopedic">
-        <form lang="en">This is <span class="emphasis">not</span> limited 
-          to coconut groves but is used for mangoes, etc.</form>
+        <form lang="en">
+          <text>
+            This is <span class="emphasis">not</span> limited
+            to coconut groves but is used for mangoes, etc.
+          </text>
+        </form>
       </note>
     </sense>
   </entry>
