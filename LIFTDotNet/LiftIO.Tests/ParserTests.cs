@@ -244,11 +244,12 @@ namespace LiftIO.Tests
                 .Method("EntryWasDeleted");
             //todo expect more!
        }
-        
-        private void ExpectMergeInNote()
+
+        private void ExpectMergeInNote(string value)
         {
             Expect.Exactly(1).On(_merger)
-                .Method("MergeInNote");
+                .Method("MergeInNote")
+                .With(Is.Anything, Is.Anything/*todo type*/, Has.ToString(Is.EqualTo(value)));
         }
         
         
@@ -441,6 +442,18 @@ namespace LiftIO.Tests
             ExpectMultiTextMergeIn("Definition", "x=hello|");
 
             ParseEntryAndCheck(string.Format("<entry><sense><def><form lang='x'>hello</form></def></sense></entry>"));
+        }
+
+        [Test]
+        public void SenseWithNote()
+        {
+            ExpectEmptyEntry();
+            ExpectGetOrMakeSense();
+            ExpectMergeGloss();
+            ExpectMergeDefinition();
+            ExpectMergeInNote("x=hello|");
+
+            ParseEntryAndCheck(string.Format("<entry><sense><note><form lang='x'>hello</form></note></sense></entry>"));
         }
 
         [Test]

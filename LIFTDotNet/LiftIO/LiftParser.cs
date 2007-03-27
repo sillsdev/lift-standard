@@ -115,13 +115,20 @@ namespace LiftIO
                 {
                     _merger.MergeInGloss(sense, gloss);
                 }
-                
+
+
+
                 SimpleMultiText def = ProcessMultiText(node, "def");
-                //no: do it anyways: remember, we may be merging, not just importing if (!def.IsEmpty)
+                //REVIEW: do it anyways: remember, we may be merging, not just importing if (!def.IsEmpty)
                 {
                     _merger.MergeInDefinition(sense, def);
                 }
-
+                SimpleMultiText note = ProcessMultiText(node, "note");
+                if(!note.IsEmpty)
+                {
+                    string noteType = null; //todo                
+                    _merger.MergeInNote(sense, noteType, note);
+                }
                 foreach (XmlNode n in node.SelectNodes("example"))
                 {
                     ReadExample(n, sense);
