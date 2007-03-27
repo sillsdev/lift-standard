@@ -18,14 +18,17 @@
 
   <!-- ======================================================== form-content -->
   <define name="form-content">
-    <attribute name="lang"/>
-    <!-- rfc 4646 -->
-    <optional>
-      <attribute name="traits"/>
-      <!-- space separated links to traits -->
-      <!-- needs constraint that has trait with id -->
-    </optional>
-    <ref name="span-content"/>
+    <attribute name="lang"/>    <!-- rfc 4646 -->
+    <interleave>
+      <element name="text">
+        <ref name="span-content"/>
+      </element>
+      <zeroOrMore>
+        <element name="trait">
+          <ref name="trait-content"/>
+        </element>
+      </zeroOrMore>
+    </interleave>
   </define>
 
   <!-- ======================================================== span-content -->
@@ -34,22 +37,27 @@
       <text/>
       <zeroOrMore>
         <element name="span">
-          <optional>
-            <attribute name="lang"/>
-            <!-- rfc 4646 -->
-          </optional>
-          <optional>
-            <attribute name="href">
-              <data type="anyURI"/>
-            </attribute>
-          </optional>
-          <optional>
-            <attribute name="class"/>
-          </optional>
-          <ref name="span-content"/>
+          <ref name="inner-span-content"/>
         </element>
       </zeroOrMore>
     </interleave>
+  </define>
+
+  <!-- ================================================== inner-span-content -->
+  <define name="inner-span-content">
+    <optional>
+      <attribute name="lang"/>
+      <!-- rfc 4646 -->
+    </optional>
+    <optional>
+      <attribute name="href">
+        <data type="anyURI"/>
+      </attribute>
+    </optional>
+    <optional>
+      <attribute name="class"/>
+    </optional>
+    <ref name="span-content"/>
   </define>
 
   <!-- =================================================== multitext-content -->
@@ -57,11 +65,12 @@
     <zeroOrMore>
       <element name="form">
         <ref name="form-content"/>
-      </element>
-    </zeroOrMore>
-    <zeroOrMore>
-      <element name="trait">
-        <ref name="trait-content"/>
+        <sch:rule context="form" >
+          <sch:assert test="not(preceding-sibling::form[@type=current()/@lang])">
+            Forms should be in different langs.
+            There is only one form with a given lang allowed in any parent element.
+          </sch:assert>
+        </sch:rule>
       </element>
     </zeroOrMore>
   </define>
@@ -97,10 +106,8 @@
 <!-- ========================================================= trait-content -->
   <define name="trait-content">
     <attribute name="name"/>
+    <!-- restrict to one trait per parent-->
     <attribute name="value"/>
-    <optional>
-      <attribute name="id"/>
-    </optional>
     <zeroOrMore>
       <element name="annotation">
         <ref name="annotation-content"/>
@@ -132,7 +139,6 @@
       </attribute>
     </optional>
     <optional>
-      <!-- problem: diagram has required, text has optional-->
       <attribute name="dateModified">
         <ref name="date.or.dateTime"/>
       </attribute>
@@ -184,15 +190,14 @@
     <interleave>
       <optional>
         <element name="form">
-          <ref name="span-content"/>
+          <ref name="form-content"/>
         </element>
       </optional>
-      <optional>
+      <zeroOrMore>
         <element name="gloss">
-          <!-- problem different content model than gloss on senses. -->
-          <ref name="multitext-content"/>
+          <ref name="form-content"/>
         </element>
-      </optional>
+      </zeroOrMore>
 
     </interleave>
   </define>
@@ -306,7 +311,6 @@
     <optional>
       <attribute name="id"/>
     </optional>
-    <!-- problem diagram has optional label attribute, text doesn't -->
     <optional>
       <attribute name="order">
         <data type="integer"/>
@@ -410,7 +414,6 @@
         </element>
       </zeroOrMore>
       <zeroOrMore>
-        <!-- problem: diagram has one or more, text has zero or more-->
         <element name="sense">
           <ref name="sense-content"/>
         </element>
@@ -437,7 +440,6 @@
   <!-- ================================================= field-defns-content -->
   <define name="field-defns-content">
     <zeroOrMore>
-      <!-- problem: diagrams have one or more text has zero or more-->
       <element name="field">
         <ref name="field-defn-content"/>
       </element>
@@ -447,7 +449,7 @@
   <!-- =================================================== range-ref-content -->
   <define name="range-ref-content">
     <attribute name="id"/>
-    <attribute name="url">      <!-- problem: diagram has urn, text has url, why not href-->
+    <attribute name="href">
       <data type="anyURI"/>
     </attribute>
     <optional>
@@ -488,7 +490,7 @@
   <!-- ======================================================== lift-content -->
   <define name="lift-content">
     <attribute name="version">
-      <value>0.9.1</value>
+      <value>0.10</value>
     </attribute>
     <optional>
       <attribute name="producer"/>
