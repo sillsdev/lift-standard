@@ -14,11 +14,11 @@ namespace LiftIO
         TEntry EntryWasDeleted(Extensible info, DateTime dateDeleted);
         TSense GetOrMakeSense(TEntry entry, Extensible info);
         TExample GetOrMakeExample(TSense sense, Extensible info);
-        void MergeInLexemeForm(TEntry entry, SimpleMultiText contents);
-        void MergeInGloss(TSense sense, SimpleMultiText multiText);
-        void MergeInExampleForm(TExample example, SimpleMultiText multiText);//, string optionalSource);
-        void MergeInTranslationForm(TExample example, SimpleMultiText multiText);
-        void MergeInDefinition(TSense sense, SimpleMultiText simpleMultiText);
+        void MergeInLexemeForm(TEntry entry, LiftMultiText contents);
+        void MergeInGloss(TSense sense, LiftMultiText multiText);
+        void MergeInExampleForm(TExample example, LiftMultiText multiText);//, string optionalSource);
+        void MergeInTranslationForm(TExample example, LiftMultiText multiText);
+        void MergeInDefinition(TSense sense, LiftMultiText liftMultiText);
 
         void FinishEntry(TEntry entry);
 
@@ -30,19 +30,19 @@ namespace LiftIO
         ///todo: field also has @date
         void MergeInField(TBase extensible, string tagAttribute, DateTime dateCreated, 
             DateTime dateModified, 
-            SimpleMultiText contents);
+            LiftMultiText contents);
 
         /// <summary>
         /// Handle LIFT's "trait" entity,
         /// which can be found on any subclass of "extensible", on any "field", and as
         /// a subclass of "annotation".
         /// </summary>
-        void MergeInTrait(TBase extensible, string name, string valueAttribute, string optionalId);
+        void MergeInTrait(TBase extensible, string name, string valueAttribution);
 
         /// <summary>
         /// Handle LIFT's "note" entity. NB: This may be called multiple times (w/ different notes).
         /// </summary>
-        void MergeInNote(TBase extensible, string type, SimpleMultiText contents);
+        void MergeInNote(TBase extensible, string type, LiftMultiText contents);
 
         void MergeInGrammaticalInfo(TSense sense, string val);
     }

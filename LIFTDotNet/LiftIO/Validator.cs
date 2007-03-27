@@ -18,11 +18,11 @@ namespace LiftIO
 
         static public string GetAnyValidationErrors(XmlTextReader documentReader)
         {
-            string[] s = typeof(SimpleMultiText).Assembly.GetManifestResourceNames();
+            string[] s = typeof(LiftMultiText).Assembly.GetManifestResourceNames();
 
             RelaxngValidatingReader reader = new RelaxngValidatingReader(
                 documentReader,
-                new XmlTextReader(typeof(SimpleMultiText).Assembly.GetManifestResourceStream("LiftIO.lift.rng")));
+                new XmlTextReader(typeof(LiftMultiText).Assembly.GetManifestResourceStream("LiftIO.lift.rng")));
             reader.ReportDetails = true;
             string lastGuy="lift";
             try
