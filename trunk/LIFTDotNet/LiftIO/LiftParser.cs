@@ -72,7 +72,7 @@ namespace LiftIO
             }
 
 
-            SimpleMultiText lexemeForm = LocateAndReadMultiText(node, "lexical-unit");
+            LiftMultiText lexemeForm = LocateAndReadMultiText(node, "lexical-unit");
             if (lexemeForm == null || lexemeForm.Count == 0)
             {
                 lexemeForm = LocateAndReadMultiText(node, "lex");
@@ -110,7 +110,7 @@ namespace LiftIO
             if (sense != null)//not been pruned
             {
                 ReadGrammi(sense, node);
-                SimpleMultiText gloss = LocateAndReadOneElementPerFormData(node, "gloss");
+                LiftMultiText gloss = LocateAndReadOneElementPerFormData(node, "gloss");
               //no: do it anyways: remember, we may be merging, not just importing  if (!gloss.IsEmpty)
                 {
                     _merger.MergeInGloss(sense, gloss);
@@ -118,12 +118,12 @@ namespace LiftIO
 
 
 
-                SimpleMultiText def = ProcessMultiText(node, "def");
+                LiftMultiText def = ProcessMultiText(node, "def");
                 //REVIEW: do it anyways: remember, we may be merging, not just importing if (!def.IsEmpty)
                 {
                     _merger.MergeInDefinition(sense, def);
                 }
-                SimpleMultiText note = ProcessMultiText(node, "note");
+                LiftMultiText note = ProcessMultiText(node, "note");
                 if(!note.IsEmpty)
                 {
                     string noteType = null; //todo                
@@ -217,13 +217,12 @@ namespace LiftIO
             {
                 _merger.MergeInTrait(target,
                                      GetStringAttribute(traitNode, "name"),
-                                     GetStringAttribute(traitNode, "value"),
-                                     GetOptionalAttributeString(traitNode, "id")
+                                     GetStringAttribute(traitNode, "value")
                                      );
             }
         }
 
-        protected SimpleMultiText ProcessMultiText(XmlNode node, string fieldName)
+        protected LiftMultiText ProcessMultiText(XmlNode node, string fieldName)
         {
             return LocateAndReadMultiText(node, fieldName);
         }
@@ -286,7 +285,7 @@ namespace LiftIO
             }
         }
 
-        protected SimpleMultiText LocateAndReadMultiText(XmlNode node, string query)
+        protected LiftMultiText LocateAndReadMultiText(XmlNode node, string query)
         {
             XmlNode element=null;
             if (query == null)
@@ -302,32 +301,43 @@ namespace LiftIO
             {
                 return ReadMultiText(element);
             }
-            return new SimpleMultiText();
+            return new LiftMultiText();
         }
 
-        protected SimpleMultiText LocateAndReadOneElementPerFormData(XmlNode node, string query)
+        protected LiftMultiText LocateAndReadOneElementPerFormData(XmlNode node, string query)
         {
             Debug.Assert(query != null);
-            SimpleMultiText text = new SimpleMultiText();
+            LiftMultiText text = new LiftMultiText();
             ReadFormNodes(node.SelectNodes(query), text);
             return text;
         }
 
-        public  SimpleMultiText ReadMultiText(XmlNode node)
+        public  LiftMultiText ReadMultiText(XmlNode node)
         {
-            SimpleMultiText text = new SimpleMultiText();
+            LiftMultiText text = new LiftMultiText();
             ReadFormNodes(node.SelectNodes("form"), text);
             return text;
         }
 
-        private void ReadFormNodes(XmlNodeList nodesWithForms, SimpleMultiText text)
+        private void ReadFormNodes(XmlNodeList nodesWithForms, LiftMultiText text)
         {
-            foreach (XmlNode form in nodesWithForms)
+            foreach (XmlNode formNode in nodesWithForms)
             {
                 try
                 {
-                    string lang = GetStringAttribute(form, _wsAttributeLabel);
-                    text.AddOrAppend(lang, form.InnerText, "; ");
+                    string lang = GetStringAttribute(formNode, _wsAttributeLabel);
+                    XmlNode textNode= formNode.SelectSingleNode("text");
+                    if (textNode != null)
+                    {
+                        text.AddOrAppend(lang, textNode.InnerText, "; ");
+                    }
+
+                    foreach (XmlNode traitNode in formNode.SelectNodes("trait"))
+                    {
+                        Trait trait = new Trait(lang, GetStringAttribute(traitNode, "name"),
+                                                GetStringAttribute(traitNode, "value"));
+                        text.Traits.Add(trait);
+                    }
                 }
                 catch (Exception e)
                 {

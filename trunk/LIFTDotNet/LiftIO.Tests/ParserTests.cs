@@ -49,8 +49,8 @@ namespace LiftIO.Tests
         [Test]
         public void MultipleFormsInOneLangAreCombined()
         {
-            _doc.LoadXml("<foobar><form lang='x'>one</form><form lang='z'>zzzz</form><form lang='x'>two</form></foobar>");
-            SimpleMultiText t = _parser.ReadMultiText(_doc.FirstChild);
+            _doc.LoadXml("<foobar><form lang='x'><text>one</text></form><form lang='z'><text>zzzz</text></form><form lang='x'><text>two</text></form></foobar>");
+            LiftMultiText t = _parser.ReadMultiText(_doc.FirstChild);
             Assert.AreEqual("one; two", t["x"]);
             Assert.AreEqual("zzzz", t["z"]);
         }
@@ -60,7 +60,7 @@ namespace LiftIO.Tests
         [Test]
         public void FirstValueOfSimpleMultiText()
         {
-            SimpleMultiText t = new SimpleMultiText();
+            LiftMultiText t = new LiftMultiText();
             t.Add("x", "1");
             t.Add("y", "2");
             Assert.AreEqual("x", t.FirstValue.Key);
@@ -231,11 +231,11 @@ namespace LiftIO.Tests
 //              //  .Method("MergeInField").With(matchers);
 //        }
 
-        private void ExpectMergeInTrait(string nameAttribute, string valueAttribute, string optionalId)
+        private void ExpectMergeInTrait(string nameAttribute, string valueAttribute)
         {
             Expect.Exactly(1).On(_merger)
                 .Method("MergeInTrait")
-                .With(Is.Anything, Is.EqualTo(nameAttribute), Is.EqualTo(valueAttribute), Is.EqualTo(optionalId));
+                .With(Is.Anything, Is.EqualTo(nameAttribute), Is.EqualTo(valueAttribute));
        }
 
         private void ExpectEntryWasDeleted()
@@ -306,8 +306,8 @@ namespace LiftIO.Tests
         {
             ExpectGetOrMakeEntry();
             ExpectMultiTextMergeIn("LexemeForm", Has.Property("Count", Is.EqualTo(2)));
-            ParseEntryAndCheck("<entry><lex><form lang='x'>hello</form><form lang='y'>bye</form></lex></entry>");
- //           ParseEntryAndCheck("<entry><lex><form lang='x'>hello</form><form lang='y'>bye</form></lex></entry>", "GetOrMakeEntry(;;;)MergeInLexemeForm(m,x=hello|y=bye|)");
+            ParseEntryAndCheck("<entry><lex><form lang='x'><text>hello</text></form><form lang='y'><text>bye</text></form></lex></entry>");
+ //           ParseEntryAndCheck("<entry><lex><form lang='x'><text>hello</text></form><form lang='y'>bye</form></lex></entry>", "GetOrMakeEntry(;;;)MergeInLexemeForm(m,x=hello|y=bye|)");
         }
 
          private void ExpectEmptyMultiTextMergeIn(string MultiTextPropertyName)
@@ -323,6 +323,12 @@ namespace LiftIO.Tests
              Expect.Exactly(1).On(_merger)
                             .Method("MergeIn" + MultiTextPropertyName)
                             .With(Is.Anything, Has.ToString(Is.EqualTo(value)));
+       }
+        private void ExpectMultiTextMergeIn(string MultiTextPropertyName, int traitCount)
+        {
+             Expect.Exactly(1).On(_merger)
+                            .Method("MergeIn" + MultiTextPropertyName)
+                            .With(Is.Anything, Has.Property("Traits", Has.Property("Count", Is.EqualTo(traitCount))));
        }
 
         private void ExpectMultiTextMergeIn(string MultiTextPropertyName, Matcher multiTextMatcher)
@@ -407,7 +413,19 @@ namespace LiftIO.Tests
             ExpectMultiTextMergeIn("Gloss","x=hello|");
             ExpectMergeDefinition();
             
-            ParseEntryAndCheck(string.Format("<entry><sense><gloss lang='x'>hello</gloss></sense></entry>"));
+            ParseEntryAndCheck(string.Format("<entry><sense><gloss lang='x'><text>hello</text></gloss></sense></entry>"));
+        }
+
+        [Test]
+        public void GlossWithTrait()
+        {
+            ExpectGetOrMakeEntry();
+            ExpectMergeInLexemeForm();
+            ExpectGetOrMakeSense();
+            ExpectMultiTextMergeIn("Gloss", 1); //todo this is an issuficient test
+            ExpectMergeDefinition();
+
+            ParseEntryAndCheck(string.Format("<entry><sense><gloss lang='x'><text>hello</text><trait name='flag' value='1'><annotation><form lang='x'><text>blah blah</text></form></annotation></trait></gloss></sense></entry>"));
         }
 
         [Test]
@@ -419,7 +437,7 @@ namespace LiftIO.Tests
             ExpectMultiTextMergeIn("Gloss", "x=hello|y=bye|");
             ExpectMergeDefinition();
 
-            ParseEntryAndCheck(string.Format("<entry><sense><gloss lang='x'>hello</gloss><gloss lang='y'>bye</gloss></sense></entry>"));
+            ParseEntryAndCheck(string.Format("<entry><sense><gloss lang='x'><text>hello</text></gloss><gloss lang='y'><text>bye</text></gloss></sense></entry>"));
         }
 
         [Test]
@@ -431,7 +449,7 @@ namespace LiftIO.Tests
             ExpectMultiTextMergeIn("Gloss", "x=hello; bye|");
             ExpectMergeDefinition();
 
-            ParseEntryAndCheck(string.Format("<entry><sense><gloss lang='x'>hello</gloss><gloss lang='x'>bye</gloss></sense></entry>"));
+            ParseEntryAndCheck(string.Format("<entry><sense><gloss lang='x'><text>hello</text></gloss><gloss lang='x'><text>bye</text></gloss></sense></entry>"));
         }
         [Test]
         public void SenseWithDefintition()
@@ -441,7 +459,7 @@ namespace LiftIO.Tests
             ExpectMergeGloss();
             ExpectMultiTextMergeIn("Definition", "x=hello|");
 
-            ParseEntryAndCheck(string.Format("<entry><sense><def><form lang='x'>hello</form></def></sense></entry>"));
+            ParseEntryAndCheck(string.Format("<entry><sense><def><form lang='x'><text>hello</text></form></def></sense></entry>"));
         }
 
         [Test]
@@ -453,7 +471,7 @@ namespace LiftIO.Tests
             ExpectMergeDefinition();
             ExpectMergeInNote("x=hello|");
 
-            ParseEntryAndCheck(string.Format("<entry><sense><note><form lang='x'>hello</form></note></sense></entry>"));
+            ParseEntryAndCheck(string.Format("<entry><sense><note><form lang='x'><text>hello</text></form></note></sense></entry>"));
         }
 
         [Test]
@@ -466,7 +484,7 @@ namespace LiftIO.Tests
                 Is.EqualTo(default(DateTime)),
                 Has.Property("Count", Is.EqualTo(2))
                 );
-            ParseEntryAndCheck("<entry><field tag='color'><form lang='en'>red</form><form lang='es'>roco</form></field></entry>");
+            ParseEntryAndCheck("<entry><field tag='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field></entry>");
 
             ExpectEmptyEntry();
             DateTime creat = new DateTime(2000,1,1).ToUniversalTime();
@@ -488,12 +506,8 @@ namespace LiftIO.Tests
         public void SimpleTraitsAreRead()
         {
             ExpectEmptyEntry();
-            ExpectMergeInTrait("color","red",null);
+            ExpectMergeInTrait("color","red");
             ParseEntryAndCheck(string.Format("<entry><trait name='color' value='red'/></entry>"));
-
-            ExpectEmptyEntry();
-            ExpectMergeInTrait("color", "red", "myid");
-            ParseEntryAndCheck(string.Format("<entry><trait name='color' value='red' id='myid'/></entry>"));
         }
 
         [Test]
@@ -520,7 +534,7 @@ namespace LiftIO.Tests
             ExpectMultiTextMergeIn("TranslationForm", "");
 
             ParseEntryAndCheck(
-                string.Format("<entry><sense><example><form lang='x'>hello</form></example></sense></entry>"));
+                string.Format("<entry><sense><example><form lang='x'><text>hello</text></form></example></sense></entry>"));
         }
 
         [Test]
@@ -535,7 +549,7 @@ namespace LiftIO.Tests
             ExpectMultiTextMergeIn("ExampleForm", "");
             ExpectMultiTextMergeIn("TranslationForm", "x=hello|");
 
-            ParseEntryAndCheck("<entry><sense><example><translation><form lang='x'>hello</form></translation></example></sense></entry>");
+            ParseEntryAndCheck("<entry><sense><example><translation><form lang='x'><text>hello</text></form></translation></example></sense></entry>");
             //    "GetOrMakeEntry(;;;)GetOrMakeSense(m,)GetOrMakeExample(m,)MergeInTranslationForm(m,x=hello|)");
         }
 
