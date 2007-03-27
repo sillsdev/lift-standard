@@ -1,22 +1,18 @@
 <?xml version="1.0"?>
 <lift version="0.10">
-  <!--
-  \lx srapa
-  \ps vt
-  \ge slap
-  \de slap with open hand
-  \dt 27/Aug/91
-  -->
-  <entry id="srapa" dateModified="1991-08-27">
+  <entry id="srapa">
     <lexical-unit>
       <form lang="zxx-Latn">
         <text>srapa</text>
+        <trait name="flag" value="true"/>
       </form>
     </lexical-unit>
     <sense id="srapa_">
       <grammatical-info value="vt"/>
       <gloss lang="en">
+        <trait name="confidence" value="high"/>
         <text>slap</text>
+        <trait name="flag" value="true"/>
       </gloss>
       <definition>
         <form lang="en">

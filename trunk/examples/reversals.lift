@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.9.1">
+<lift version="0.10">
   <!--
   \lx utan
   \ps n
@@ -11,22 +11,36 @@
   -->
   <entry id="utan">
     <lexical-unit>
-      <form lang="zxx-Latn">utan</form>
+      <form lang="zxx-Latn">
+        <text>utan</text>
+      </form>
     </lexical-unit>
     <sense id="utan_">
       <grammatical-info value="n"/>
       <trait name="semantic-domain" value="Nplant"/>
-      <gloss lang="en">veg</gloss>
-      <gloss lang="id">sayur</gloss>
-      <gloss lang="id">jamu</gloss>
+      <gloss lang="en">
+        <text>veg</text>
+      </gloss>
+      <gloss lang="id">
+        <text>sayur</text>
+      </gloss>
+      <gloss lang="id">
+        <text>jamu</text>
+      </gloss>
       <reversal type="eng">
-        <form lang="en">mushroom</form>
+        <form lang="en">
+          <text>mushroom</text>
+        </form>
       </reversal>
       <reversal type="eng">
-        <form lang="en">vegetable</form>
+        <form lang="en">
+          <text>vegetable</text>
+        </form>
       </reversal>
       <definition>
-        <form lang="en">non-bulbous edible leafy and stalky plant and fungi</form>
+        <form lang="en">
+          <text>non-bulbous edible leafy and stalky plant and fungi</text>
+        </form>
       </definition>
     </sense>
   </entry>

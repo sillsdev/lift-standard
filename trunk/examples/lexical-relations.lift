@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.9.1">
+<lift version="0.10">
   <!--
   \lx hete
   \ps vt
@@ -12,18 +12,26 @@
   -->
   <entry id="hete">
     <lexical-unit>
-      <form lang="zxx-Latn">hete</form>
+      <form lang="zxx-Latn">
+        <text>hete</text>
+      </form>
     </lexical-unit>
     <sense id="hete_">
-      <gloss lang="en">cut</gloss>
+      <gloss lang="en">
+        <text>cut</text>
+      </gloss>
       <definition>
-        <form lang="en">cut into sectios for use</form>
+        <form lang="en">
+          <text>cut into sectios for use</text>
+        </form>
       </definition>
       <relation name="gen" ref="lata_"/>
     </sense>
     <variant>
       <trait name="variant-type" value="paradigm"/>
-      <form lang="zxx-Latn">hetek</form>
+      <form lang="zxx-Latn">
+        <text>hetek</text>
+      </form>
     </variant>
   </entry>
 </lift>
