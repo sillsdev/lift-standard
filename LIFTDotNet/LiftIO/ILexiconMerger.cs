@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace LiftIO
 {
@@ -36,15 +37,16 @@ namespace LiftIO
         /// Handle LIFT's "trait" entity,
         /// which can be found on any subclass of "extensible", on any "field", and as
         /// a subclass of "annotation".
+        /// Note, currently (mar 2007), traits inside forms are instead provided through the LiftMultiText
         /// </summary>
-        void MergeInTrait(TBase extensible, string name, string valueAttribution);
+        void MergeInTrait(TBase extensible, Trait trait);
 
         /// <summary>
         /// Handle LIFT's "note" entity. NB: This may be called multiple times (w/ different notes).
         /// </summary>
         void MergeInNote(TBase extensible, string type, LiftMultiText contents);
 
-        void MergeInGrammaticalInfo(TSense sense, string val);
+        void MergeInGrammaticalInfo(TSense sense, string val, List<Trait> traits);
     }
 
 }
