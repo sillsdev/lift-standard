@@ -36,7 +36,7 @@ namespace LiftIO
             }
             catch (Exception e)
             {
-                if (reader.Name == "version" && lastGuy == "lift")
+                if (reader.Name == "version" && (lastGuy == "lift" || lastGuy==""))
                 {
                     return String.Format(
                         "This file claims to be version {0} of LIFT, but this version of the program uses version {1}",
@@ -52,7 +52,7 @@ namespace LiftIO
         {
             get
             {
-                return "0.9.1";
+                return "0.10";
             }
         }
     }
