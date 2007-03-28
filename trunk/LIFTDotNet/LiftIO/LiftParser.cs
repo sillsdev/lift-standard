@@ -96,12 +96,28 @@ namespace LiftIO
 
         protected void ReadGrammi(TSense sense, XmlNode senseNode)
         {
-            XmlNode grammi = senseNode.SelectSingleNode("grammatical-info");
-            if (grammi != null)
+            XmlNode grammiNode = senseNode.SelectSingleNode("grammatical-info");
+            if (grammiNode != null)
             {
-                string val = GetStringAttribute(grammi, "value");
-                _merger.MergeInGrammaticalInfo(sense, val);
+                string val = GetStringAttribute(grammiNode, "value");
+                _merger.MergeInGrammaticalInfo(sense, val, GetTraitList(grammiNode));
             }
+        }
+
+        /// <summary>
+        /// Used for elements with traits that are not top level objects (extensibles) or forms.
+        /// In Mar 2007, this appied only to grammatical-info elements
+        /// </summary>
+        /// <param name="grammi"></param>
+        /// <returns></returns>
+        private static List<Trait> GetTraitList(XmlNode grammi)
+        {
+            List<Trait> traits = new List<Trait>();
+            foreach (XmlNode traitNode in grammi.SelectNodes("trait"))
+            {
+                traits.Add(GetTrait(traitNode));
+            }
+            return traits;
         }
 
         public TSense ReadSense(XmlNode node, TEntry entry)
@@ -215,10 +231,7 @@ namespace LiftIO
         {
             foreach (XmlNode traitNode in node.SelectNodes("trait"))
             {
-                _merger.MergeInTrait(target,
-                                     GetStringAttribute(traitNode, "name"),
-                                     GetStringAttribute(traitNode, "value")
-                                     );
+                _merger.MergeInTrait(target,GetTrait(traitNode));
             }
         }
 
@@ -334,8 +347,8 @@ namespace LiftIO
 
                     foreach (XmlNode traitNode in formNode.SelectNodes("trait"))
                     {
-                        Trait trait = new Trait(lang, GetStringAttribute(traitNode, "name"),
-                                                GetStringAttribute(traitNode, "value"));
+                        Trait trait = GetTrait(traitNode);
+                        trait.LanguageHint = lang;
                         text.Traits.Add(trait);
                     }
                 }
@@ -344,6 +357,12 @@ namespace LiftIO
                     NotifyError(e);
                 }
             }
+        }
+
+        private static Trait GetTrait(XmlNode traitNode)
+        {
+            return new Trait(GetStringAttribute(traitNode, "name"),
+                             GetStringAttribute(traitNode, "value"));
         }
 
         private static bool NodeContentIsJustAString(XmlNode node)

@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using NMock2;
+using NMock2.Matchers;
 using NUnit.Framework;
 
 namespace LiftIO.Tests
@@ -18,6 +19,47 @@ namespace LiftIO.Tests
         private Mockery _mocks;
         private List<LiftParser<DummyBase, Dummy, Dummy, Dummy>.ErrorArgs> _parsingErrors;
 
+        /// <summary>
+        /// only handles a single trait
+        /// </summary>
+        class LiftMultiTextTraitMatcher : NMock2.Matcher
+        {
+            private string _expectedLanguageOfFirstTrait;
+            private string _expectedNameOfFirstTrait;
+            private string _expectedValueOfFirstTrait;
+            private int _expectedCount;
+
+            public LiftMultiTextTraitMatcher(string expectedLanguageOfFirstTrait, string expectedNameOfFirstTrait, string expectedValueOfFirstTrait, int expectedNumberOfTraits)
+            {
+                _expectedLanguageOfFirstTrait = expectedLanguageOfFirstTrait;
+                _expectedCount = expectedNumberOfTraits;
+                _expectedValueOfFirstTrait = expectedValueOfFirstTrait;
+                _expectedNameOfFirstTrait = expectedNameOfFirstTrait;
+            }
+
+            public override bool Matches(object o)
+            {
+                LiftMultiText m = o as LiftMultiText;
+                if (m.Traits.Count != _expectedCount)
+                {
+                    return false;
+                }
+                LiftIO.Trait t = m.Traits[0];
+                if (_expectedLanguageOfFirstTrait != null && _expectedLanguageOfFirstTrait != string.Empty)
+                {
+                    if (t.LanguageHint != _expectedLanguageOfFirstTrait)
+                    {
+                        return false;
+                    }
+                }
+                return (t.Name == _expectedNameOfFirstTrait && t.Value == _expectedValueOfFirstTrait);
+            }
+
+            public override void DescribeTo(TextWriter writer)
+            {
+                writer.Write(string.Format("TraitMatcher(expectedLanguage={0}, expectedName={1}, expectedValue={2}, numberOfTraits={3})", _expectedLanguageOfFirstTrait, _expectedNameOfFirstTrait, _expectedValueOfFirstTrait,_expectedCount));
+            }
+        }
 
         [SetUp]
         public void Setup()
@@ -113,14 +155,14 @@ namespace LiftIO.Tests
         public void EntryWithGuidId()
         {
             Guid g = Guid.NewGuid();
-            ExpectMergeInLexemeForm();
+            ExpectMergeInLexemeForm(Is.Anything);
             ParseEntryAndCheck(string.Format("<entry id=\"{0}\" />", g.ToString()), 
                  string.Format("{0};;;",g.ToString()));
         }
         [Test]
         public void EntryWithNonGuidId()
         {
-            ExpectMergeInLexemeForm();
+            ExpectMergeInLexemeForm(Is.Anything);
             ParseEntryAndCheck(string.Format("<entry id=\"{0}\" />", "-foo-"),
                  string.Format("{0};;;", "-foo-"));
         }
@@ -157,7 +199,7 @@ namespace LiftIO.Tests
         private void ExpectEmptyEntry()
         {
             ExpectGetOrMakeEntry();
-            ExpectMergeInLexemeForm();
+            ExpectMergeInLexemeForm(Is.Anything);
         }
 
 
@@ -174,10 +216,11 @@ namespace LiftIO.Tests
                 .Method("GetOrMakeSense")
                 .Will(Return.Value(new Dummy()));
         }
-        private void ExpectMergeInGrammi()
+        private void ExpectMergeInGrammi(Matcher traitListMatcher)
         {
             Expect.Exactly(1).On(_merger)
-                .Method("MergeInGrammaticalInfo");
+                .Method("MergeInGrammaticalInfo")
+                .With(Is.Anything, Is.Anything, traitListMatcher);
         }
 
         private void ExpectGetOrMakeExample()
@@ -187,16 +230,12 @@ namespace LiftIO.Tests
                 .Will(Return.Value(new Dummy()));
         }
         
-        private void ExpectMergeInLexemeForm(string exactMultiTextToString)
+
+        private void ExpectMergeInLexemeForm(Matcher matcher)
         {
             Expect.Exactly(1).On(_merger)
                 .Method("MergeInLexemeForm")
-                .With(Is.Anything, Is.EqualTo(exactMultiTextToString));
-        }
-        private void ExpectMergeInLexemeForm()
-        {
-            Expect.Exactly(1).On(_merger)
-                .Method("MergeInLexemeForm");
+                .With(Is.Anything,matcher);
         }
         private void ExpectFinishEntry()
         {
@@ -231,11 +270,11 @@ namespace LiftIO.Tests
 //              //  .Method("MergeInField").With(matchers);
 //        }
 
-        private void ExpectMergeInTrait(string nameAttribute, string valueAttribute)
+        private void ExpectMergeInTrait(Matcher traitMatcher)
         {
             Expect.Exactly(1).On(_merger)
                 .Method("MergeInTrait")
-                .With(Is.Anything, Is.EqualTo(nameAttribute), Is.EqualTo(valueAttribute));
+                .With(Is.Anything, traitMatcher);
        }
 
         private void ExpectEntryWasDeleted()
@@ -260,14 +299,14 @@ namespace LiftIO.Tests
         [Test]
         public void EntryWithoutId()
         {
-            ExpectMergeInLexemeForm();
+            ExpectMergeInLexemeForm(Is.Anything);
             ParseEntryAndCheck("<entry/>", ";;;");
         }
 
         [Test]
         public void EntryWithReadableIdPlusGuid()
         {
-            ExpectMergeInLexemeForm();
+            ExpectMergeInLexemeForm(Is.Anything);
             Guid g = Guid.NewGuid();
 //            string s = String.Format("<lift xmlns:flex='http://fieldworks.sil.org'><entry  id='-foo' flex:guid='{0}'/></lift>", g);
 //
@@ -284,7 +323,7 @@ namespace LiftIO.Tests
         public void FormMissingLangGeneratesNonFatalError()
         {
             ExpectGetOrMakeEntry();
-            ExpectMergeInLexemeForm();
+            ExpectMergeInLexemeForm(Is.Anything);
             ParseEntryAndCheck("<entry><lex><form/></lex></entry>");
             Assert.AreEqual(1, _parsingErrors.Count);
         }
@@ -296,7 +335,7 @@ namespace LiftIO.Tests
            using (_mocks.Ordered)
             {
                 ExpectGetOrMakeEntry(";;;");
-                ExpectMergeInLexemeForm();
+                ExpectMergeInLexemeForm(Is.Anything);
             }
             ParseEntryAndCheck("<entry><lex><form lang='x'/></lex></entry>");
         }
@@ -324,12 +363,12 @@ namespace LiftIO.Tests
                             .Method("MergeIn" + MultiTextPropertyName)
                             .With(Is.Anything, Has.ToString(Is.EqualTo(value)));
        }
-        private void ExpectMultiTextMergeIn(string MultiTextPropertyName, int traitCount)
-        {
-             Expect.Exactly(1).On(_merger)
-                            .Method("MergeIn" + MultiTextPropertyName)
-                            .With(Is.Anything, Has.Property("Traits", Has.Property("Count", Is.EqualTo(traitCount))));
-       }
+//        private void ExpectMultiTextMergeIn(string MultiTextPropertyName, Matcher matcher)
+//        {
+//             Expect.Exactly(1).On(_merger)
+//                            .Method("MergeIn" + MultiTextPropertyName)
+//                            .With(Is.Anything, Has.Property("Traits",  matcher));
+//       }
 
         private void ExpectMultiTextMergeIn(string MultiTextPropertyName, Matcher multiTextMatcher)
         {
@@ -351,7 +390,7 @@ namespace LiftIO.Tests
         private void TryDateFormat(string created)
         {
             ExpectGetOrMakeEntry();
-            ExpectMergeInLexemeForm();
+            ExpectMergeInLexemeForm(Is.Anything);
             ParseEntryAndCheck(
                 string.Format("<entry id='foo' dateCreated='{0}'></entry>", created));
         }
@@ -360,7 +399,7 @@ namespace LiftIO.Tests
         public void DateWithoutTimeOk()
         {
             ExpectGetOrMakeEntry();
-            ExpectMergeInLexemeForm();
+            ExpectMergeInLexemeForm(Is.Anything);
             ParseEntryAndCheck("<entry id='foo' dateCreated='2005-01-01'></entry>");
             Assert.AreEqual(0, _parsingErrors.Count);
         }
@@ -397,7 +436,7 @@ namespace LiftIO.Tests
         public void EntryWithSense()
         {
             ExpectGetOrMakeEntry();
-            ExpectMergeInLexemeForm();
+            ExpectMergeInLexemeForm(Is.Anything);
             ExpectGetOrMakeSense();
             ExpectMergeGloss();
             ExpectMergeDefinition();
@@ -408,7 +447,7 @@ namespace LiftIO.Tests
         public void SenseWithGloss()
         {
             ExpectGetOrMakeEntry();
-            ExpectMergeInLexemeForm();
+            ExpectMergeInLexemeForm(Is.Anything);
             ExpectGetOrMakeSense();
             ExpectMultiTextMergeIn("Gloss","x=hello|");
             ExpectMergeDefinition();
@@ -420,19 +459,55 @@ namespace LiftIO.Tests
         public void GlossWithTrait()
         {
             ExpectGetOrMakeEntry();
-            ExpectMergeInLexemeForm();
+            ExpectMergeInLexemeForm(Is.Anything);
             ExpectGetOrMakeSense();
-            ExpectMultiTextMergeIn("Gloss", 1); //todo this is an issuficient test
+            ExpectMultiTextMergeIn("Gloss", new LiftMultiTextTraitMatcher("x","flag","1", 1));
             ExpectMergeDefinition();
 
             ParseEntryAndCheck(string.Format("<entry><sense><gloss lang='x'><text>hello</text><trait name='flag' value='1'><annotation><form lang='x'><text>blah blah</text></form></annotation></trait></gloss></sense></entry>"));
         }
 
         [Test]
+        public void LexicalUnitWithTrait()
+        {
+            ExpectGetOrMakeEntry();
+            ExpectMergeInLexemeForm(new LiftMultiTextTraitMatcher("x", "flag", "1", 1));
+            ParseEntryAndCheck(string.Format("<entry><lexical-unit><form lang='x'><text>blah blah</text><trait name='flag' value='1'/></form></lexical-unit></entry>"));
+        }
+
+        /// <summary>
+        /// e.g., a 
+        /// </summary>
+        [Test]
+        public void SenseWithTraitThatHasSubTrait()
+        {
+            ExpectGetOrMakeEntry();
+            ExpectMergeInLexemeForm(Is.Anything);
+            ExpectGetOrMakeSense();
+            ExpectMultiTextMergeIn("Gloss", new LiftMultiTextTraitMatcher("x", "flag", "1", 1));
+            ExpectMergeDefinition();
+
+            ParseEntryAndCheck(string.Format("<entry><sense><gloss lang='x'><text>hello</text><trait name='flag' value='1'><annotation><form lang='x'><text>blah blah</text></form></annotation></trait></gloss></sense></entry>"));
+        }
+
+        [Test]
+        public void GrammiWithTwoTraits()
+        {
+            ExpectGetOrMakeEntry();
+            ExpectMergeInLexemeForm(Is.Anything);
+            ExpectGetOrMakeSense();
+            ExpectMultiTextMergeIn("Gloss", Is.Anything);
+            ExpectMergeDefinition();
+            ExpectMergeInGrammi(Has.Property("Count", Is.EqualTo(2)));
+
+            ParseEntryAndCheck(string.Format("<entry><sense><grammatical-info value='x'><trait name='one' value='1'/><trait name='two' value='2'/></grammatical-info></sense></entry>"));
+        }
+
+        [Test]
         public void GlossWithTwoLanguages()
         {
             ExpectGetOrMakeEntry();
-            ExpectMergeInLexemeForm();
+            ExpectMergeInLexemeForm(Is.Anything);
             ExpectGetOrMakeSense();
             ExpectMultiTextMergeIn("Gloss", "x=hello|y=bye|");
             ExpectMergeDefinition();
@@ -444,7 +519,7 @@ namespace LiftIO.Tests
         public void GlossWithTwoFormsInSameLanguageAreCombined()
         {
             ExpectGetOrMakeEntry();
-            ExpectMergeInLexemeForm();
+            ExpectMergeInLexemeForm(Is.Anything);
             ExpectGetOrMakeSense();
             ExpectMultiTextMergeIn("Gloss", "x=hello; bye|");
             ExpectMergeDefinition();
@@ -506,8 +581,11 @@ namespace LiftIO.Tests
         public void SimpleTraitsAreRead()
         {
             ExpectEmptyEntry();
-            ExpectMergeInTrait("color","red");
-            ParseEntryAndCheck(string.Format("<entry><trait name='color' value='red'/></entry>"));
+            ExpectMergeInTrait(new NMock2.Matchers.AndMatcher(
+                    Has.Property("Name", Is.EqualTo("color")), Has.Property("Value", Is.EqualTo("red"))));
+            ExpectMergeInTrait(new NMock2.Matchers.AndMatcher(
+                    Has.Property("Name", Is.EqualTo("shape")), Has.Property("Value", Is.EqualTo("square"))));
+            ParseEntryAndCheck(string.Format("<entry><trait name='color' value='red'/><trait name='shape' value='square'/></entry>"));
         }
 
         [Test]
@@ -517,7 +595,7 @@ namespace LiftIO.Tests
             ExpectGetOrMakeSense();
             ExpectMergeGloss();
             ExpectMergeDefinition();
-            ExpectMergeInGrammi();
+            ExpectMergeInGrammi(Is.Anything);
             ParseEntryAndCheck("<entry><sense><grammatical-info value='blue'/></sense></entry>");
         }
 
@@ -525,7 +603,7 @@ namespace LiftIO.Tests
         public void SenseWithExample()
         {
             ExpectGetOrMakeEntry();
-            ExpectMergeInLexemeForm();
+            ExpectMergeInLexemeForm(Is.Anything);
             ExpectGetOrMakeSense();
             ExpectMergeGloss();
             ExpectMergeDefinition();
@@ -541,7 +619,7 @@ namespace LiftIO.Tests
         public void ExampleWithTranslation()
         {
             ExpectGetOrMakeEntry();
-            ExpectMergeInLexemeForm();
+            ExpectMergeInLexemeForm(Is.Anything);
             ExpectGetOrMakeSense();
             ExpectMergeGloss();
             ExpectMergeDefinition();
