@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 using NUnit.Framework;
 
 namespace LiftIO.Tests
@@ -20,17 +21,27 @@ namespace LiftIO.Tests
 
         }
 
+        [Test]
+        public void ValidatorVersionMatchedEmbeddedSchemaVersion()
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.Load(typeof (LiftMultiText).Assembly.GetManifestResourceStream("LiftIO.lift.rng"));
+            string query = String.Format("//x:attribute/x:value[.='{0}']", Validator.LiftVersion);
+            XmlNamespaceManager m = new XmlNamespaceManager(doc.NameTable);
+            m.AddNamespace("x", "http://relaxng.org/ns/structure/1.0");
+            Assert.IsNotNull(doc.FirstChild.SelectSingleNode(query, m));
+        }
 
         [Test]
         public void GoodLiftValidates()
         {
-            string contents = "<lift version='0.9.1'></lift>";
+            string contents = "<lift version='0.10'></lift>";
             Validate(contents, true);
         }
         [Test]
         public void BadLiftDoesNotValidate()
         {
-            string contents = "<lift version='0.9.1'><header></header><header></header></lift>";
+            string contents = "<lift version='0.10'><header></header><header></header></lift>";
             Validate(contents, false);
         }
 
