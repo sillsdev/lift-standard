@@ -46,6 +46,7 @@
     <Compile Include="LiftMultiText.cs" />
     <Compile Include="SynchronicMerger.cs" />
     <Compile Include="Trait.cs" />
+    <Compile Include="Utilities.cs" />
     <Compile Include="Validator.cs" />
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>

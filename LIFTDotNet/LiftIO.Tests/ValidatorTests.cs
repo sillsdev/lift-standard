@@ -35,7 +35,7 @@ namespace LiftIO.Tests
         [Test]
         public void GoodLiftValidates()
         {
-            string contents = "<lift version='0.10'></lift>";
+            string contents = string.Format("<lift version='{0}'></lift>", Validator.LiftVersion);
             Validate(contents, true);
         }
         [Test]
