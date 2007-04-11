@@ -16,21 +16,23 @@ namespace LiftIO
     /// </summary>
     public class SynchronicMerger
     {
-        public const string BaseLiftFileName = "base.lift.xml";
+      //  private string _pathToBaseLiftFile;
+        public const  string ExtensionOfIncrementalFiles = ".lift.update";
 
-        public void MergeDirectory(string directory)
+        public void MergeUpdatesIntoFile(string pathToBaseLiftFile)
         {
-            
-            DirectoryInfo di = new DirectoryInfo(directory);
-            FileInfo[] files = di.GetFiles("*lift.xml", SearchOption.TopDirectoryOnly);
-            if (files.Length < 2)
+           // _pathToBaseLiftFile = pathToBaseLiftFile;
+
+            DirectoryInfo di = new DirectoryInfo(Path.GetDirectoryName(pathToBaseLiftFile));
+            FileInfo[] files = di.GetFiles("*"+ExtensionOfIncrementalFiles, SearchOption.TopDirectoryOnly);
+            if (files.Length < 1)
             {
                 return;
             }
             Array.Sort<FileInfo>(files, new FileInfoComparer());
             int count = files.Length;
-            
-            string pathToMergeInTo = files[0].FullName;
+
+            string pathToMergeInTo = pathToBaseLiftFile;// files[0].FullName;
 
             for (int i = 0; i < count; i++)
             {
@@ -41,7 +43,7 @@ namespace LiftIO
                 }
             }
 
-            for (int i = 1 /*skip first one*/; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 string outputPath = Path.GetTempFileName();
                 MergeInNewFile(pathToMergeInTo, files[i].FullName, outputPath);
@@ -50,26 +52,27 @@ namespace LiftIO
                 //TODO Delete temp files this creates
             }
 
-            string basePath = Path.Combine(directory, BaseLiftFileName);
+            //string pathToBaseLiftFile = Path.Combine(directory, BaseLiftFileName);
             Debug.Assert(File.Exists(pathToMergeInTo));
-            if (File.Exists(basePath))
+            if (File.Exists(pathToBaseLiftFile))
             {
-                string bakPath = basePath+".bak";
+                string bakPath = pathToBaseLiftFile+".bak";
                 if (File.Exists(bakPath))
                 {
                     File.Delete(bakPath);
                 }
-                File.Replace(pathToMergeInTo, basePath, bakPath);
+                File.Replace(pathToMergeInTo, pathToBaseLiftFile, bakPath);
             }
             else
             {
-                File.Move(pathToMergeInTo, basePath);
+                //todo: this is not going to work across volumes
+                File.Move(pathToMergeInTo, pathToBaseLiftFile);
             }
 
             //delete all the non-base paths
             foreach (FileInfo file in files)
             {
-                if (file.Name.ToLower() != BaseLiftFileName.ToLower())
+                if (file.FullName != pathToBaseLiftFile)
                 {
                     file.Delete();
                 }
@@ -106,28 +109,45 @@ namespace LiftIO
                     ProcessElement(olderReader, writer, newerDoc);
                     break;
                 default:
-                    WriteShallowNode(olderReader, writer);
+                    Utilities.WriteShallowNode(olderReader, writer);
                     break;
             }
         }
 
         private static void ProcessElement(XmlReader olderReader, XmlWriter writer, XmlDocument newerDoc)
         {
-            if ( olderReader.NodeType == XmlNodeType.EndElement && olderReader.Name == "lift")
+            if ( olderReader.Name == "lift" && olderReader.IsEmptyElement) //i.e., <lift/>
             {
-                foreach(XmlNode n in newerDoc.SelectNodes("//entry")) //REVIEW CreateNavigator
+                writer.WriteStartElement("lift");
+                writer.WriteAttributes(olderReader, true);
+                foreach(XmlNode n in newerDoc.SelectNodes("//entry")) 
                 {
-                   writer.WriteNode(n.CreateNavigator(), true /*REVIEW*/);
+                   writer.WriteNode(n.CreateNavigator(), true /*REVIEW*/);//REVIEW CreateNavigator
                 }
                 //write out the closing lift element
-                 writer.WriteNode(olderReader, true);
+                writer.WriteEndElement();
+                olderReader.Read();
+            }
+            else if (olderReader.Name == "lift" &&
+                olderReader.NodeType == XmlNodeType.EndElement)
+            {
+                foreach (XmlNode n in newerDoc.SelectNodes("//entry")) //REVIEW CreateNavigator
+                {
+                    writer.WriteNode(n.CreateNavigator(), true /*REVIEW*/);
+                }
+                //write out the closing lift element
+                writer.WriteNode(olderReader, true);
             }
             else
             {
                 if (olderReader.Name == "entry")
                 {
-                    string oldId = olderReader.GetAttribute("id");
-                    XmlNode match= newerDoc.SelectSingleNode("//entry[@id='" + oldId + "']");
+                    string oldId = olderReader.GetAttribute("guid");
+                    if (String.IsNullOrEmpty(oldId))
+                    {
+                        throw new ApplicationException("All entries must have guid attributes in order for merging to work. " + olderReader.Value);
+                    }
+                    XmlNode match= newerDoc.SelectSingleNode("//entry[@guid='" + oldId + "']");
                     if (match != null)
                     {
                         olderReader.Skip(); //skip the old one
@@ -141,7 +161,7 @@ namespace LiftIO
                 }
                 else
                 {
-                    WriteShallowNode(olderReader, writer);
+                    Utilities.WriteShallowNode(olderReader, writer);
                 }
             }
         }
@@ -155,56 +175,7 @@ namespace LiftIO
             }
         }
 
-        static void WriteShallowNode(XmlReader reader, XmlWriter writer)
-        {
-            if (reader == null)
-            {
-                throw new ArgumentNullException("reader");
-            }
-            if (writer == null)
-            {
-                throw new ArgumentNullException("writer");
-            }
-            switch (reader.NodeType)
-            {
-                case XmlNodeType.Element:
-                    writer.WriteStartElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
-                    writer.WriteAttributes(reader, true);
-                    if (reader.IsEmptyElement)
-                    {
-                        writer.WriteEndElement();
-                   }
-                    break;
-                case XmlNodeType.Text:
-                    writer.WriteString(reader.Value);
-                    break;
-                case XmlNodeType.Whitespace:
-                case XmlNodeType.SignificantWhitespace:
-                    writer.WriteWhitespace(reader.Value);
-                    break;
-                case XmlNodeType.CDATA:
-                    writer.WriteCData(reader.Value);
-                    break;
-                case XmlNodeType.EntityReference:
-                    writer.WriteEntityRef(reader.Name);
-                    break;
-                case XmlNodeType.XmlDeclaration:
-                case XmlNodeType.ProcessingInstruction:
-                    writer.WriteProcessingInstruction(reader.Name, reader.Value);
-                    break;
-                case XmlNodeType.DocumentType:
-                    writer.WriteDocType(reader.Name, reader.GetAttribute("PUBLIC"), reader.GetAttribute("SYSTEM"),
-                                        reader.Value);
-                    break;
-                case XmlNodeType.Comment:
-                    writer.WriteComment(reader.Value);
-                    break;
-                case XmlNodeType.EndElement:
-                    writer.WriteFullEndElement();
-                    break;
-            }
-            reader.Read();
-        }
+       
 
     }
 }
