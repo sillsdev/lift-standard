@@ -12,7 +12,7 @@ namespace LiftIO
     public interface ILexiconMerger<TBase, TEntry, TSense, TExample>
     {
         TEntry GetOrMakeEntry(Extensible info);
-        TEntry EntryWasDeleted(Extensible info, DateTime dateDeleted);
+        void EntryWasDeleted(Extensible info, DateTime dateDeleted);
         TSense GetOrMakeSense(TEntry entry, Extensible info);
         TExample GetOrMakeExample(TSense sense, Extensible info);
         void MergeInLexemeForm(TEntry entry, LiftMultiText contents);
