@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- From http://msbuildtasks.tigris.org/ -->
+  <Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets"/>
+
+  <PropertyGroup>
+    <ApplicationName>LiftIO</ApplicationName>
+    <Company>SIL International</Company>
+    <Copyright>Copyright © SIL International 2006-2007</Copyright>
+
+    <Major>0</Major>
+    <Minor>1</Minor>
+    <Bug>0</Bug>
+    <Revision></Revision>
+  </PropertyGroup>
+
+
+  <Target Name="Version">
+    <!--
+      You must install the subversion package (not tortoise or another fancy gui version)
+      http://subversion.tigris.org/project_packages.html
+    -->
+    <SvnVersion LocalPath="$(MSBuildProjectDirectory)">
+      <Output TaskParameter="Revision" PropertyName="Revision" />
+      <Output TaskParameter="Revision" PropertyName="AssemblyRevision"/>
+      <Output TaskParameter="Revision" PropertyName="AssemblyFileRevision"/>
+    </SvnVersion>
+
+    <Message Text="Version: $(Major).$(Minor).$(Bug).$(Revision)"/>
+  </Target>
+
+  <!-- From http://www.gotdotnet.com/codegallery/codegallery.aspx?id=93d23e13-c653-4815-9e79-16107919f93e -->
+  <!--  <Import Project="$(MSBuildExtensionsPath)\Microsoft\AssemblyInfoTask\Microsoft.VersionNumber.targets"/> -->
+  <!-- instead of importing here, we include the actual file with modifications specific to this project (subversion)-->
+
+  <!-- This targets file includes all the necessary information to automatically increment build numbers as part of
+     a regular build process. To use it simply include it in your project file after any other includes. The typical
+     include line looks like this:
+     
+     <Import Project="$(MSBuildExtensionsPath)\Microsoft\AssemblyInfoTask\Microsoft.VersionNumber.targets"/>
+  -->
+  <!-- Properties for controlling the Assembly Version -->
+  <PropertyGroup>
+    <AssemblyMajorVersion>$(Major)</AssemblyMajorVersion>
+    <AssemblyMinorVersion>$(Minor)</AssemblyMinorVersion>
+    <AssemblyBuildNumber>$(Bug)</AssemblyBuildNumber>
+    <AssemblyBuildNumberType>NoIncrement</AssemblyBuildNumberType>
+    <AssemblyBuildNumberFormat>0</AssemblyBuildNumberFormat>
+    <AssemblyRevision>$(Revision)</AssemblyRevision>
+    <AssemblyRevisionType>NoIncrement</AssemblyRevisionType>
+    <AssemblyRevisionFormat>0</AssemblyRevisionFormat>
+  </PropertyGroup>
+
+  <!-- Properties for controlling the Assembly File Version -->
+  <PropertyGroup>
+    <AssemblyFileMajorVersion>$(Major)</AssemblyFileMajorVersion>
+    <AssemblyFileMinorVersion>$(Minor)</AssemblyFileMinorVersion>
+    <AssemblyFileBuildNumber>$(Bug)</AssemblyFileBuildNumber>
+    <AssemblyFileBuildNumberType>NoIncrement</AssemblyFileBuildNumberType>
+    <AssemblyFileBuildNumberFormat>0</AssemblyFileBuildNumberFormat>
+    <AssemblyFileRevision>$(Revision)</AssemblyFileRevision>
+    <AssemblyFileRevisionType>NoIncrement</AssemblyFileRevisionType>
+    <AssemblyFileRevisionFormat>0</AssemblyFileRevisionFormat>
+  </PropertyGroup>
+
+  <!-- Properties for controlling COM visibility -->
+  <PropertyGroup>
+    <AssemblyComVisible></AssemblyComVisible>
+    <AssemblyGuid></AssemblyGuid>
+  </PropertyGroup>
+
+  <!-- Propeties for controlling extended assembly attributes -->
+  <PropertyGroup>
+    <AssemblyCompany>$(Company)</AssemblyCompany>
+    <AssemblyConfiguration>$(Configuration)</AssemblyConfiguration>
+    <AssemblyCopyright>$(Copyright)</AssemblyCopyright>
+    <AssemblyCulture></AssemblyCulture>
+    <AssemblyDescription></AssemblyDescription>
+    <AssemblyProduct>$(ApplicationName)</AssemblyProduct>
+    <AssemblyTitle></AssemblyTitle>
+  </PropertyGroup>
+
+  <!-- Properties for controlling key signing through assemblyinfo files -->
+  <PropertyGroup>
+    <AssemblyIncludeSigningInformation>false</AssemblyIncludeSigningInformation>
+    <AssemblyDelaySign>false</AssemblyDelaySign>
+    <AssemblyKeyFile></AssemblyKeyFile>
+    <AssemblyKeyName></AssemblyKeyName>
+  </PropertyGroup>
+
+  <!-- The items that get processed by the task 
+    Add all AssemblyInfo files in all sub-directories to the list of
+    files that should be processed by the task but don't include ones under
+    subversion's special directory
+    -->
+  <ItemGroup>
+    <AssemblyInfoFiles Include="**\AssemblyInfo.*" Exclude="**\.svn\**\*.*"/>
+  </ItemGroup>
+
+  <!-- Import the task -->
+  <UsingTask AssemblyName="AssemblyInfoTask, Version=1.0.51130.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35" TaskName="AssemblyInfo"/>
+
+  <!-- The target that acutally does all the work. The inputs are the same as the CoreCompileDependsOn target
+  (with the addition of @(AssemblyInfoFiles) to ensure that we only ever update the AssemblyInfo files if a 
+  compile is actually going to take place. The outputs are the AssemblyInfoFiles that were passed in for update. -->
+  <Target Name="UpdateAssemblyInfoFiles">
+    <Message Text="AssemblyVersion: $(AssemblyMajorVersion).$(AssemblyMinorVersion).$(AssemblyBuildNumber).$(AssemblyRevision)"/>
+    <Message Text="AssemblyFileVersion: $(AssemblyFileMajorVersion).$(AssemblyFileMinorVersion).$(AssemblyFileBuildNumber).$(AssemblyFileRevision)"/>
+
+    <AssemblyInfo AssemblyInfoFiles="@(AssemblyInfoFiles)"
+                  AssemblyVersion="$(AssemblyVersion)" 
+                  AssemblyMajorVersion="$(AssemblyMajorVersion)"
+                  AssemblyMinorVersion="$(AssemblyMinorVersion)"
+                  AssemblyBuildNumber="$(AssemblyBuildNumber)"
+                  AssemblyRevision="$(AssemblyRevision)"
+                  AssemblyBuildNumberType="$(AssemblyBuildNumberType)"
+                  AssemblyBuildNumberFormat="$(AssemblyBuildNumberFormat)"
+                  AssemblyRevisionType="$(AssemblyRevisionType)"
+                  AssemblyRevisionFormat="$(AssemblyRevisionFormat)"
+                  AssemblyFileVersion="$(AssemblyFileVersion)"
+                  AssemblyFileMajorVersion="$(AssemblyFileMajorVersion)"
+                  AssemblyFileMinorVersion="$(AssemblyFileMinorVersion)"
+                  AssemblyFileBuildNumber="$(AssemblyFileBuildNumber)"
+                  AssemblyFileRevision="$(AssemblyFileRevision)"
+                  AssemblyFileBuildNumberType="$(AssemblyFileBuildNumberType)"
+                  AssemblyFileBuildNumberFormat="$(AssemblyFileBuildNumberFormat)"
+                  AssemblyFileRevisionType="$(AssemblyFileRevisionType)"
+                  AssemblyFileRevisionFormat="$(AssemblyFileRevisionFormat)"
+                  ComVisible="$(AssemblyComVisible)"
+                  AssemblyGuid="$(AssemblyGuid)"
+                  AssemblyCompany="$(AssemblyCompany)"
+                  AssemblyConfiguration="$(AssemblyConfiguration)"
+                  AssemblyCopyright="$(AssemblyCopyright)"
+                  AssemblyCulture="$(AssemblyCulture)"
+                  AssemblyDescription="$(AssemblyDescription)"
+                  AssemblyProduct="$(AssemblyProduct)"
+                  AssemblyTitle="$(AssemblyTitle)"
+                  AssemblyIncludeSigningInformation="$(AssemblyIncludeSigningInformation)" 
+                  AssemblyDelaySign="$(AssemblyDelaySign)"
+                  AssemblyKeyFile="$(AssemblyKeyFile)"
+                  AssemblyKeyName="$(AssemblyKeyName)">
+      <Output TaskParameter="MaxAssemblyVersion" PropertyName="MaxAssemblyVersion"/>
+      <Output TaskParameter="MaxAssemblyFileVersion" PropertyName="MaxAssemblyFileVersion"/>
+    </AssemblyInfo>
+  </Target>
+
+  <PropertyGroup>
+    <BaseDirectory>$(MSBuildProjectDirectory)</BaseDirectory>
+  </PropertyGroup>
+
+  <Target Name="Compile">
+    <GetSolutionProjects Solution="$(BaseDirectory)\LiftIO.sln">
+      <Output ItemName="Projects" TaskParameter="Output"/>
+    </GetSolutionProjects>
+    
+    
+    <MSBuild Projects="@(Projects)"
+             Targets="Rebuild"
+             Properties="Configuration=Debug" />
+
+    <MSBuild Projects="@(Projects)"
+             Targets="Rebuild"
+             Properties="Configuration=Release" />
+  </Target>
+
+  <Target Name="Test">
+    <!-- collect up the test dlls that were generated in the Compile step
+    into the xTestAssemblies property-->
+    <CreateItem Include="$(BaseDirectory)\output\Debug\*.Tests.dll">
+      <Output TaskParameter="Include" ItemName="DebugTestAssemblies"/>
+    </CreateItem>
+    <CreateItem Include="$(BaseDirectory)\output\Release\*.Tests.dll">
+      <Output TaskParameter="Include" ItemName="ReleaseTestAssemblies"/>
+    </CreateItem>
+
+    <MakeDir Directories="$(BaseDirectory)\output\TestResults\Debug\;
+                          $(BaseDirectory)\output\TestResults\Release\"/>
+
+    <Message Text="Running Tests on %(DebugTestAssemblies.FullPath)"/>
+    
+    
+    <!-- run the tests individually -->
+    <NUnit OutputXmlFile="$(BaseDirectory)\output\TestResults\Debug\%(DebugTestAssemblies.Filename).xml"
+           Assemblies="%(DebugTestAssemblies.Identity)" 
+           WorkingDirectory="$(BaseDirectory)\output\Debug">
+    </NUnit>
+    <NUnit OutputXmlFile="$(BaseDirectory)\output\TestResults\Release\%(ReleaseTestAssemblies.Filename).xml"
+           Assemblies="%(ReleaseTestAssemblies.Identity)" 
+           WorkingDirectory="$(BaseDirectory)\output\Release">
+    </NUnit>
+  </Target>
+
+
+  
+  <Target Name="Build">
+    <CallTarget Targets="Version;
+                         UpdateAssemblyInfoFiles;
+                         Compile;
+                         Test"/>
+    <Message Text="Build Complete"/>
+  </Target>
+
+  <Target Name="Clean">
+    <MSBuild Projects="$(BaseDirectory)\LiftIO.sln"
+             Targets="Clean"
+             Properties="Configuration=Debug" />
+    <MSBuild Projects="$(BaseDirectory)\LiftIO.sln"
+             Targets="Clean"
+             Properties="Configuration=Release" />
+  </Target>
+
+</Project>
