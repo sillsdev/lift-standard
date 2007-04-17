@@ -32,7 +32,7 @@ namespace LiftIO
         {
             get
             {
-                Enumerator enumerator = this.GetEnumerator();
+                Enumerator enumerator = GetEnumerator();
                 enumerator.MoveNext();
                 return enumerator.Current;
             }
@@ -53,7 +53,7 @@ namespace LiftIO
         public void Prepend(string key, string prepend)
         {
             string existing;
-            if (this.TryGetValue(key, out existing))
+            if (TryGetValue(key, out existing))
             {
                 this[key] = prepend + existing;
                 return;
@@ -70,7 +70,7 @@ namespace LiftIO
         public void AddOrAppend(string key, string newValue, string delimiter)
         {
             string existing;
-            if (this.TryGetValue(key, out existing))
+            if (TryGetValue(key, out existing))
             {
                 this[key] = existing + delimiter + newValue;
                 return;
