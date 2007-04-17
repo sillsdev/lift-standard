@@ -1,5 +1,6 @@
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
+using System.Globalization;
 
 namespace LiftIO
 {
@@ -26,20 +27,18 @@ namespace LiftIO
             get { return _creationTime; }
             set 
             { 
-                System.Diagnostics.Debug.Assert(value == default(DateTime) || value.Kind == DateTimeKind.Utc);
+                Debug.Assert(value == default(DateTime) || value.Kind == DateTimeKind.Utc);
                 _creationTime = value; 
             }
         }
         public static DateTime ParseDateTimeCorrectly(string time)
         {
-            DateTime d = DateTime.Parse(time, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AdjustToUniversal);
-            
-            //when only a date component was given, the above still gives unspecified
-            if (d.Kind != DateTimeKind.Utc)
-            {
-                d = new DateTime(d.Ticks,DateTimeKind.Utc);
-            }
-            return d;
+            DateTime result = DateTime.ParseExact(time,
+                                                  new string[] { LiftTimeFormatNoTimeZone, LiftTimeFormatWithTimeZone, LiftDateOnlyFormat },
+                                                  CultureInfo.InvariantCulture,
+                                                  DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
+            Debug.Assert(result.Kind == DateTimeKind.Utc);
+            return result;
         }
 
         public DateTime ModificationTime
@@ -47,31 +46,43 @@ namespace LiftIO
             get { return _modificationTime; }
             set 
             {
-                System.Diagnostics.Debug.Assert(value==default(DateTime) || value.Kind == DateTimeKind.Utc);
+                Debug.Assert(value==default(DateTime) || value.Kind == DateTimeKind.Utc);
                 _modificationTime = value;
             }
         }
 
         public string Id
         {
-            get { return _id; }
-            set { _id = value; }
+            get
+            {
+                return _id;
+            }
+            set
+            {
+                _id = value;
+            }
         }
 
         public Guid Guid
         {
-            get { return _guid; }
-            set { _guid = value; }
+            get
+            {
+                return _guid;
+            }
+            set
+            {
+                _guid = value;
+            }
         }
 
         public override string ToString()
         {
             string s = _id;
-            if(Guid != Guid.Empty)
+            if (Guid != Guid.Empty)
             {
-                s += "/" + Guid.ToString();
+                s += "/" + Guid;
             }
-            s+=";";
+            s += ";";
 
             if (default(DateTime) != _creationTime)
             {

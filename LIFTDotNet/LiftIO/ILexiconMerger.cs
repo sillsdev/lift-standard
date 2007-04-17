@@ -15,11 +15,16 @@ namespace LiftIO
         void EntryWasDeleted(Extensible info, DateTime dateDeleted);
         TSense GetOrMakeSense(TEntry entry, Extensible info);
         TExample GetOrMakeExample(TSense sense, Extensible info);
+
         void MergeInLexemeForm(TEntry entry, LiftMultiText contents);
+        void MergeInCitationForm(TEntry entry, LiftMultiText contents);
+
         void MergeInGloss(TSense sense, LiftMultiText multiText);
+        void MergeInDefinition(TSense sense, LiftMultiText liftMultiText);
+
         void MergeInExampleForm(TExample example, LiftMultiText multiText);//, string optionalSource);
         void MergeInTranslationForm(TExample example, LiftMultiText multiText);
-        void MergeInDefinition(TSense sense, LiftMultiText liftMultiText);
+        void MergeInSource(TExample example, string source);
 
         void FinishEntry(TEntry entry);
 
