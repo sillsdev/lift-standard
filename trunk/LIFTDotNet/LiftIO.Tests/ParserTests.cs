@@ -245,28 +245,28 @@ namespace LiftIO.Tests
                 .With(Is.Anything,matcher);
         }
 
-        private void ExpectMergeInCitationForm(Matcher matcher)
-        {
-            Expect.Exactly(1).On(_merger)
-                .Method("MergeInCitationForm")
-                .With(Is.Anything, matcher);
-        }
+        //private void ExpectMergeInCitationForm(Matcher matcher)
+        //{
+        //    Expect.Exactly(1).On(_merger)
+        //        .Method("MergeInCitationForm")
+        //        .With(Is.Anything, matcher);
+        //}
 
         private void ExpectFinishEntry()
         {
             Expect.Exactly(1).On(_merger)
                 .Method("FinishEntry");
         }
-        private void ExpectMergeGloss()
-        {
-            Expect.Exactly(1).On(_merger)
-                .Method("MergeInGloss");
-        }
-        private void ExpectMergeDefinition()
-        {
-            Expect.Exactly(1).On(_merger)
-                .Method("MergeInDefinition");
-        }
+        //private void ExpectMergeGloss()
+        //{
+        //    Expect.Exactly(1).On(_merger)
+        //        .Method("MergeInGloss");
+        //}
+        //private void ExpectMergeDefinition()
+        //{
+        //    Expect.Exactly(1).On(_merger)
+        //        .Method("MergeInDefinition");
+        //}
 
 
         private void ExpectMergeInField(Matcher tagMatcher, Matcher dateCreatedMatcher, Matcher dateModifiedMatcher, Matcher multiTextMatcher)
@@ -707,12 +707,13 @@ namespace LiftIO.Tests
 
 
         [Test]
-        [ExpectedException(typeof(ApplicationException))]
-        public void TraitsOnEntries_MultipleOfSameType_Error()
+        public void TraitsOnEntries_MultipleOfSameType_Okay()
         {
             ExpectEmptyEntry();
             ExpectMergeInTrait(new NMock2.Matchers.AndMatcher(
                     Has.Property("Name", Is.EqualTo("color")), Has.Property("Value", Is.EqualTo("red"))));
+            ExpectMergeInTrait(new NMock2.Matchers.AndMatcher(
+                    Has.Property("Name", Is.EqualTo("color")), Has.Property("Value", Is.EqualTo("blue"))));
             ParseEntryAndCheck(string.Format("<entry><trait name='color' value='red'/><trait name='color' value='blue'/></entry>"));
         }
 
