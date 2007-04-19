@@ -262,14 +262,6 @@ namespace LiftIO
         {
             foreach (XmlNode traitNode in node.SelectNodes("trait"))
             {
-                string traitName = GetStringAttribute(traitNode, "name");
-                string priorTraitWithSameName = String.Format("preceding-sibling::trait[@name='{0}']", traitName);
-                if (traitNode.SelectSingleNode(priorTraitWithSameName) != null)
-                {
-                    // a fatal error
-                    throw new ApplicationException(String.Format("Trait with same name ({0}) as sibling not allowed. Context:{1}", traitName, traitNode.ParentNode.OuterXml));
-                }
-
                 _merger.MergeInTrait(target,GetTrait(traitNode));
             }
         }
