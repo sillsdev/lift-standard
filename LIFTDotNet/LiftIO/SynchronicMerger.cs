@@ -165,7 +165,7 @@ namespace LiftIO
             return bakPath;
         }
 
-        private void MergeInNewFile(string olderFilePath, string newerFilePath, string outputPath)
+        static private void MergeInNewFile(string olderFilePath, string newerFilePath, string outputPath)
         {
             XmlDocument newerDoc = new XmlDocument();
             newerDoc.Load(newerFilePath);
