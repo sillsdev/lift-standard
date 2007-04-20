@@ -1,9 +1,7 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Xml;
 
 namespace LiftIO
@@ -29,43 +27,112 @@ namespace LiftIO
             {
                 return;
             }
-            Array.Sort<FileInfo>(files, new FileInfoComparer());
+            Array.Sort(files, new FileInfoLastWriteTimeComparer());
             int count = files.Length;
 
             string pathToMergeInTo = pathToBaseLiftFile;// files[0].FullName;
+
+            FileAttributes fa =  File.GetAttributes(pathToBaseLiftFile);
+            if((fa & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+            {
+                return;
+            }
 
             for (int i = 0; i < count; i++)
             {
                 if(files[i].IsReadOnly)
                 {
-                    //todo: "Cannot merge safely because at least one file is locked: {0}
+                    //todo: "Cannot merge safely because at least one file is read only: {0}
                     return;
                 }
             }
 
+            List<string> filesToDelete = new List<string>();
             for (int i = 0; i < count; i++)
             {
                 string outputPath = Path.GetTempFileName();
-                MergeInNewFile(pathToMergeInTo, files[i].FullName, outputPath);
+                try
+                {
+                    MergeInNewFile(pathToMergeInTo, files[i].FullName, outputPath);
+                }
+                catch(IOException)
+                {
+                    // todo: "Cannot most likely one of the files is locked
+                    return;
+                }
                 pathToMergeInTo = outputPath;
-
-                //TODO Delete temp files this creates
+                filesToDelete.Add(outputPath);
             }
 
             //string pathToBaseLiftFile = Path.Combine(directory, BaseLiftFileName);
             Debug.Assert(File.Exists(pathToMergeInTo));
+
+            // File.Move works across volumes but the destination cannot exist.
             if (File.Exists(pathToBaseLiftFile))
             {
+                string backupOfBackup;
+                do
+                {
+                    backupOfBackup = pathToBaseLiftFile + Path.GetRandomFileName();
+                }
+                while(File.Exists(backupOfBackup));
+
+
                 string bakPath = pathToBaseLiftFile+".bak";
                 if (File.Exists(bakPath))
                 {
-                    File.Delete(bakPath);
+                    // move the backup out of the way, if something fails here we have nothing to do
+                    if ((File.GetAttributes(bakPath) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+                    {
+                        bakPath = GetNextAvailableBakPath(bakPath);
+                    }
+                    else
+                    {
+                        try
+                        {
+                            File.Move(bakPath, backupOfBackup);
+                        }
+                        catch (IOException)
+                        {
+                            // back file is Locked. Create the next available backup Path
+                            bakPath = GetNextAvailableBakPath(bakPath);
+                        }
+                    }
                 }
-                File.Replace(pathToMergeInTo, pathToBaseLiftFile, bakPath);
+
+                try
+                {
+                    File.Move(pathToBaseLiftFile, bakPath);
+
+                    try
+                    {
+                        File.Move(pathToMergeInTo, pathToBaseLiftFile);
+                    }
+                    catch
+                    {
+                        // roll back to prior state
+                        File.Move(bakPath, pathToBaseLiftFile);
+                        throw;
+                    }
+                }
+                catch 
+                {
+                    // roll back to prior state
+                    if (File.Exists(backupOfBackup))
+                    {
+                        File.Move(backupOfBackup, bakPath);
+                    }
+                    throw; 
+                }
+
+                //everything was successful so can get rid of backupOfBackup
+                if (File.Exists(backupOfBackup))
+                {
+                    File.Delete(backupOfBackup);
+                }
             }
             else
             {
-                //todo: this is not going to work across volumes
                 File.Move(pathToMergeInTo, pathToBaseLiftFile);
             }
 
@@ -77,6 +144,25 @@ namespace LiftIO
                     file.Delete();
                 }
             }
+
+            //delete all our temporary files
+            foreach (string s in filesToDelete)
+            {
+                File.Delete(s);
+            }
+        }
+
+        private static string GetNextAvailableBakPath(string bakPath) {
+            int i = 0;
+            string newBakPath;
+            do
+            {
+                i++;
+                newBakPath = bakPath + i;
+            }
+            while (File.Exists(newBakPath));
+            bakPath = newBakPath;
+            return bakPath;
         }
 
         private void MergeInNewFile(string olderFilePath, string newerFilePath, string outputPath)
@@ -167,11 +253,11 @@ namespace LiftIO
         }
 
 
-        internal class FileInfoComparer : IComparer<FileInfo>
+        internal class FileInfoLastWriteTimeComparer : IComparer<FileInfo>
         {
             public int Compare(FileInfo x, FileInfo y)
             {
-                return DateTime.Compare(((FileInfo)x).LastWriteTime, ((FileInfo)y).LastWriteTime);
+                return DateTime.Compare(x.LastWriteTime, y.LastWriteTime);
             }
         }
 
