@@ -19,7 +19,8 @@ namespace LiftIO
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
 
-            using (XmlWriter writer = XmlTextWriter.Create(outputPath /*Console.Out*/, settings))
+            // nb:  don't use XmlTextWriter.Create, that's broken. Ignores the indent setting
+            using (XmlWriter writer = XmlWriter.Create(outputPath /*Console.Out*/, settings))
             {
                 //For each entry in the new guy, read through the whole base file
                 using (XmlReader reader = XmlTextReader.Create(inputPath))
@@ -92,7 +93,8 @@ namespace LiftIO
 
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
-            using (XmlWriter writer = XmlTextWriter.Create(path, settings))
+            // nb:  don't use XmlTextWriter.Create, that's broken. Ignores the indent setting
+            using (XmlWriter writer = XmlWriter.Create(path, settings))
             {
                 writer.WriteStartDocument();
                 writer.WriteStartElement("lift");
