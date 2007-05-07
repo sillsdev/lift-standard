@@ -21,8 +21,7 @@ namespace LiftIO
         {
            // _pathToBaseLiftFile = pathToBaseLiftFile;
 
-            DirectoryInfo di = new DirectoryInfo(Path.GetDirectoryName(pathToBaseLiftFile));
-            FileInfo[] files = di.GetFiles("*"+ExtensionOfIncrementalFiles, SearchOption.TopDirectoryOnly);
+            FileInfo[] files = GetPendingUpdateFiles(pathToBaseLiftFile);
             if (files.Length < 1)
             {
                 return;
@@ -152,6 +151,32 @@ namespace LiftIO
             }
         }
 
+        public static FileInfo[] GetPendingUpdateFiles(string pathToBaseLiftFile)
+        {
+            DirectoryInfo di = new DirectoryInfo(Path.GetDirectoryName(pathToBaseLiftFile));
+            return di.GetFiles("*"+ExtensionOfIncrementalFiles, SearchOption.TopDirectoryOnly);
+        }
+
+        static private void TestWriting(XmlWriter w)
+        {
+         //  w.WriteStartDocument();
+            w.WriteStartElement("start");
+            w.WriteElementString("one", "hello");
+            w.WriteElementString("two", "bye");
+            w.WriteEndElement();
+        //   w.WriteEndDocument();
+        }
+       static public void TestWritingFile()
+        {
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+         // nb:  don't use XmlTextWriter.Create, that's broken. Ignores the indent setting
+            using (XmlWriter writer = XmlWriter.Create("C:\\test.xml", settings))
+            {
+                TestWriting(writer);
+            }
+        }
+
         private static string GetNextAvailableBakPath(string bakPath) {
             int i = 0;
             string newBakPath;
@@ -171,6 +196,8 @@ namespace LiftIO
             newerDoc.Load(newerFilePath);
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
+            settings.IndentChars = "\t";
+
          // nb:  don't use XmlTextWriter.Create, that's broken. Ignores the indent setting
             using (XmlWriter writer = XmlWriter.Create(outputPath /*Console.Out*/, settings)) 
             {
@@ -203,6 +230,10 @@ namespace LiftIO
 
         private static void ProcessElement(XmlReader olderReader, XmlWriter writer, XmlDocument newerDoc)
         {
+
+
+            //empty lift file, write new elements
+
             if ( olderReader.Name == "lift" && olderReader.IsEmptyElement) //i.e., <lift/>
             {
                 writer.WriteStartElement("lift");
@@ -215,6 +246,9 @@ namespace LiftIO
                 writer.WriteEndElement();
                 olderReader.Read();
             }
+
+            //hit the end, write out any remaing new elements
+
             else if (olderReader.Name == "lift" &&
                 olderReader.NodeType == XmlNodeType.EndElement)
             {
@@ -222,6 +256,7 @@ namespace LiftIO
                 {
                     writer.WriteNode(n.CreateNavigator(), true /*REVIEW*/);
                 }
+
                 //write out the closing lift element
                 writer.WriteNode(olderReader, true);
             }
@@ -250,6 +285,7 @@ namespace LiftIO
                 {
                     Utilities.WriteShallowNode(olderReader, writer);
                 }
+
             }
         }
 

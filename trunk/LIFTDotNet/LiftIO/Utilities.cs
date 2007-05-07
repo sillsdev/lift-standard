@@ -22,7 +22,6 @@ namespace LiftIO
             // nb:  don't use XmlTextWriter.Create, that's broken. Ignores the indent setting
             using (XmlWriter writer = XmlWriter.Create(outputPath /*Console.Out*/, settings))
             {
-                //For each entry in the new guy, read through the whole base file
                 using (XmlReader reader = XmlTextReader.Create(inputPath))
                 {
                     //bool elementWasReplaced = false;
