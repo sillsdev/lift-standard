@@ -195,6 +195,7 @@ namespace LiftIO
             XmlDocument newerDoc = new XmlDocument();
             newerDoc.Load(newerFilePath);
             XmlWriterSettings settings = new XmlWriterSettings();
+            settings.NewLineOnAttributes = true;//ugly, but great for merging with revision control systems
             settings.Indent = true;
             settings.IndentChars = "\t";
 

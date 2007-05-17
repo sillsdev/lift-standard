@@ -18,6 +18,7 @@ namespace LiftIO
             string outputPath = Path.GetTempFileName();
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
+            settings.NewLineOnAttributes = true;//ugly, but great for merging with revision control systems
 
             // nb:  don't use XmlTextWriter.Create, that's broken. Ignores the indent setting
             using (XmlWriter writer = XmlWriter.Create(outputPath /*Console.Out*/, settings))
@@ -92,7 +93,7 @@ namespace LiftIO
 
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
-            // nb:  don't use XmlTextWriter.Create, that's broken. Ignores the indent setting
+            settings.NewLineOnAttributes = true;//ugly, but great for merging with revision control systems
             using (XmlWriter writer = XmlWriter.Create(path, settings))
             {
                 writer.WriteStartDocument();
