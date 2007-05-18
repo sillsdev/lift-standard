@@ -137,26 +137,28 @@
 
   <!-- ================================================== extensible-content -->
   <define name="extensible-content">
-    <optional>
-      <attribute name="dateCreated">
-        <ref name="date.or.dateTime"/>
-      </attribute>
-    </optional>
-    <optional>
-      <attribute name="dateModified">
-        <ref name="date.or.dateTime"/>
-      </attribute>
-    </optional>
-    <zeroOrMore>
-      <element name="field">
-        <ref name="field-content"/>
-      </element>
-    </zeroOrMore>
-    <zeroOrMore>
-      <element name="trait">
-        <ref name="trait-content"/>
-      </element>
-    </zeroOrMore>
+    <interleave>
+      <optional>
+        <attribute name="dateCreated">
+          <ref name="date.or.dateTime"/>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="dateModified">
+          <ref name="date.or.dateTime"/>
+        </attribute>
+      </optional>
+      <zeroOrMore>
+        <element name="field">
+          <ref name="field-content"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="trait">
+          <ref name="trait-content"/>
+        </element>
+      </zeroOrMore>
+    </interleave>
   </define>
 
   <!-- ======================================================== note-content -->
