@@ -354,7 +354,20 @@ namespace LiftIO.Tests
             }
             ParseEntryAndCheck("<entry><lexical-unit><form lang='x'/></lexical-unit></entry>");
         }
-        
+
+//        [Test]
+//        public void SpacesTrimmedFromLexicalUnit()
+//        {
+//            ExpectGetOrMakeEntry();
+//            ExpectMultiTextMergeIn("LexemeForm", Has.Property("Count", Is.EqualTo(2)));
+//            //            ExpectMergeInCitationForm(Is.Anything);
+//            string content ="<entry><lexical-unit><form lang='x'><text> hello </text></form></lexical-unit></entry>";
+//            ExpectFinishEntry();
+//            _doc.LoadXml(content);
+//            Dummy d = _parser.ReadEntry(_doc.FirstChild);
+//            d
+//        }
+
         [Test]
         public void EntryWithLexicalUnit()
         {

@@ -363,7 +363,7 @@ namespace LiftIO
                     XmlNode textNode= formNode.SelectSingleNode("text");
                     if (textNode != null)
                     {
-                        text.AddOrAppend(lang, textNode.InnerText, "; ");
+                        text.AddOrAppend(lang, textNode.InnerText.Trim(), "; ");
                     }
 
                     foreach (XmlNode traitNode in formNode.SelectNodes("trait"))
