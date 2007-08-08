@@ -92,10 +92,23 @@ namespace LiftIO
             {
                 ReadSense(n, entry);
             }
-            
+
+            foreach (XmlNode n in node.SelectNodes("relation"))
+            {
+                ReadRelation(n, entry);
+            } 
+
             ReadExtensibleElementDetails(entry, node);
             _merger.FinishEntry(entry);
             return entry;
+        }
+
+        private void ReadRelation(XmlNode n, TBase parent)
+        {
+            string targetId = GetStringAttribute(n, "ref");
+            string relationTypeName = GetStringAttribute(n, "name");
+
+            _merger.MergeInRelation(parent, relationTypeName, targetId);
         }
 
         protected void ReadGrammi(TSense sense, XmlNode senseNode)
@@ -153,6 +166,10 @@ namespace LiftIO
                 {
                     ReadExample(n, sense);
                 }
+                foreach (XmlNode n in node.SelectNodes("relation"))
+                {
+                    ReadRelation(n, sense);
+                } 
                 ReadExtensibleElementDetails(sense, node);
             }
             return sense;

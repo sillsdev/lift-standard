@@ -291,7 +291,12 @@ namespace LiftIO.Tests
                 .Method("MergeInTrait")
                 .With(Is.Anything, traitMatcher);
        }
-
+        private void ExpectMergeInRelation(string relationType, string targetId)
+        {
+            Expect.Exactly(1).On(_merger)
+                .Method("MergeInRelation")
+                .With(Is.Anything, Is.EqualTo(relationType), Is.EqualTo(targetId));  
+       }
         private void ExpectEntryWasDeleted()
         {
             Expect.Exactly(1).On(_merger)
@@ -782,6 +787,17 @@ namespace LiftIO.Tests
 
             ParseEntryAndCheck(
                 string.Format("<entry><sense><example><form lang='x'><text>hello</text></form></example></sense></entry>"));
+        }
+
+        [Test]
+        public void SenseWithRelation()
+        {
+            ExpectGetOrMakeEntry();
+            ExpectGetOrMakeSense();
+            ExpectMergeInRelation("synonym", "one");
+
+            ParseEntryAndCheck(
+                string.Format("<entry><sense><relation name=\"synonym\" ref=\"one\" /></sense></entry>"));
         }
 
         [Test]

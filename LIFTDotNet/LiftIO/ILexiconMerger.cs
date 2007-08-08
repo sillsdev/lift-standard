@@ -47,6 +47,11 @@ namespace LiftIO
         void MergeInTrait(TBase extensible, Trait trait);
 
         /// <summary>
+        /// Handle LIFT's "relation" entity (currently missing several attributes)
+        /// </summary>
+        void MergeInRelation(TBase extensible, string relationTypeName, string targetId);
+
+        /// <summary>
         /// Handle LIFT's "note" entity. NB: This may be called multiple times (w/ different notes).
         /// </summary>
         void MergeInNote(TBase extensible, string type, LiftMultiText contents);
