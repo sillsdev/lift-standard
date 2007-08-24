@@ -55,25 +55,13 @@ namespace LiftIO
         {
                 if (reader.Name == "entry")
                 {
-                    string id = reader.GetAttribute("id");
                     string guid = reader.GetAttribute("guid");
-                    if (String.IsNullOrEmpty(guid) || String.IsNullOrEmpty(id))
+                    if (String.IsNullOrEmpty(guid))
                     {
+                        guid = Guid.NewGuid().ToString();
                         writer.WriteStartElement(reader.Prefix, reader.LocalName, reader.NamespaceURI);
                         writer.WriteAttributes(reader, true);
-                        if(String.IsNullOrEmpty(guid))
-                        {
-                            guid = Guid.NewGuid().ToString();
-                            writer.WriteAttributeString("guid", guid);
-                        }
-                        if (String.IsNullOrEmpty(id))
-                        {
-                            //string lexemeForm = WE HAVE NO WAY OF GETTING AT THIS YET
-                            //id = lexemeForm + "_" + guid;
-                            id = guid;
-                            writer.WriteAttributeString("id", id);
-                        } 
-
+                        writer.WriteAttributeString("guid", guid);
                         string s = reader.ReadInnerXml();//this seems to be enough to get the reader to the next element
                         writer.WriteRaw(s);
                         writer.WriteEndElement();
