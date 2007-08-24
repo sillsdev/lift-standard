@@ -106,9 +106,9 @@ namespace LiftIO
         private void ReadRelation(XmlNode n, TBase parent)
         {
             string targetId = GetStringAttribute(n, "ref");
-            string relationTypeName = GetStringAttribute(n, "name");
+            string relationFieldName = GetStringAttribute(n, "name");
 
-            _merger.MergeInRelation(parent, relationTypeName, targetId);
+            _merger.MergeInRelation(parent, relationFieldName, targetId);
         }
 
         protected void ReadGrammi(TSense sense, XmlNode senseNode)
