@@ -1,7 +1,9 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Xml;
+using System.Xml.Xsl;
 
 namespace LiftIO
 {
@@ -15,13 +17,13 @@ namespace LiftIO
         /// <returns>path to a processed version</returns>
         static public string ProcessLiftForLaterMerging(string inputPath)
         {
-            string outputPath = Path.GetTempFileName();
+            string outputOfPassOne = Path.GetTempFileName();
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
             settings.NewLineOnAttributes = true;//ugly, but great for merging with revision control systems
 
             // nb:  don't use XmlTextWriter.Create, that's broken. Ignores the indent setting
-            using (XmlWriter writer = XmlWriter.Create(outputPath /*Console.Out*/, settings))
+            using (XmlWriter writer = XmlWriter.Create(outputOfPassOne /*Console.Out*/, settings))
             {
                 using (XmlReader reader = XmlTextReader.Create(inputPath))
                 {
@@ -33,8 +35,29 @@ namespace LiftIO
                 }
             }
 
-            return outputPath;
+            XslCompiledTransform transform = new XslCompiledTransform();
+            using ( Stream canonicalizeXsltStream= Assembly.GetExecutingAssembly().GetManifestResourceStream("LiftIO.canonicalizeLift.xsl"))
+            {
+                using (XmlReader xsltReader = XmlReader.Create(canonicalizeXsltStream))
+                {
+                    transform.Load(xsltReader);
+                    xsltReader.Close();
+                }
+                canonicalizeXsltStream.Close();
+            }
+
+            string outputOfPassTwo = Path.GetTempFileName();
+            using (Stream output = File.Create(outputOfPassTwo))
+            {
+                transform.Transform(outputOfPassOne, new XsltArgumentList(), output);
+            }
+            transform.TemporaryFiles.Delete();
+            File.Delete(outputOfPassOne);
+
+            return outputOfPassTwo;
         }
+
+
 
         private static void ProcessNode(XmlReader reader, XmlWriter writer)
         {

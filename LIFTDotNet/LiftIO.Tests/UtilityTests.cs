@@ -48,30 +48,30 @@ namespace LiftIO.Tests
             AssertXPathNotNull(output, "//entry[@id='two' and @guid]");
         }
 
-//
-//        [Test]
-//        public void MissingHumanReadableIdsAdded_NoGuid()
-//        {
-//            string input = WriteFile("<entry><lexical-unit><form lang='v'><text>kindness</text></form></lexical-unit></entry>");
-//            string output = Utilities.ProcessLiftForLaterMerging(input);
-//            AssertXPathNotNull(output, "//entry[@id and @guid]");
-//        }
-//
-//        [Test]
-//        public void MissingHumanReadableIdsAdded_AlreadyHadGuid()
-//        {
-//            string input = WriteFile("<entry guid='6b4269b9-f5d4-4e48-ad91-17109d9882e4'><lexical-unit ><form lang='v'><text>kindness</text></form></lexical-unit></entry>");
-//            string output = Utilities.ProcessLiftForLaterMerging(input);
-//            AssertXPathNotNull(output, "//entry[@id and @guid]");
-//        }
 
-//        [Test]
-//        public void NoIdAddedIf_NoLexemeFormToUse()
-//        {
-//            string input = WriteFile("<entry></entry>");
-//            string output = Utilities.ProcessLiftForLaterMerging(input);
-//            AssertXPathNotNull(output, "//entry[@guid and not(@id)]");
-//        }
+        [Test]
+        public void MissingHumanReadableIdsAdded_NoGuid()
+        {
+            string input = WriteFile("<entry><lexical-unit><form lang='v'><text>kindness</text></form></lexical-unit></entry>");
+            string output = Utilities.ProcessLiftForLaterMerging(input);
+            AssertXPathNotNull(output, "//entry[@id and @guid]");
+        }
+
+        [Test]
+        public void MissingHumanReadableIdsAdded_AlreadyHadGuid()
+        {
+            string input = WriteFile("<entry guid='6b4269b9-f5d4-4e48-ad91-17109d9882e4'><lexical-unit ><form lang='v'><text>kindness</text></form></lexical-unit></entry>");
+            string output = Utilities.ProcessLiftForLaterMerging(input);
+            AssertXPathNotNull(output, "//entry[@id and @guid]");
+        }
+
+        [Test]
+        public void NoIdAddedIf_NoLexemeFormToUse()
+        {
+            string input = WriteFile("<entry></entry>");
+            string output = Utilities.ProcessLiftForLaterMerging(input);
+            AssertXPathNotNull(output, "//entry[@guid and not(@id)]");
+        }
 
         [Test]
         public void InnerContentsUntouched()
