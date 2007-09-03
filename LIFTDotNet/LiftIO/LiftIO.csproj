@@ -38,6 +38,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exceptions.cs" />
     <Compile Include="Extensible.cs" />
     <Compile Include="ILexiconMerger.cs" />
     <Compile Include="ILiftMergerTestSuite.cs" />
