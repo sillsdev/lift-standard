@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
@@ -17,6 +18,12 @@ namespace LiftIO
       //  private string _pathToBaseLiftFile;
         public const  string ExtensionOfIncrementalFiles = ".lift.update";
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <exception cref="IOException">If file is locked</exception>
+        /// <exception cref="LiftFormatException">If there is an error and then file is found to be non-conformant.</exception>
+        /// <param name="pathToBaseLiftFile"></param>
         public void MergeUpdatesIntoFile(string pathToBaseLiftFile)
         {
            // _pathToBaseLiftFile = pathToBaseLiftFile;
@@ -54,10 +61,20 @@ namespace LiftIO
                 {
                     MergeInNewFile(pathToMergeInTo, files[i].FullName, outputPath);
                 }
-                catch(IOException)
+                catch (IOException ioerror)
                 {
                     // todo: "Cannot most likely one of the files is locked
-                    return;
+                    throw ioerror;
+                }
+                catch (Exception error)
+                {
+                    //eventually we'll just check everything before-hand.  But for now our rng
+                    //validator is painfully slow in files which have date stamps,
+                    //because two formats are allowed an our mono rng validator 
+                    //throws non-fatal exceptions for each one
+                    Validator.CheckLiftWithPossibleThrow(pathToBaseLiftFile);
+                    Validator.CheckLiftWithPossibleThrow(files[i].FullName);
+                    throw error; //must have been something else
                 }
                 pathToMergeInTo = outputPath;
                 filesToDelete.Add(outputPath);
@@ -66,7 +83,28 @@ namespace LiftIO
             //string pathToBaseLiftFile = Path.Combine(directory, BaseLiftFileName);
             Debug.Assert(File.Exists(pathToMergeInTo));
 
-            // File.Move works across volumes but the destination cannot exist.
+            MakeBackup(pathToBaseLiftFile, pathToMergeInTo);
+
+            //delete all the non-base paths
+            foreach (FileInfo file in files)
+            {
+                if (file.FullName != pathToBaseLiftFile)
+                {
+                    file.Delete();
+                }
+            }
+
+            //delete all our temporary files
+            foreach (string s in filesToDelete)
+            {
+                File.Delete(s);
+            }
+        }
+
+
+        private void MakeBackup(string pathToBaseLiftFile, string pathToMergeInTo)
+        {
+// File.Move works across volumes but the destination cannot exist.
             if (File.Exists(pathToBaseLiftFile))
             {
                 string backupOfBackup;
@@ -133,21 +171,6 @@ namespace LiftIO
             else
             {
                 File.Move(pathToMergeInTo, pathToBaseLiftFile);
-            }
-
-            //delete all the non-base paths
-            foreach (FileInfo file in files)
-            {
-                if (file.FullName != pathToBaseLiftFile)
-                {
-                    file.Delete();
-                }
-            }
-
-            //delete all our temporary files
-            foreach (string s in filesToDelete)
-            {
-                File.Delete(s);
             }
         }
 
@@ -302,4 +325,6 @@ namespace LiftIO
        
 
     }
+
+
 }

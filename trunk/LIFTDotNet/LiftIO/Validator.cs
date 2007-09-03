@@ -53,5 +53,16 @@ namespace LiftIO
                 return "0.10";
             }
         }
+
+        public static void CheckLiftWithPossibleThrow(string pathToLiftFile)
+        {
+            string errors = LiftIO.Validator.GetAnyValidationErrors(pathToLiftFile);
+            if (!String.IsNullOrEmpty(errors))
+            {
+                errors = string.Format("The dictionary file at {0} does not conform to the LIFT format used by this version of WeSay.  The RNG validator said: {1}.",
+                                       pathToLiftFile, errors);
+                throw new LiftIO.LiftFormatException(errors);
+            }
+        }
     }
 }
