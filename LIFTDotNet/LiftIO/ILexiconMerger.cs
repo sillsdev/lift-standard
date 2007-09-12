@@ -21,6 +21,7 @@ namespace LiftIO
 
         void MergeInGloss(TSense sense, LiftMultiText multiText);
         void MergeInDefinition(TSense sense, LiftMultiText liftMultiText);
+        void MergeInPicture(TSense sense, string href, LiftMultiText caption);
 
         void MergeInExampleForm(TExample example, LiftMultiText multiText);//, string optionalSource);
         void MergeInTranslationForm(TExample example, LiftMultiText multiText);

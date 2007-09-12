@@ -297,6 +297,21 @@ namespace LiftIO.Tests
                 .Method("MergeInRelation")
                 .With(Is.Anything, Is.EqualTo(relationType), Is.EqualTo(targetId));  
        }
+ 
+       private void ExpectMergeInPicture(string href)
+        {
+            Expect.Exactly(1).On(_merger)
+                .Method("MergeInPicture")
+                .With(Is.Anything, Is.EqualTo(href), Is.Null);  
+       }
+
+        private void ExpectMergeInPictureWithCaption(string href)
+        {
+            Expect.Exactly(1).On(_merger)
+                .Method("MergeInPicture")
+                .With(Is.Anything, Is.EqualTo(href), Is.NotNull);
+        }
+
         private void ExpectEntryWasDeleted()
         {
             Expect.Exactly(1).On(_merger)
@@ -798,6 +813,29 @@ namespace LiftIO.Tests
 
             ParseEntryAndCheck(
                 string.Format("<entry><sense><relation name=\"synonym\" ref=\"one\" /></sense></entry>"));
+        }
+
+        [Test]
+        public void SenseWithPicture()
+        {
+            ExpectGetOrMakeEntry();
+            ExpectGetOrMakeSense();
+            ExpectMergeInPicture("bird.jpg");
+
+            ParseEntryAndCheck(
+                string.Format("<entry><sense><picture href=\"bird.jpg\" /></sense></entry>"));
+        }
+
+
+        [Test]
+        public void SenseWithPictureAndCaption()
+        {
+            ExpectGetOrMakeEntry();
+            ExpectGetOrMakeSense();
+            ExpectMergeInPictureWithCaption("bird.jpg");
+
+            ParseEntryAndCheck(
+                string.Format("<entry><sense><picture href=\"bird.jpg\" ><label><form lang='en'><text>bird</text></form></label></picture></sense></entry>"));
         }
 
         [Test]

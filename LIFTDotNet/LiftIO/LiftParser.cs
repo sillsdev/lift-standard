@@ -96,8 +96,8 @@ namespace LiftIO
             foreach (XmlNode n in node.SelectNodes("relation"))
             {
                 ReadRelation(n, entry);
-            } 
-
+            }
+            
             ReadExtensibleElementDetails(entry, node);
             _merger.FinishEntry(entry);
             return entry;
@@ -109,6 +109,17 @@ namespace LiftIO
             string relationFieldName = GetStringAttribute(n, "name");
 
             _merger.MergeInRelation(parent, relationFieldName, targetId);
+        }
+
+        private void ReadPicture(XmlNode n, TSense parent)
+        {
+            string href = GetStringAttribute(n, "href");
+            LiftMultiText caption = LocateAndReadMultiText(n, "label");
+            if(caption.IsEmpty)
+            {
+                caption = null;
+            }
+            _merger.MergeInPicture(parent, href, caption);
         }
 
         protected void ReadGrammi(TSense sense, XmlNode senseNode)
@@ -169,6 +180,11 @@ namespace LiftIO
                 foreach (XmlNode n in node.SelectNodes("relation"))
                 {
                     ReadRelation(n, sense);
+                }
+
+                foreach (XmlNode n in node.SelectNodes("picture"))
+                {
+                    ReadPicture(n, sense);
                 } 
                 ReadExtensibleElementDetails(sense, node);
             }
