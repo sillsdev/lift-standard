@@ -364,7 +364,7 @@
         </element>
       </zeroOrMore>
       <zeroOrMore>
-        <element name="illustration">
+        <element name="picture">
           <ref name="URLRef-content"/>
         </element>
       </zeroOrMore>
