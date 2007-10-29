@@ -2,6 +2,8 @@
          xmlns="http://relaxng.org/ns/structure/1.0"
          xmlns:sch="http://purl.oclc.org/dsdl/schematron">
 
+<!-- need to define the normalization or lack thereof in keys especially in regard to whitespace -->
+
 
   <!-- ==================================================== date or dateTime -->
   <define name="date.or.dateTime">
@@ -28,8 +30,8 @@
         <ref name="span-content"/>
       </element>
       <zeroOrMore>
-        <element name="trait">
-          <ref name="trait-content"/>
+        <element name="annotation">
+          <ref name="annotation-content"/>
         </element>
       </zeroOrMore>
     </interleave>
@@ -70,7 +72,7 @@
       <element name="form">
         <ref name="form-content"/>
         <sch:rule context="form" >
-          <sch:assert test="not(preceding-sibling::form[@type=current()/@lang])">
+          <sch:assert test="not(preceding-sibling::form[@lang=current()/@lang])">
             Forms should be in different langs.
             There is only one form with a given lang allowed in any parent element.
           </sch:assert>
@@ -94,7 +96,15 @@
   <!-- ======================================================= field-content -->
   <define name="field-content">
     <ref name="multitext-content"/>
-    <attribute name="tag"/>
+    <ref name="extensible-without-field-content"/>    <!-- problem should be same as extensible but without field -->
+    <attribute name="type"/>
+    <sch:rule context="field" >
+      <sch:assert test="not(preceding-sibling::field[@type=current()/@type])">
+        Fields should have different types.
+        There is only one field with a given type allowed in any parent element.
+      </sch:assert>
+    </sch:rule>
+
     <optional>
       <attribute name="dateCreated">
         <ref name="date.or.dateTime"/>
@@ -110,7 +120,6 @@
 <!-- ========================================================= trait-content -->
   <define name="trait-content">
     <attribute name="name"/>
-    <!-- restrict to one trait per parent-->
     <attribute name="value"/>
     <zeroOrMore>
       <element name="annotation">
@@ -122,6 +131,7 @@
   <!-- ================================================== annotation-content -->
   <define name="annotation-content">
     <ref name="multitext-content"/>
+    <attribute name="name"/>
     <optional>
       <attribute name="value"/>
     </optional>
@@ -135,28 +145,43 @@
     </optional>
   </define>
 
+
+  <!-- ===================================== extensible-without-field-content -->
+  <define name="extensible-without-field-content">
+    <interleave>
+      <optional>
+        <attribute name="dateCreated">
+          <ref name="date.or.dateTime"/>
+        </attribute>
+      </optional>
+      <optional>
+        <attribute name="dateModified">
+          <ref name="date.or.dateTime"/>
+        </attribute>
+      </optional>
+      <zeroOrMore>
+        <element name="annotation">
+          <ref name="annotation-content"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="trait">
+          <ref name="trait-content"/>
+        </element>
+      </zeroOrMore>
+    </interleave>
+  </define>
+
   <!-- ================================================== extensible-content -->
   <define name="extensible-content">
-    <optional>
-      <attribute name="dateCreated">
-        <ref name="date.or.dateTime"/>
-      </attribute>
-    </optional>
-    <optional>
-      <attribute name="dateModified">
-        <ref name="date.or.dateTime"/>
-      </attribute>
-    </optional>
+    <interleave>
+    <ref name="extensible-without-field-content"/>
     <zeroOrMore>
       <element name="field">
         <ref name="field-content"/>
       </element>
     </zeroOrMore>
-    <zeroOrMore>
-      <element name="trait">
-        <ref name="trait-content"/>
-      </element>
-    </zeroOrMore>
+    </interleave>
   </define>
 
   <!-- ======================================================== note-content -->
@@ -274,7 +299,7 @@
   <define name="relation-content">
     <!-- @ref is a @name relation of parent-->
     <ref name="extensible-content"/>
-    <attribute name="name"/>
+    <attribute name="type"/>
     <ref name="refid"/>
     <optional>
       <attribute name="order">
@@ -364,7 +389,7 @@
         </element>
       </zeroOrMore>
       <zeroOrMore>
-        <element name="picture">
+        <element name="illustration">
           <ref name="URLRef-content"/>
         </element>
       </zeroOrMore>
@@ -494,7 +519,7 @@
   <!-- ======================================================== lift-content -->
   <define name="lift-content">
     <attribute name="version">
-      <value>0.10</value>
+      <value>0.11</value>
     </attribute>
     <optional>
       <attribute name="producer"/>
