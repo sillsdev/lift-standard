@@ -499,7 +499,7 @@ namespace LiftIO.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(ApplicationException))]
+        [ExpectedException(typeof(LiftFormatException))]
         public void EntryWithNote_MultipleNotesSameType_Error()
         {
             ExpectGetOrMakeEntry();
@@ -693,7 +693,7 @@ namespace LiftIO.Tests
 
 
         [Test]
-        [ExpectedException(typeof(ApplicationException))]
+        [ExpectedException(typeof(LiftFormatException))]
         public void MultipleFieldsOnEntries_SameTag_Error()
         {
             ExpectEmptyEntry();
