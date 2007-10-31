@@ -249,7 +249,7 @@ namespace LiftIO
                     }
                     catch (Exception)
                     {
-                        NotifyError(new ApplicationException(String.Format("{0} is not a valid GUID", guidString)));
+                        NotifyError(new LiftFormatException(String.Format("{0} is not a valid GUID", guidString)));
                     }
                 }
             }
@@ -275,7 +275,7 @@ namespace LiftIO
                 if(fieldNode.SelectSingleNode(priorFieldWithSameTag) != null)
                 {
                     // a fatal error
-                    throw new ApplicationException(String.Format("Field with same tag ({0}) as sibling not allowed. Context:{1}", fieldType, fieldNode.ParentNode.OuterXml));
+                    throw new LiftFormatException(String.Format("Field with same tag ({0}) as sibling not allowed. Context:{1}", fieldType, fieldNode.ParentNode.OuterXml));
                 }
                 this._merger.MergeInField(target,
                                          fieldType,
@@ -309,7 +309,7 @@ namespace LiftIO
             }
             catch(NullReferenceException)
             {
-                throw new ApplicationException(string.Format("Expected a {0} attribute on {1}.", attr, form.OuterXml));
+                throw new LiftFormatException(string.Format("Expected a {0} attribute on {1}.", attr, form.OuterXml));
             }
         }
 
@@ -360,7 +360,7 @@ namespace LiftIO
                 XmlNodeList nodes = node.SelectNodes(query);
                 if (nodes.Count > 1)
                 {
-                    throw new ApplicationException(String.Format("Duplicated element of type {0} unexpected. Context:{1}", query, nodes.Item(0).ParentNode.OuterXml));
+                    throw new LiftFormatException(String.Format("Duplicated element of type {0} unexpected. Context:{1}", query, nodes.Item(0).ParentNode.OuterXml));
                 }
             }
 
