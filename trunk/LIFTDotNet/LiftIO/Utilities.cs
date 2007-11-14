@@ -1,4 +1,5 @@
 using System;
+using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -17,6 +18,11 @@ namespace LiftIO
         /// <returns>path to a processed version</returns>
         static public string ProcessLiftForLaterMerging(string inputPath)
         {
+            if (inputPath == null)
+            {
+                throw new ArgumentNullException("inputPath");
+            }
+
             string outputOfPassOne = Path.GetTempFileName();
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
@@ -45,13 +51,16 @@ namespace LiftIO
                 }
                 canonicalizeXsltStream.Close();
             }
-
             string outputOfPassTwo = Path.GetTempFileName();
             using (Stream output = File.Create(outputOfPassTwo))
             {
                 transform.Transform(outputOfPassOne, new XsltArgumentList(), output);
             }
-            transform.TemporaryFiles.Delete();
+            TempFileCollection tempfiles = transform.TemporaryFiles;
+            if (tempfiles != null) // tempfiles will be null when debugging is not enabled
+            {
+                tempfiles.Delete();
+            }
             File.Delete(outputOfPassOne);
 
             return outputOfPassTwo;
