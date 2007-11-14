@@ -154,14 +154,23 @@
     <GetSolutionProjects Solution="$(BaseDirectory)\LiftIO.sln">
       <Output ItemName="Projects" TaskParameter="Output"/>
     </GetSolutionProjects>
-    
-    
+
+
     <MSBuild Projects="@(Projects)"
-             Targets="Rebuild"
+             Targets="Clean"
              Properties="Configuration=Debug" />
 
     <MSBuild Projects="@(Projects)"
-             Targets="Rebuild"
+             Targets="Clean"
+             Properties="Configuration=Release" />
+
+
+    <MSBuild Projects="@(Projects)"
+             Targets="Build"
+             Properties="Configuration=Debug" />
+
+    <MSBuild Projects="@(Projects)"
+             Targets="Build"
              Properties="Configuration=Release" />
   </Target>
 
