@@ -26,79 +26,80 @@ namespace LiftIO
         /// <param name="pathToBaseLiftFile"></param>
         public void MergeUpdatesIntoFile(string pathToBaseLiftFile)
         {
-           // _pathToBaseLiftFile = pathToBaseLiftFile;
+// _pathToBaseLiftFile = pathToBaseLiftFile;
 
-            FileInfo[] files = GetPendingUpdateFiles(pathToBaseLiftFile);
-            if (files.Length < 1)
-            {
-                return;
-            }
-            Array.Sort(files, new FileInfoLastWriteTimeComparer());
-            int count = files.Length;
-
-            string pathToMergeInTo = pathToBaseLiftFile;// files[0].FullName;
-
-            FileAttributes fa =  File.GetAttributes(pathToBaseLiftFile);
-            if((fa & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
-            {
-                return;
-            }
-
-            for (int i = 0; i < count; i++)
-            {
-                if(files[i].IsReadOnly)
+                FileInfo[] files = GetPendingUpdateFiles(pathToBaseLiftFile);
+                if (files.Length < 1)
                 {
-                    //todo: "Cannot merge safely because at least one file is read only: {0}
                     return;
                 }
-            }
+                Array.Sort(files, new FileInfoLastWriteTimeComparer());
+                int count = files.Length;
 
-            List<string> filesToDelete = new List<string>();
-            for (int i = 0; i < count; i++)
-            {
-                string outputPath = Path.GetTempFileName();
-                try
+                string pathToMergeInTo = pathToBaseLiftFile; // files[0].FullName;
+
+                FileAttributes fa = File.GetAttributes(pathToBaseLiftFile);
+                if ((fa & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
                 {
-                    MergeInNewFile(pathToMergeInTo, files[i].FullName, outputPath);
+                    return;
                 }
-                catch (IOException ioerror)
+
+                for (int i = 0; i < count; i++)
                 {
-                    // todo: "Cannot most likely one of the files is locked
-                    throw ioerror;
+                    if (files[i].IsReadOnly)
+                    {
+                        //todo: "Cannot merge safely because at least one file is read only: {0}
+                        return;
+                    }
                 }
-                catch (Exception error)
+
+                List<string> filesToDelete = new List<string>();
+                for (int i = 0; i < count; i++)
                 {
-                    //eventually we'll just check everything before-hand.  But for now our rng
-                    //validator is painfully slow in files which have date stamps,
-                    //because two formats are allowed an our mono rng validator 
-                    //throws non-fatal exceptions for each one
-                    Validator.CheckLiftWithPossibleThrow(pathToBaseLiftFile);
-                    Validator.CheckLiftWithPossibleThrow(files[i].FullName);
-                    throw error; //must have been something else
+                    string outputPath = Path.GetTempFileName();
+                    try
+                    {
+                        MergeInNewFile(pathToMergeInTo, files[i].FullName, outputPath);
+                    }
+                    catch (IOException ioerror)
+                    {
+                        // todo: "Cannot most likely one of the files is locked
+                        throw ioerror;
+                    }
+                    catch (Exception error)
+                    {
+                        //eventually we'll just check everything before-hand.  But for now our rng
+                        //validator is painfully slow in files which have date stamps,
+                        //because two formats are allowed an our mono rng validator 
+                        //throws non-fatal exceptions for each one
+                        Validator.CheckLiftWithPossibleThrow(pathToBaseLiftFile);
+                        Validator.CheckLiftWithPossibleThrow(files[i].FullName);
+                        throw error; //must have been something else
+                    }
+                    pathToMergeInTo = outputPath;
+                    filesToDelete.Add(outputPath);
                 }
-                pathToMergeInTo = outputPath;
-                filesToDelete.Add(outputPath);
-            }
 
-            //string pathToBaseLiftFile = Path.Combine(directory, BaseLiftFileName);
-            Debug.Assert(File.Exists(pathToMergeInTo));
+                //string pathToBaseLiftFile = Path.Combine(directory, BaseLiftFileName);
+                Debug.Assert(File.Exists(pathToMergeInTo));
 
-            MakeBackup(pathToBaseLiftFile, pathToMergeInTo);
+                MakeBackup(pathToBaseLiftFile, pathToMergeInTo);
 
-            //delete all the non-base paths
-            foreach (FileInfo file in files)
-            {
-                if (file.FullName != pathToBaseLiftFile)
+                //delete all the non-base paths
+                foreach (FileInfo file in files)
                 {
-                    file.Delete();
+                    if (file.FullName != pathToBaseLiftFile)
+                    {
+                        file.Delete();
+                    }
                 }
-            }
 
-            //delete all our temporary files
-            foreach (string s in filesToDelete)
-            {
-                File.Delete(s);
-            }
+                //delete all our temporary files
+                foreach (string s in filesToDelete)
+                {
+                    File.Delete(s);
+                }
+
         }
 
 
@@ -215,25 +216,32 @@ namespace LiftIO
 
         static private void MergeInNewFile(string olderFilePath, string newerFilePath, string outputPath)
         {
-            XmlDocument newerDoc = new XmlDocument();
-            newerDoc.Load(newerFilePath);
-            XmlWriterSettings settings = new XmlWriterSettings();
-            settings.NewLineOnAttributes = true;//ugly, but great for merging with revision control systems
-            settings.Indent = true;
-            settings.IndentChars = "\t";
-
-         // nb:  don't use XmlTextWriter.Create, that's broken. Ignores the indent setting
-            using (XmlWriter writer = XmlWriter.Create(outputPath /*Console.Out*/, settings)) 
+            try
             {
-                //For each entry in the new guy, read through the whole base file
-                using (XmlReader olderReader = XmlTextReader.Create(olderFilePath))
+                XmlDocument newerDoc = new XmlDocument();
+                newerDoc.Load(newerFilePath);
+                XmlWriterSettings settings = new XmlWriterSettings();
+                settings.NewLineOnAttributes = true; //ugly, but great for merging with revision control systems
+                settings.Indent = true;
+                settings.IndentChars = "\t";
+
+                // nb:  don't use XmlTextWriter.Create, that's broken. Ignores the indent setting
+                using (XmlWriter writer = XmlWriter.Create(outputPath /*Console.Out*/, settings))
                 {
-                    //bool elementWasReplaced = false;
-                    while (!olderReader.EOF)
+                    //For each entry in the new guy, read through the whole base file
+                    using (XmlReader olderReader = XmlTextReader.Create(olderFilePath))
                     {
-                        ProcessOlderNode(olderReader, newerDoc, writer);
+                        //bool elementWasReplaced = false;
+                        while (!olderReader.EOF)
+                        {
+                            ProcessOlderNode(olderReader, newerDoc, writer);
+                        }
                     }
                 }
+            }
+            catch (LiftFormatException error)
+            {
+                throw new LiftMergingException(olderFilePath, newerFilePath, error);
             }
         }
 
