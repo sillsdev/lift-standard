@@ -68,12 +68,19 @@ namespace LiftIO
                     }
                     catch (Exception error)
                     {
+                       try 
+                       {
+                           Validator.CheckLiftWithPossibleThrow(files[i].FullName);
+                       }
+                        catch(Exception e2)
+                        {
+                            throw new BadUpdateFileException(pathToMergeInTo, files[i].FullName, e2);
+                        }
                         //eventually we'll just check everything before-hand.  But for now our rng
                         //validator is painfully slow in files which have date stamps,
                         //because two formats are allowed an our mono rng validator 
                         //throws non-fatal exceptions for each one
                         Validator.CheckLiftWithPossibleThrow(pathToBaseLiftFile);
-                        Validator.CheckLiftWithPossibleThrow(files[i].FullName);
                         throw error; //must have been something else
                     }
                     pathToMergeInTo = outputPath;
@@ -216,8 +223,7 @@ namespace LiftIO
 
         static private void MergeInNewFile(string olderFilePath, string newerFilePath, string outputPath)
         {
-            try
-            {
+
                 XmlDocument newerDoc = new XmlDocument();
                 newerDoc.Load(newerFilePath);
                 XmlWriterSettings settings = new XmlWriterSettings();
@@ -238,11 +244,7 @@ namespace LiftIO
                         }
                     }
                 }
-            }
-            catch (LiftFormatException error)
-            {
-                throw new LiftMergingException(olderFilePath, newerFilePath, error);
-            }
+
         }
 
 

@@ -16,12 +16,12 @@ namespace LiftIO
             set { _filePath = value; }
         }
     }
-    public class LiftMergingException :ApplicationException
+    public class BadUpdateFileException :ApplicationException
     {
         private readonly string _pathToOldFile;
         private readonly string _pathToNewFile;
 
-        public LiftMergingException(string pathToOldFile, string pathToNewFile, Exception innerException)
+        public BadUpdateFileException(string pathToOldFile, string pathToNewFile, Exception innerException)
             : base("Error merging lift", innerException)
         {
             this._pathToOldFile = pathToOldFile;
