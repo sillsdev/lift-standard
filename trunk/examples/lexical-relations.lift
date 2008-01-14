@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.10">
+<lift version="0.11">
   <!--
   \lx hete
   \ps vt
@@ -25,7 +25,7 @@
           <text>cut into sectios for use</text>
         </form>
       </definition>
-      <relation name="gen" ref="lata_"/>
+      <relation type="gen" ref="lata_"/>
     </sense>
     <variant>
       <trait name="variant-type" value="paradigm"/>

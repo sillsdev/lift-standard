@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.10">
+<lift version="0.11">
   <entry id="hugal">
     <lexical-unit>
       <form lang="zxx-Latn">
@@ -27,15 +27,15 @@
           </text>
         </form>
       </definition>
-      <relation name="subentry" ref="munhugal_gamble"/>
+      <relation type="subentry" ref="munhugal_gamble"/>
     </sense>
     <sense>
-      <relation name="subentry" ref="humugal_win"/>
-      <relation name="subentry" ref="hugálon_win"/>
+      <relation type="subentry" ref="humugal_win"/>
+      <relation type="subentry" ref="hugálon_win"/>
     </sense>
     <sense>
-      <relation name="subentry" ref="munhugal_lose"/>
-      <relation name="subentry" ref="ihugal_lose"/>
+      <relation type="subentry" ref="munhugal_lose"/>
+      <relation type="subentry" ref="ihugal_lose"/>
     </sense>
   </entry>
   

@@ -1,18 +1,18 @@
 <?xml version="1.0"?>
-<lift version="0.10">
+<lift version="0.11">
   <entry id="srapa">
     <lexical-unit>
       <form lang="zxx-Latn">
         <text>srapa</text>
-        <trait name="flag" value="true"/>
+        <annotation name="flag" value="true"/>
       </form>
     </lexical-unit>
     <sense id="srapa_">
       <grammatical-info value="vt"/>
       <gloss lang="en">
-        <trait name="confidence" value="high"/>
+        <annotation name="confidence" value="high"/>
         <text>slap</text>
-        <trait name="flag" value="true"/>
+        <annotation name="flag" value="true"/>
       </gloss>
       <definition>
         <form lang="en">

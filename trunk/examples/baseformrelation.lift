@@ -36,8 +36,6 @@
           </text>
         </form>
       </definition>
-      <relation type="subentry" ref="hairbrush"/>
-      <relation type="subentry" ref="paintbrush"/>
     </sense>
   </entry>
   <entry id="hairbrush">
@@ -58,6 +56,7 @@
         </form>
       </definition>
     </sense>
+    <relation type="BaseForm" ref="brush"/>
   </entry>
   <entry id="paintbrush">
     <lexical-unit>
@@ -77,5 +76,6 @@
         </form>
       </definition>
     </sense>
+    <relation type="BaseForm" ref="brush"/>
   </entry>
 </lift>
