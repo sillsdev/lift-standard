@@ -1,8 +1,8 @@
-<grammar datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes" 
+<grammar datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
          xmlns="http://relaxng.org/ns/structure/1.0"
          xmlns:sch="http://purl.oclc.org/dsdl/schematron">
 
-<!-- need to define the normalization or lack thereof in keys especially in regard to whitespace -->
+  <!-- need to define the normalization or lack thereof in keys especially in regard to whitespace -->
 
 
   <!-- ==================================================== date or dateTime -->
@@ -20,7 +20,8 @@
 
   <!-- ======================================================== form-content -->
   <define name="form-content">
-    <attribute name="lang"/>    <!-- rfc 4646 -->
+    <attribute name="lang"/>
+    <!-- rfc 4646 -->
     <ref name="form-no-lang-content"/>
   </define>
 
@@ -36,7 +37,7 @@
       </zeroOrMore>
     </interleave>
   </define>
-  
+
   <!-- ======================================================== span-content -->
   <define name="span-content">
     <interleave>
@@ -52,8 +53,8 @@
   <!-- ================================================== inner-span-content -->
   <define name="inner-span-content">
     <optional>
-      <attribute name="lang"/>
       <!-- rfc 4646 -->
+      <attribute name="lang"/>
     </optional>
     <optional>
       <attribute name="href">
@@ -95,8 +96,11 @@
 
   <!-- ======================================================= field-content -->
   <define name="field-content">
+    <interleave>
     <ref name="multitext-content"/>
-    <ref name="extensible-without-field-content"/>    <!-- problem should be same as extensible but without field -->
+    <ref name="extensible-without-field-content"/>
+    </interleave>
+    <!-- problem should be same as extensible but without field -->
     <attribute name="type"/>
     <sch:rule context="field" >
       <sch:assert test="not(preceding-sibling::field[@type=current()/@type])">
@@ -106,12 +110,13 @@
     </sch:rule>
   </define>
 
-<!-- ========================================================= trait-content -->
+  <!-- ========================================================= trait-content -->
   <define name="trait-content">
     <attribute name="name"/>
     <attribute name="value"/>
     <zeroOrMore>
-      <element name="annotation"> <!-- !!! documentation has this labeled as status-->
+      <!-- !!! documentation has this labeled as status-->
+      <element name="annotation">
         <ref name="annotation-content"/>
       </element>
     </zeroOrMore>
@@ -164,19 +169,17 @@
   <!-- ================================================== extensible-content -->
   <define name="extensible-content">
     <interleave>
-    <ref name="extensible-without-field-content"/>
-    <zeroOrMore>
-      <element name="field">
-        <ref name="field-content"/>
-      </element>
-    </zeroOrMore>
+      <ref name="extensible-without-field-content"/>
+      <zeroOrMore>
+        <element name="field">
+          <ref name="field-content"/>
+        </element>
+      </zeroOrMore>
     </interleave>
   </define>
 
   <!-- ======================================================== note-content -->
   <define name="note-content">
-    <ref name="multitext-content"/>
-    <ref name="extensible-content"/>
     <optional>
       <attribute name="type"/>
     </optional>
@@ -186,26 +189,31 @@
         There is only one note with a given type allowed in any parent element.
       </sch:assert>
     </sch:rule>
+    <interleave>
+      <ref name="multitext-content"/>
+      <ref name="extensible-content"/>
+    </interleave>
   </define>
 
   <!-- =============================================== pronunciation-content -->
   <define name="pronunciation-content">
-    <ref name="multitext-content"/>
-    <ref name="extensible-content"/>
-    <zeroOrMore>
-      <element name="media">
-        <ref name="URLRef-content"/>
-      </element>
-    </zeroOrMore>
+    <interleave>
+      <ref name="multitext-content"/>
+      <ref name="extensible-content"/>
+      <zeroOrMore>
+        <element name="media">
+          <ref name="URLRef-content"/>
+        </element>
+      </zeroOrMore>
+    </interleave>
   </define>
 
   <!-- =================================================== etymology-content -->
   <define name="etymology-content">
-    <ref name="extensible-content"/>
-
     <attribute name="type"/>
     <attribute name="source"/>
     <interleave>
+      <ref name="extensible-content"/>
       <optional>
         <element name="form">
           <ref name="form-no-lang-content"/>
@@ -232,27 +240,31 @@
 
   <!-- ==================================================== reversal-content -->
   <define name="reversal-content">
-    <ref name="multitext-content"/>
     <optional>
       <attribute name="type"/>
     </optional>
-    <optional>
-      <ref name="reversal-main"/>
-    </optional>
+    <interleave>
+      <ref name="multitext-content"/>
+      <optional>
+        <ref name="reversal-main"/>
+      </optional>
+    </interleave>
   </define>
 
   <!-- ======================================================= reversal-main -->
   <define name="reversal-main">
     <element name="main">
-      <ref name="multitext-content"/>
       <sch:rule context="main">
         <sch:assert test="parent::*/form">
           A main should not exist without a parent form
         </sch:assert>
       </sch:rule>
+      <interleave>
+      <ref name="multitext-content"/>
       <optional>
         <ref name="reversal-main"/>
       </optional>
+      </interleave>
     </element>
   </define>
 
@@ -269,25 +281,28 @@
       </sch:assert>
     </sch:rule>
   </define>
-  
+
   <!-- ===================================================== example-content -->
   <define name="example-content">
-    <ref name="multitext-content"/>
-    <ref name="extensible-content"/>
     <optional>
-      <attribute name="source"/> <!-- a key-->
+      <attribute name="source"/>
+      <!-- a key-->
     </optional>
-    <zeroOrMore>
-      <element name="translation">
-        <ref name="translation-content"/>
-      </element>
-    </zeroOrMore>
+
+    <interleave>
+      <ref name="multitext-content"/>
+      <ref name="extensible-content"/>
+      <zeroOrMore>
+        <element name="translation">
+          <ref name="translation-content"/>
+        </element>
+      </zeroOrMore>
+    </interleave>
   </define>
 
   <!-- ==================================================== relation-content -->
   <define name="relation-content">
     <!-- @ref is a @name relation of parent-->
-    <ref name="extensible-content"/>
     <attribute name="type"/>
     <ref name="refid"/>
     <optional>
@@ -295,30 +310,39 @@
         <data type="integer"/>
       </attribute>
     </optional>
-    <optional>
-      <element name="usage">
-        <ref name="multitext-content"/>
-      </element>
-    </optional>
+
+    <interleave>
+      <ref name="extensible-content"/>
+
+      <optional>
+        <element name="usage">
+          <ref name="multitext-content"/>
+        </element>
+      </optional>
+    </interleave>
   </define>
 
   <!-- ===================================================== variant-content -->
   <define name="variant-content">
-    <ref name="extensible-content"/>
-    <ref name="multitext-content"/>
     <optional>
       <ref name="refid"/>
     </optional>
-    <zeroOrMore>
-      <element name="pronunciation">
-        <ref name="pronunciation-content"/>
-      </element>
-    </zeroOrMore>
-    <zeroOrMore>
-      <element name="relation">
-        <ref name="relation-content"/>
-      </element>
-    </zeroOrMore>
+
+    <interleave>
+      <ref name="extensible-content"/>
+      <ref name="multitext-content"/>
+
+      <zeroOrMore>
+        <element name="pronunciation">
+          <ref name="pronunciation-content"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="relation">
+          <ref name="relation-content"/>
+        </element>
+      </zeroOrMore>
+    </interleave>
   </define>
 
   <!-- ======================================================= sense-content -->

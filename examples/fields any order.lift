@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<lift version="0.11">
+  <entry>
+    <variant>
+      <pronunciation>
+        <form lang="qaa-latn-fonipa">
+          <text>det</text>
+        </form>
+      </pronunciation>
+      <form lang="qaa">
+        <text>det</text>
+      </form>
+      <field type="comment">
+        <annotation name="status" value="needs to be checked"></annotation>
+        <form lang="en">
+          <text>A comment in a variant</text>
+        </form>
+      </field>
+    </variant>
+    <pronunciation>
+      <media href="http://example.com/picture.jpg"/>
+      <field type="comment">
+        <form lang="en">
+          <text>A comment in a pronunciation</text>
+        </form>
+      </field>
+      <form lang="qaa-latn-fonipa">
+        <text>des</text>
+      </form>
+    </pronunciation>
+    <sense>
+      <reversal type="eng">
+        <main>
+          <main>
+            <form lang="en">
+              <text>plant</text>
+            </form>
+          </main>
+          <form lang="en">
+            <text>vegetable</text>
+          </form>
+        </main>
+        <form lang="en">
+          <text>mushroom</text>
+        </form>
+      </reversal>
+      <etymology source="xkal" type="">
+        <form>
+          <text>etymology</text>
+        </form>
+        <gloss lang="en">
+          <text>English gloss</text>
+        </gloss>
+        <gloss lang="fr">
+          <text>French gloss</text>
+        </gloss>
+        <field type="comment">
+          <form lang="en">
+            <text>English comment</text>
+          </form>
+          <form lang="fr">
+            <text>French comment</text>
+          </form>
+        </field>
+      </etymology>
+      <example>
+        <translation>
+          <form lang="en">
+            <text>The fall from the cliff killed him.</text>
+          </form>
+        </translation>
+        <field type="comment">
+          <form lang="en">
+            <text>A comment in an example</text>
+          </form>
+        </field>
+        <form lang="qaa">
+          <text>Werka des to kew.</text>
+        </form>
+      </example>
+
+      <relation type="subentry" ref="reto">
+        <usage>
+          <form lang="en">
+            <text>Takero village</text>
+          </form>
+        </usage>
+        <field type="comment">
+          <form lang="en">
+            <text>A comment in a relation</text>
+          </form>
+        </field>
+      </relation>
+
+    </sense>
+    <note>
+      <field type="comment">
+        <form lang="en">
+          <text>A comment in a note</text>
+        </form>
+      </field>
+      <form lang="en">
+        <text>The actual text of the note.</text>
+      </form>
+    </note>
+  </entry>
+</lift>
