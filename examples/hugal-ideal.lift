@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.10">
+<lift version="0.11">
   <entry id="hugal">
     <lexical-unit>
       <form lang="zxx-Latn">
@@ -27,7 +27,7 @@
           </text>
         </form>
       </definition>
-      <relation name="shared semantic core" ref="munhugal_gamble"/>
+      <relation type="shared semantic core" ref="munhugal_gamble"/>
     </sense>
 
     <variant ref="munhugal">
@@ -62,10 +62,10 @@
           </text>
         </form>
       </definition>
-      <relation name="shared semantic core" ref="humugal_win"/>
+      <relation type="shared semantic core" ref="humugal_win"/>
     </sense>
-    <relation name="morpheme" ref="hugal"/>
-    <relation name="morpheme" ref="-on"/>
+    <relation type="morpheme" ref="hugal"/>
+    <relation type="morpheme" ref="-on"/>
   </entry>
 
   <entry id="humugal">
@@ -84,10 +84,10 @@
           </text>
         </form>
       </definition>
-      <relation name="shared semantic core" ref="hugálon_win"/>
+      <relation type="shared semantic core" ref="hugálon_win"/>
     </sense>
-    <relation name="morpheme" ref="-um-"/>
-    <relation name="morpheme" ref="hugal"/>
+    <relation type="morpheme" ref="-um-"/>
+    <relation type="morpheme" ref="hugal"/>
   </entry>
 
   <entry id="ihugal">
@@ -107,10 +107,10 @@
           </text>
         </form>
       </definition>
-      <relation name="shared semantic core" ref="munhugal_lose"/>
+      <relation type="shared semantic core" ref="munhugal_lose"/>
     </sense>
-    <relation name="morpheme" ref="i-"/>
-    <relation name="morpheme" ref="hugal"/>
+    <relation type="morpheme" ref="i-"/>
+    <relation type="morpheme" ref="hugal"/>
   </entry>
 
   <entry id="munhugal">
@@ -129,7 +129,7 @@
           </text>
         </form>
       </definition>
-      <relation name="shared semantic core" ref="hugal_gamble"/>
+      <relation type="shared semantic core" ref="hugal_gamble"/>
     </sense>
     <sense id="munhugal_lose">
       <grammatical-info value="v"/>
@@ -141,9 +141,9 @@
           </text>
         </form>
       </definition>
-      <relation name="shared semantic core" ref="ihugal_lose"/>
+      <relation type="shared semantic core" ref="ihugal_lose"/>
     </sense>
-    <relation name="morpheme" ref="mun-"/>
-    <relation name="morpheme" ref="hugal"/>
+    <relation type="morpheme" ref="mun-"/>
+    <relation type="morpheme" ref="hugal"/>
   </entry>
 </lift>

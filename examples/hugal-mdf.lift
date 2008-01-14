@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.10">
+<lift version="0.11">
   <entry id="hugal">
     <lexical-unit>
       <form lang="zxx-Latn">
@@ -28,11 +28,11 @@
         </form>
       </definition>
     </sense>
-    <relation name="subentry" ref="munhugal"/>
+    <relation type="subentry" ref="munhugal"/>
     <!-- a better (functional rather than structural) name would be inflection -->
-    <relation name="subentry" ref="humugal"/>
-    <relation name="subentry" ref="ihugal"/>
-    <relation name="subentry" ref="hugálon"/>
+    <relation type="subentry" ref="humugal"/>
+    <relation type="subentry" ref="ihugal"/>
+    <relation type="subentry" ref="hugálon"/>
   </entry>
   
   <entry id="hugálon">

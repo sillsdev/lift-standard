@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<lift version="0.10">
+<lift version="0.11">
   <entry id="test">
     <lexical-unit>
       <form lang="zxx-Latn">
@@ -7,17 +7,15 @@
       </form>
     </lexical-unit>
     <!-- other information including <sense> here -->
-    <trait name="status" value="changed">
-      <annotation value="changed" when="2003-04-05" who="Sally">
-        <form lang="en">
-          <text>Create the original record</text>
-        </form>
-      </annotation>
-      <annotation value="changed" when="2004-05-06" who="Fred">
-        <form lang="en">
-          <text>Add quality definitions</text>
-        </form>
-      </annotation>
-    </trait>
+    <annotation name="status" value="changed" when="2003-04-05" who="Sally">
+      <form lang="en">
+        <text>Create the original record</text>
+      </form>
+    </annotation>
+    <annotation name="status" value="changed" when="2004-05-06" who="Fred">
+      <form lang="en">
+        <text>Add quality definitions</text>
+      </form>
+    </annotation>
   </entry>
 </lift>
