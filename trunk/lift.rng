@@ -104,17 +104,6 @@
         There is only one field with a given type allowed in any parent element.
       </sch:assert>
     </sch:rule>
-
-    <optional>
-      <attribute name="dateCreated">
-        <ref name="date.or.dateTime"/>
-      </attribute>
-    </optional>
-    <optional>
-      <attribute name="dateModified">
-        <ref name="date.or.dateTime"/>
-      </attribute>
-    </optional>
   </define>
 
 <!-- ========================================================= trait-content -->
@@ -122,7 +111,7 @@
     <attribute name="name"/>
     <attribute name="value"/>
     <zeroOrMore>
-      <element name="annotation">
+      <element name="annotation"> <!-- !!! documentation has this labeled as status-->
         <ref name="annotation-content"/>
       </element>
     </zeroOrMore>
