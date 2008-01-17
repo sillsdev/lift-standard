@@ -56,6 +56,14 @@ namespace LiftIO
                 List<string> filesToDelete = new List<string>();
                 for (int i = 0; i < count; i++)
                 {
+                   //let empty files be as if they didn't exist.  They do represent that something
+                    //went wrong, but (at least in WeSay) we can detect that something by a more
+                    //accurate means, and these just get in the way
+                    if (files[i].Length == 0)
+                    {
+                        continue;
+                    }
+
                     string outputPath = Path.GetTempFileName();
                     try
                     {
