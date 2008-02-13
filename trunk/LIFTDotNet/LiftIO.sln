@@ -13,6 +13,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiftIO", "LiftIO\LiftIO.csp
 		Release.AspNetCompiler.Debug = "False"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiftMerge", "LiftMerge\LiftMerge.csproj", "{015C2C75-9326-43A6-B9BB-1A58F5F7AC8D}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiftMerge.Exe.Tests", "LiftMerge.Tests\LiftMerge.Exe.Tests.csproj", "{69478C9B-6262-47AD-902D-81D712B14674}"
+	ProjectSection(WebsiteProperties) = preProject
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.Debug = "False"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +39,14 @@ Global
 		{A3A7698C-790B-4139-95C8-60380AF35F9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3A7698C-790B-4139-95C8-60380AF35F9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A3A7698C-790B-4139-95C8-60380AF35F9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{015C2C75-9326-43A6-B9BB-1A58F5F7AC8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{015C2C75-9326-43A6-B9BB-1A58F5F7AC8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{015C2C75-9326-43A6-B9BB-1A58F5F7AC8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{015C2C75-9326-43A6-B9BB-1A58F5F7AC8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69478C9B-6262-47AD-902D-81D712B14674}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69478C9B-6262-47AD-902D-81D712B14674}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69478C9B-6262-47AD-902D-81D712B14674}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69478C9B-6262-47AD-902D-81D712B14674}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

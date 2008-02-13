@@ -42,6 +42,7 @@
     <Compile Include="Extensible.cs" />
     <Compile Include="ILexiconMerger.cs" />
     <Compile Include="ILiftMergerTestSuite.cs" />
+    <Compile Include="LiftVersionControlMerger.cs" />
     <Compile Include="LiftParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LiftMultiText.cs" />
