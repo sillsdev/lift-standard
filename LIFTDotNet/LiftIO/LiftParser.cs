@@ -20,6 +20,7 @@ namespace LiftIO
         private string _wsAttributeLabel = "lang";
 
         private bool _cancelNow = false;
+        private DateTime _defaultCreationModificationUTC;
 //        private string _defaultLangId="??";
 
 
@@ -31,8 +32,9 @@ namespace LiftIO
         /// <summary>
         /// 
         /// </summary>
-        public virtual void ReadFile(XmlDocument doc)
+        public virtual void ReadFile(XmlDocument doc, DateTime defaultCreationModificationUTC)
         {
+            _defaultCreationModificationUTC = defaultCreationModificationUTC;
             XmlNodeList entryNodes = doc.SelectNodes("/lift/entry");
             int count = 0;
             const int kInterval = 50;
@@ -57,7 +59,7 @@ namespace LiftIO
         public TEntry ReadEntry(XmlNode node)
         {
             Extensible extensible = ReadExtensibleElementBasics(node);
-            DateTime dateDeleted = GetOptionalDate(node, "dateDeleted");
+            DateTime dateDeleted = GetOptionalDate(node, "dateDeleted", default(DateTime));
             if(dateDeleted != default(DateTime))
             {
                 _merger.EntryWasDeleted(extensible, dateDeleted);
@@ -253,8 +255,8 @@ namespace LiftIO
                     }
                 }
             }
-            extensible.CreationTime = GetOptionalDate(node, "dateCreated");
-            extensible.ModificationTime = GetOptionalDate(node, "dateModified");
+            extensible.CreationTime = GetOptionalDate(node, "dateCreated", _defaultCreationModificationUTC);
+            extensible.ModificationTime = GetOptionalDate(node, "dateModified", _defaultCreationModificationUTC);
 
             return extensible;
         }
@@ -279,8 +281,8 @@ namespace LiftIO
                 }
                 this._merger.MergeInField(target,
                                          fieldType,
-                                         GetOptionalDate(fieldNode, "dateCreated"),
-                                         GetOptionalDate(fieldNode, "dateModified"),
+                                         GetOptionalDate(fieldNode, "dateCreated", default(DateTime)),
+                                         GetOptionalDate(fieldNode, "dateModified", default(DateTime)),
                                          ReadMultiText(fieldNode));
 
                 //todo (maybe) ReadTraits(node, target);
@@ -327,12 +329,13 @@ namespace LiftIO
         /// </summary>
         /// <param name="xmlNode"></param>
         /// <param name="name"></param>
+        /// <param name="defaultDateTime">the time to use if this attribute isn't found</param>
         /// <returns></returns>
-        protected DateTime GetOptionalDate(XmlNode xmlNode, string name)
+        protected DateTime GetOptionalDate(XmlNode xmlNode, string name, DateTime defaultDateTime)
         {
             XmlAttribute attr = xmlNode.Attributes[name];
             if (attr == null)
-                return default(DateTime);
+                return defaultDateTime;
 
             /* if the incoming data lacks a time, we'll have a kind of 'unspecified', else utc */
 
@@ -343,7 +346,7 @@ namespace LiftIO
             catch (FormatException e)
             {
                 NotifyError(e); // not a fatal error
-                return default(DateTime);
+                return defaultDateTime;
             }
         }
 

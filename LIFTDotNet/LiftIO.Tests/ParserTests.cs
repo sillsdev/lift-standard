@@ -154,10 +154,10 @@ namespace LiftIO.Tests
                     .WithAnyArguments()
                     .Will(Return.Value(null));
             }
-            _parser.ReadFile(_doc);
+            _parser.ReadFile(_doc, default(DateTime));
             _mocks.VerifyAllExpectationsHaveBeenMet();
         }
-
+        
         [Test]
         public void EntryWithGuid()
         {
