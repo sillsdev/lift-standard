@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -7,10 +7,10 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("LiftMerge")]
 [assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("LiftMerge")]
-[assembly: AssemblyCopyright("Copyright ©  2008")]
+[assembly: AssemblyConfiguration("Debug")]
+[assembly: AssemblyCompany("SIL International")]
+[assembly: AssemblyProduct("LiftIO")]
+[assembly: AssemblyCopyright("Copyright © SIL International 2008")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
