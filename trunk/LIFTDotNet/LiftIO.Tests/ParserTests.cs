@@ -325,7 +325,13 @@ namespace LiftIO.Tests
                 .Method("MergeInNote")
                 .With(Is.Anything, Is.Anything/*todo type*/, Has.ToString(Is.EqualTo(value)));
         }
-        
+
+        private void ExpectTypedMergeInNote(string type)
+        {
+            Expect.Exactly(1).On(_merger)
+                .Method("MergeInNote")
+                .With(Is.Anything, Is.EqualTo(type), Is.Anything);
+        }
         
         
         
@@ -489,24 +495,16 @@ namespace LiftIO.Tests
         }
 
         [Test]
-        public void EntryWithNote_MultipleNotesDifferentTypes_OnlyNoteWithNoTypeRead()
+        public void EntryWithTwoNotes()
         {
             ExpectGetOrMakeEntry();
-      //      ExpectMergeInLexemeForm(Is.Anything);
-            ExpectMergeInNote("x=hello|");
+            ExpectTypedMergeInNote("typeone");
+            ExpectTypedMergeInNote("typetwo");
 
-            ParseEntryAndCheck(string.Format("<entry><note type='test'/><note><form lang='x'><text>hello</text></form></note></entry>"));
+            ParseEntryAndCheck(string.Format("<entry><note type='typeone'><form lang='x'><text>one</text></form></note><note type='typetwo'><form lang='x'><text>two</text></form></note></entry>"));
         }
 
-        [Test]
-        [ExpectedException(typeof(LiftFormatException))]
-        public void EntryWithNote_MultipleNotesSameType_Error()
-        {
-            ExpectGetOrMakeEntry();
-            //      ExpectMergeInLexemeForm(Is.Anything);
 
-            ParseEntryAndCheck(string.Format("<entry><note/><note><form lang='x'><text>hello</text></form></note></entry>"));
-        }
 
         [Test]
         public void EntryWithSense()
