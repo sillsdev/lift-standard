@@ -83,12 +83,8 @@ namespace LiftIO
             {
                 _merger.MergeInCitationForm(entry, citationForm);
             }
-            LiftMultiText note = LocateAndReadMultiText(node, "note[not(@type)]");
-            if (!note.IsEmpty)
-            {
-                string noteType = null; //todo                
-                _merger.MergeInNote(entry, noteType, note);
-            }
+
+            ReadNotes(node, entry);
 
             foreach (XmlNode n in node.SelectNodes("sense"))
             {
@@ -103,6 +99,16 @@ namespace LiftIO
             ReadExtensibleElementDetails(entry, node);
             _merger.FinishEntry(entry);
             return entry;
+        }
+
+        private void ReadNotes(XmlNode node, TBase e)
+        {
+            foreach (XmlNode noteNode in node.SelectNodes("note"))
+            {
+                string noteType = GetOptionalAttributeString(noteNode, "type");
+                LiftMultiText noteText = ReadMultiText(noteNode);
+                _merger.MergeInNote(e, noteType, noteText);
+            }
         }
 
         private void ReadRelation(XmlNode n, TBase parent)
@@ -169,12 +175,9 @@ namespace LiftIO
                 {
                     _merger.MergeInDefinition(sense, def);
                 }
-                LiftMultiText note = LocateAndReadMultiText(node, "note[not(@type)]");
-                if(!note.IsEmpty)
-                {
-                    string noteType = null; //todo                
-                    _merger.MergeInNote(sense, noteType, note);
-                }
+
+                ReadNotes(node, sense);
+
                 foreach (XmlNode n in node.SelectNodes("example"))
                 {
                     ReadExample(n, sense);
@@ -215,12 +218,8 @@ namespace LiftIO
                 {
                     _merger.MergeInSource(example, source);
                 }
-                LiftMultiText note = LocateAndReadMultiText(node, "note[not(@type)]");
-                if (!note.IsEmpty)
-                {
-                    string noteType = null; //todo                
-                    _merger.MergeInNote(example, noteType, note);
-                }
+
+                ReadNotes(node, example);
 
                 ReadExtensibleElementDetails(example, node);
             }
@@ -372,6 +371,16 @@ namespace LiftIO
                 return ReadMultiText(element);
             }
             return new LiftMultiText();
+        }
+
+        protected List<LiftMultiText> LocateAndReadOneOrMoreMultiText(XmlNode node, string query)
+        {
+            List<LiftMultiText> results = new List<LiftMultiText>();      
+            foreach (XmlNode n in node.SelectNodes(query))
+            {
+                results.Add(ReadMultiText(n));
+            }
+            return results;
         }
 
         protected LiftMultiText LocateAndReadOneElementPerFormData(XmlNode node, string query)
