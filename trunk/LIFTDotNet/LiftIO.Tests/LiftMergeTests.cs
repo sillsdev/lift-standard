@@ -1,11 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Xml;
 using LiftIO;
 using NUnit.Framework;
 
-namespace LiftMerge.Tests
+namespace LiftIO.Tests
 {
     [TestFixture]
     public class LiftMergeTests
@@ -18,7 +16,7 @@ namespace LiftMerge.Tests
         [SetUp]
         public void Setup()
         {
-            _ours = @"<?xml version='1.0' encoding='utf-8'?>
+            this._ours = @"<?xml version='1.0' encoding='utf-8'?>
                     <lift version='0.10' producer='WeSay 1.0.0.0'>
                         <entry id='usOnly'/>
                         <entry id='sameInBoth'>
@@ -31,7 +29,7 @@ namespace LiftMerge.Tests
                         <entry id='doomedByOther'/>
                     </lift>";
 
-            _theirs = @"<?xml version='1.0' encoding='utf-8'?>
+            this._theirs = @"<?xml version='1.0' encoding='utf-8'?>
                     <lift version='0.10' producer='WeSay 1.0.0.0'>
                        <entry id='sameInBoth'>
                             <lexical-unit>
@@ -58,7 +56,7 @@ namespace LiftMerge.Tests
                         </entry>
 
                     </lift>";
-            _ancestor = @"<?xml version='1.0' encoding='utf-8'?>
+            this._ancestor = @"<?xml version='1.0' encoding='utf-8'?>
                     <lift version='0.10' producer='WeSay 1.0.0.0'>
                         <entry id='doomedByOther'/>
                         <entry id='doomedByUs'/>
@@ -75,7 +73,7 @@ namespace LiftMerge.Tests
         [Test]
         public void Conflict_TheirsAppearsInCollisionNote()
         {
-            _ours = @"<?xml version='1.0' encoding='utf-8'?>
+            this._ours = @"<?xml version='1.0' encoding='utf-8'?>
                     <lift version='0.10' producer='WeSay 1.0.0.0'>
                         <entry id='lexicalformcollission'>
                             <lexical-unit>
@@ -86,7 +84,7 @@ namespace LiftMerge.Tests
                         </entry>
                     </lift>";
 
-            _theirs = @"<?xml version='1.0' encoding='utf-8'?>
+            this._theirs = @"<?xml version='1.0' encoding='utf-8'?>
                     <lift version='0.10' producer='WeSay 1.0.0.0'>
                         <entry id='lexicalformcollission'>
                             <lexical-unit>
@@ -96,11 +94,11 @@ namespace LiftMerge.Tests
                             </lexical-unit>
                         </entry>
                     </lift>";
-            _ancestor = @"<?xml version='1.0' encoding='utf-8'?>
+            this._ancestor = @"<?xml version='1.0' encoding='utf-8'?>
                     <lift version='0.10' producer='WeSay 1.0.0.0'>
                         <entry id='lexicalformcollission'/>
                     </lift>";
-            LiftIO.LiftVersionControlMerger merger = new LiftVersionControlMerger(_ours, _theirs, _ancestor);
+            LiftVersionControlMerger merger = new LiftVersionControlMerger(this._ours, this._theirs, this._ancestor);
             string result = merger.GetMergedLift();
             AssertXPathMatchesExactlyOne(result, "lift/entry[@id='lexicalformcollission']");
             AssertXPathMatchesExactlyOne(result, "lift/entry");//just one
@@ -112,7 +110,7 @@ namespace LiftMerge.Tests
         [Test, Ignore("Not implemented")]
         public void EachHasNewSense_BothSensesCoveyed()
         {
-            _ours = @"<?xml version='1.0' encoding='utf-8'?>
+            this._ours = @"<?xml version='1.0' encoding='utf-8'?>
                     <lift version='0.10' producer='WeSay 1.0.0.0'>
                         <entry id='newSensesCollision'>
                             <sense>
@@ -123,7 +121,7 @@ namespace LiftMerge.Tests
                         </entry>
                     </lift>";
 
-            _theirs = @"<?xml version='1.0' encoding='utf-8'?>
+            this._theirs = @"<?xml version='1.0' encoding='utf-8'?>
                     <lift version='0.10' producer='WeSay 1.0.0.0'>
                         <entry id='newSensesCollision'>
                             <sense>
@@ -133,11 +131,11 @@ namespace LiftMerge.Tests
                              </sense>
                         </entry>
                     </lift>";
-            _ancestor = @"<?xml version='1.0' encoding='utf-8'?>
+            this._ancestor = @"<?xml version='1.0' encoding='utf-8'?>
                     <lift version='0.10' producer='WeSay 1.0.0.0'>
                         <entry id='newSensesCollision'/>
                     </lift>"; 
-            LiftIO.LiftVersionControlMerger merger = new LiftVersionControlMerger(_ours, _theirs, _ancestor);
+            LiftVersionControlMerger merger = new LiftVersionControlMerger(this._ours, this._theirs, this._ancestor);
             string result = merger.GetMergedLift();
             AssertXPathMatchesExactlyOne(result, "lift/entry[@id='newSensesCollision']");
             AssertXPathMatchesExactlyOne(result, "lift/entry[@id='newSensesCollision' and sense/gloss/text='ourSense']");
@@ -147,7 +145,7 @@ namespace LiftMerge.Tests
         [Test]
         public void NewEntryFromUs_Conveyed()
         {
-            LiftIO.LiftVersionControlMerger merger = new LiftVersionControlMerger(_ours, _theirs, _ancestor);
+            LiftVersionControlMerger merger = new LiftVersionControlMerger(this._ours, this._theirs, this._ancestor);
             string result = merger.GetMergedLift();
             AssertXPathMatchesExactlyOne(result, "lift/entry[@id='usOnly']");
         }
@@ -155,21 +153,21 @@ namespace LiftMerge.Tests
         [Test]
         public void NewEntryFromThem_Conveyed()
         { 
-            LiftIO.LiftVersionControlMerger merger = new LiftVersionControlMerger(_ours, _theirs, _ancestor);
+            LiftVersionControlMerger merger = new LiftVersionControlMerger(this._ours, this._theirs, this._ancestor);
             string result = merger.GetMergedLift();
             AssertXPathMatchesExactlyOne(result, "lift/entry[@id='themOnly']");
         }
         [Test]
         public void UnchangedEntryInBoth_NotDuplicated()
         {
-            LiftIO.LiftVersionControlMerger merger = new LiftVersionControlMerger(_ours, _theirs, _ancestor);
+            LiftVersionControlMerger merger = new LiftVersionControlMerger(this._ours, this._theirs, this._ancestor);
             string result = merger.GetMergedLift();
             AssertXPathMatchesExactlyOne(result, "lift/entry[@id='sameInBoth']");
         }
         [Test]
         public void EntryRemovedByOther_Removed()
         {
-            LiftIO.LiftVersionControlMerger merger = new LiftVersionControlMerger(_ours, _theirs, _ancestor);
+            LiftVersionControlMerger merger = new LiftVersionControlMerger(this._ours, this._theirs, this._ancestor);
             string result = merger.GetMergedLift();
             AssertXPathMatchesExactlyOne(result, "lift[not(entry/@id='doomedByOther')]");
         }
@@ -177,7 +175,7 @@ namespace LiftMerge.Tests
         [Test]
         public void EntryRemovedByUs_Removed()
         {
-            LiftIO.LiftVersionControlMerger merger = new LiftVersionControlMerger(_ours, _theirs, _ancestor);
+            LiftVersionControlMerger merger = new LiftVersionControlMerger(this._ours, this._theirs, this._ancestor);
             string result = merger.GetMergedLift();
             AssertXPathMatchesExactlyOne(result, "lift[not(entry/@id='doomedByUs')]");
         }
@@ -206,7 +204,7 @@ namespace LiftMerge.Tests
         {
         }
         
-        private void AssertXPathMatchesExactlyOne(string xml, string xpath)
+        private static void AssertXPathMatchesExactlyOne(string xml, string xpath)
         {
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(xml);

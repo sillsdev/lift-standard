@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using NUnit.Framework;
@@ -38,6 +37,7 @@ namespace LiftIO.Tests
             string contents = string.Format("<lift version='{0}'></lift>", Validator.LiftVersion);
             Validate(contents, true);
         }
+
         [Test]
         public void BadLiftDoesNotValidate()
         {

@@ -312,7 +312,7 @@
 
   <!-- ==================================================== relation-content -->
   <define name="relation-content">
-    <!-- @ref is a @name relation of parent-->
+    <!-- @ref is a @type relation of parent-->
     <attribute name="type"/>
     <ref name="refid"/>
     <optional>

@@ -23,10 +23,10 @@ namespace LiftIO.Tests
         /// </summary>
         class LiftMultiTextTraitMatcher : Matcher
         {
-            private string _expectedLanguageOfFirstTrait;
-            private string _expectedNameOfFirstTrait;
-            private string _expectedValueOfFirstTrait;
-            private int _expectedCount;
+            private readonly string _expectedLanguageOfFirstTrait;
+            private readonly string _expectedNameOfFirstTrait;
+            private readonly string _expectedValueOfFirstTrait;
+            private readonly int _expectedCount;
 
             public LiftMultiTextTraitMatcher(string expectedLanguageOfFirstTrait, string expectedNameOfFirstTrait, string expectedValueOfFirstTrait, int expectedNumberOfTraits)
             {
@@ -71,7 +71,7 @@ namespace LiftIO.Tests
             _merger = _mocks.NewMock<ILexiconMerger<DummyBase, Dummy, Dummy, Dummy>>();
             _parser = new LiftParser<DummyBase, Dummy, Dummy, Dummy>(_merger);
             _parsingWarnings = new List<LiftParser<DummyBase, Dummy, Dummy, Dummy>.ErrorArgs>();
-            _parser.ParsingWarning += new EventHandler<LiftParser<DummyBase, Dummy, Dummy, Dummy>.ErrorArgs>(OnParsingWarning);
+            _parser.ParsingWarning += OnParsingWarning;
         }
 
         void OnParsingWarning(object sender, LiftParser<DummyBase, Dummy, Dummy, Dummy>.ErrorArgs e)

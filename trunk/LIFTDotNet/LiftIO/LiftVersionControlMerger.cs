@@ -10,10 +10,10 @@ namespace LiftIO
         private readonly string _ourLift;
         private readonly string _theirLift;
         private readonly string _commonAncestorLift;
-        private List<string> _processedIds = new List<string>();
-        private XmlDocument _ours;
-        private XmlDocument _theirs;
-        private XmlDocument _ancestor;
+        private readonly List<string> _processedIds = new List<string>();
+        private readonly XmlDocument _ours;
+        private readonly XmlDocument _theirs;
+        private readonly XmlDocument _ancestor;
 
         public LiftVersionControlMerger(string ours, string theirs, string common)
         {
@@ -54,7 +54,7 @@ namespace LiftIO
             return builder.ToString();
         }
 
-        private XmlNode FindEntry(XmlDocument doc, string id)
+        private static XmlNode FindEntry(XmlNode doc, string id)
         {
             return doc.SelectSingleNode("lift/entry[@id='"+id+"']");
         }
@@ -90,7 +90,7 @@ namespace LiftIO
             }
         }
 
-        private string MakeMergedEntry(XmlNode ourEntry, XmlNode theirEntry)
+        private static string MakeMergedEntry(XmlNode ourEntry, XmlNode theirEntry)
         {
             XmlNode mergeNoteFieldNode = ourEntry.OwnerDocument.CreateElement("field");
             AddAttribute(mergeNoteFieldNode, "tag", "mergeConflict");
@@ -104,19 +104,19 @@ namespace LiftIO
             return ourEntry.OuterXml;
         }
 
-        private void AddDateCreatedAttribute(XmlNode elementNode)
+        private static void AddDateCreatedAttribute(XmlNode elementNode)
         {
             AddAttribute(elementNode, "dateCreated", DateTime.Now.ToString(Extensible.LiftTimeFormatNoTimeZone));
         }
 
-        private void AddAttribute(XmlNode element, string name, string value)
+        private static void AddAttribute(XmlNode element, string name, string value)
         {
             XmlAttribute attr = element.OwnerDocument.CreateAttribute(name);
             attr.Value = value;
             element.Attributes.Append(attr);
         }
 
-        private bool AreTheSame(XmlNode ourEntry, XmlNode theirEntry)
+        private static bool AreTheSame(XmlNode ourEntry, XmlNode theirEntry)
         {
             //for now...
             if (GetModifiedDate(theirEntry) == GetModifiedDate(ourEntry) 
@@ -129,7 +129,7 @@ namespace LiftIO
             return false;
         }
 
-        private DateTime GetModifiedDate(XmlNode entry)
+        private static DateTime GetModifiedDate(XmlNode entry)
         {
             XmlAttribute d = entry.Attributes["dateModified"];
             if (d == null)
@@ -148,7 +148,7 @@ namespace LiftIO
             }
         }
 
-        private string GetId(XmlNode e)
+        private static string GetId(XmlNode e)
         {
             return e.Attributes["id"].Value;
         }

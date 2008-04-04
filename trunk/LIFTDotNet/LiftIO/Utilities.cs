@@ -1,6 +1,5 @@
 using System;
 using System.CodeDom.Compiler;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Xml;
@@ -77,7 +76,7 @@ namespace LiftIO
                     ProcessElement(reader, writer);
                     break;
                 default:
-                    Utilities.WriteShallowNode(reader, writer);
+                    WriteShallowNode(reader, writer);
                     break;
             }
         }
