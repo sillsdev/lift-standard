@@ -23,6 +23,14 @@ namespace LiftIO.Tests
         }
 
         [Test]
+        public void ParseDateTimeWithTimeZoneAtBeginningOfYear()
+        {
+            DateTime parsedDateTime = Extensible.ParseDateTimeCorrectly("2005-01-01T01:11:11+8:00");
+            Assert.IsTrue(parsedDateTime.Kind == DateTimeKind.Utc);
+            Assert.AreEqual(new DateTime(2004, 12, 31, 17, 11, 11, DateTimeKind.Utc), parsedDateTime);
+        }
+
+        [Test]
         public void ParseDateTimeNoTimeZone()
         {
             DateTime parsedDateTime = Extensible.ParseDateTimeCorrectly("2007-02-03T03:01:39Z");

@@ -35,7 +35,7 @@ namespace LiftIO
         {
             DateTime result = DateTime.ParseExact(time,
                                                   new string[] { LiftTimeFormatNoTimeZone, LiftTimeFormatWithTimeZone, LiftDateOnlyFormat },
-                                                  CultureInfo.InvariantCulture,
+                                                  new DateTimeFormatInfo(),
                                                   DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
             Debug.Assert(result.Kind == DateTimeKind.Utc);
             return result;
