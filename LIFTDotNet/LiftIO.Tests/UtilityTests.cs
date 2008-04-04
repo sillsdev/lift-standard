@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using System.Xml;
 using NUnit.Framework;
 
@@ -81,7 +79,7 @@ namespace LiftIO.Tests
             AssertXPathNotNull(output, "//entry/sense[@id='foo']/example");
         }
 
-        private string WriteFile(string xmlForEntries)
+        private static string WriteFile(string xmlForEntries)
         {
             string output = Path.GetTempFileName();
             using (StreamWriter writer = File.CreateText(output))
@@ -96,7 +94,7 @@ namespace LiftIO.Tests
         }
 
 
-        private void AssertXPathNotNull(string documentPath, string xpath)
+        private static void AssertXPathNotNull(string documentPath, string xpath)
         {
             XmlDocument doc = new XmlDocument();
             doc.Load(documentPath);

@@ -16,8 +16,8 @@ namespace LiftIO
         public event EventHandler<StepsArgs> SetTotalNumberSteps;
         public event EventHandler<ProgressEventArgs> SetStepsCompleted;
 
-        private ILexiconMerger<TBase, TEntry, TSense, TExample> _merger;
-        private string _wsAttributeLabel = "lang";
+        private readonly ILexiconMerger<TBase, TEntry, TSense, TExample> _merger;
+        private const string _wsAttributeLabel = "lang";
 
         private bool _cancelNow = false;
         private DateTime _defaultCreationModificationUTC;
@@ -514,7 +514,7 @@ namespace LiftIO
 
         public class ProgressEventArgs : EventArgs
         {
-            private int _progress;
+            private readonly int _progress;
             private bool _cancel = false;
             public ProgressEventArgs(int progress)
             {
