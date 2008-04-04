@@ -75,12 +75,12 @@ namespace LiftIO
                 {
                     MergeInNewFile(pathToMergeInTo, files[i].FullName, outputPath);
                 }
-                catch (IOException ioerror)
+                catch (IOException)
                 {
                     // todo: "Cannot most likely one of the files is locked
-                    throw ioerror;
+                    throw;
                 }
-                catch (Exception error)
+                catch (Exception)
                 {
                     try
                     {
@@ -95,7 +95,7 @@ namespace LiftIO
                     //because two formats are allowed an our mono rng validator 
                     //throws non-fatal exceptions for each one
                     Validator.CheckLiftWithPossibleThrow(pathToBaseLiftFile);
-                    throw error; //must have been something else
+                    throw; //must have been something else
                 }
                 pathToMergeInTo = outputPath;
                 filesToDelete.Add(outputPath);
@@ -130,7 +130,7 @@ namespace LiftIO
         }
 
 
-        private void MakeBackup(string pathToBaseLiftFile, string pathToMergeInTo)
+        private static void MakeBackup(string pathToBaseLiftFile, string pathToMergeInTo)
         {
 // File.Move works across volumes but the destination cannot exist.
             if (File.Exists(pathToBaseLiftFile))

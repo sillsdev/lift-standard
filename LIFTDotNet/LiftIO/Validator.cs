@@ -16,8 +16,6 @@ namespace LiftIO
 
         static public string GetAnyValidationErrors(XmlTextReader documentReader)
         {
-            string[] s = typeof(LiftMultiText).Assembly.GetManifestResourceNames();
-
             RelaxngValidatingReader reader = new RelaxngValidatingReader(
                 documentReader,
                 new XmlTextReader(typeof(LiftMultiText).Assembly.GetManifestResourceStream("LiftIO.lift.rng")));
@@ -38,7 +36,7 @@ namespace LiftIO
                 {
                     return String.Format(
                         "This file claims to be version {0} of LIFT, but this version of the program uses version {1}",
-                        reader.Value, LiftIO.Validator.LiftVersion);
+                        reader.Value, LiftVersion);
                 }
                 string m = string.Format("{0}\r\nError near: {1} {2} '{3}'",e.Message, lastGuy, reader.Name, reader.Value);
                 return m;
@@ -56,12 +54,12 @@ namespace LiftIO
 
         public static void CheckLiftWithPossibleThrow(string pathToLiftFile)
         {
-            string errors = LiftIO.Validator.GetAnyValidationErrors(pathToLiftFile);
+            string errors = GetAnyValidationErrors(pathToLiftFile);
             if (!String.IsNullOrEmpty(errors))
             {
                 errors = string.Format("The dictionary file at {0} does not conform to the LIFT format used by this version of WeSay.  The RNG validator said: {1}.",
                                        pathToLiftFile, errors);
-                throw new LiftIO.LiftFormatException(errors);
+                throw new LiftFormatException(errors);
             }
         }
     }
