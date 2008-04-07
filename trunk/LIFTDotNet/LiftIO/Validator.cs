@@ -65,7 +65,14 @@ namespace LiftIO
             }
         }
 
-		public static string GetCorrectLiftVersionOfFile(string pathToOriginalLift)
+        //was "GetCorrectLiftVersionOfFile"
+
+        /// <summary>
+        /// If the lift file is an older version of lift, creates a new file migrated to the current version
+        /// </summary>
+        /// <param name="pathToOriginalLift"></param>
+        /// <returns>the path to the original file or to a new, migrated one, in the same directory</returns>
+		public static string MakeMigratedLiftFileIfNeeded(string pathToOriginalLift)
 		{
 			XmlReaderSettings readerSettings = new XmlReaderSettings();
 			readerSettings.ValidationType = ValidationType.None;
