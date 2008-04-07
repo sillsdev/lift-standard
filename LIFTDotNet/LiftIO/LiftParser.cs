@@ -280,7 +280,10 @@ namespace LiftIO
 		private void ReadSubsense(XmlNode node, TSense sense)
 		{
 			TSense subsense = _merger.GetOrMakeSubsense(sense, ReadExtensibleElementBasics(node));
-			FinishReadingSense(node, subsense);
+            if (subsense != null)//wesay can't handle these in April 2008
+            {
+                FinishReadingSense(node, subsense);
+            }
 		}
 
 		private TExample ReadExample(XmlNode node, TSense sense)
@@ -613,7 +616,7 @@ namespace LiftIO
 			}
 			string pathToResultingLiftFile;
 			if (liftVersionOfRequestedFile != LiftIO.Validator.LiftVersion)
-				pathToResultingLiftFile = LiftIO.Validator.GetCorrectLiftVersionOfFile(pathToLift);
+				pathToResultingLiftFile = LiftIO.Validator.MakeMigratedLiftFileIfNeeded(pathToLift);
 			else
 				pathToResultingLiftFile = pathToLift;
 		    string producerName;
