@@ -248,11 +248,6 @@
       <optional>
         <ref name="reversal-main"/>
       </optional>
-      <optional>
-        <element name="grammatical-info">
-          <ref name="grammatical-info-content"/>
-        </element>
-      </optional>
     </interleave>
   </define>
 
@@ -265,15 +260,10 @@
         </sch:assert>
       </sch:rule>
       <interleave>
-        <ref name="multitext-content"/>
-        <optional>
-          <ref name="reversal-main"/>
-        </optional>
-        <optional>
-          <element name="grammatical-info">
-            <ref name="grammatical-info-content"/>
-          </element>
-        </optional>
+      <ref name="multitext-content"/>
+      <optional>
+        <ref name="reversal-main"/>
+      </optional>
       </interleave>
     </element>
   </define>
@@ -307,17 +297,12 @@
           <ref name="translation-content"/>
         </element>
       </zeroOrMore>
-      <zeroOrMore>
-        <element name="note">
-          <ref name="note-content"/>
-        </element>
-      </zeroOrMore>
     </interleave>
   </define>
 
   <!-- ==================================================== relation-content -->
   <define name="relation-content">
-    <!-- @ref is a @type relation of parent-->
+    <!-- @ref is a @name relation of parent-->
     <attribute name="type"/>
     <ref name="refid"/>
     <optional>
@@ -394,6 +379,11 @@
       <zeroOrMore>
         <element name="relation">
           <ref name="relation-content"/>
+        </element>
+      </zeroOrMore>
+      <zeroOrMore>
+        <element name="etymology">
+          <ref name="etymology-content"/>
         </element>
       </zeroOrMore>
       <zeroOrMore>
@@ -480,11 +470,6 @@
           <ref name="relation-content"/>
         </element>
       </zeroOrMore>
-      <zeroOrMore>
-        <element name="etymology">
-          <ref name="etymology-content"/>
-        </element>
-      </zeroOrMore>
     </interleave>
   </define>
 
@@ -547,7 +532,7 @@
   <!-- ======================================================== lift-content -->
   <define name="lift-content">
     <attribute name="version">
-      <value>0.12</value>
+      <value>0.11</value>
     </attribute>
     <optional>
       <attribute name="producer"/>

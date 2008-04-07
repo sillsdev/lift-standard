@@ -1,5 +1,7 @@
 using System;
 using System.Xml;
+using System.Xml.Xsl;
+using System.IO;
 using Commons.Xml.Relaxng;
 
 namespace LiftIO
@@ -48,7 +50,7 @@ namespace LiftIO
         {
             get
             {
-                return "0.10";
+                return "0.12";
             }
         }
 
@@ -62,5 +64,48 @@ namespace LiftIO
                 throw new LiftFormatException(errors);
             }
         }
-    }
+
+		public static string GetCorrectLiftVersionOfFile(string pathToOriginalLift)
+		{
+			XmlReaderSettings readerSettings = new XmlReaderSettings();
+			readerSettings.ValidationType = ValidationType.None;
+			readerSettings.IgnoreComments = true;
+			string version = null;
+			using (XmlReader reader = XmlReader.Create(pathToOriginalLift, readerSettings))
+			{
+				if (reader.IsStartElement("lift"))
+					version = reader.GetAttribute("version");
+			}
+			if (String.IsNullOrEmpty(version) || version == LiftIO.Validator.LiftVersion)
+				return pathToOriginalLift;
+			string[] resources = typeof(LiftMultiText).Assembly.GetManifestResourceNames();
+			string pathToMigratedLift = pathToOriginalLift;
+			while (version != LiftIO.Validator.LiftVersion)
+			{
+				string xslName = null;
+				foreach (string name in resources)
+				{
+					if (name.EndsWith(".xsl") && name.StartsWith("LiftIO.LIFT-" + version + "-"))
+					{
+						xslName = name;
+						break;
+					}
+				}
+				if (xslName == null)
+					break;
+				string nextversion = xslName.Split(new char[] { '-' })[2];
+				nextversion = nextversion.Remove(nextversion.LastIndexOf('.'));
+				string nextfile = String.Format("{0}-{1}", pathToOriginalLift, nextversion);
+				Stream xslstream = typeof(LiftMultiText).Assembly.GetManifestResourceStream(xslName);
+				XslCompiledTransform xsl = new XslCompiledTransform();
+				xsl.Load(new XmlTextReader(xslstream));
+				xsl.Transform(pathToMigratedLift, nextfile);
+				if (pathToMigratedLift != pathToOriginalLift)
+					File.Delete(pathToMigratedLift);
+				pathToMigratedLift = nextfile;
+				version = nextversion;
+			}
+			return pathToMigratedLift;
+		}
+	}
 }

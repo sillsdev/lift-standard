@@ -60,6 +60,15 @@
       <Link>canonicalizeLift.xsl</Link>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="LIFT-0.10-0.11.xsl" />
+    <EmbeddedResource Include="LIFT-0.11-0.12.xsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="lift-0.10.rng" />
+    <EmbeddedResource Include="lift-0.11.rng" />
+    <EmbeddedResource Include="lift-0.12.rng" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

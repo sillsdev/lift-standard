@@ -92,8 +92,8 @@ namespace LiftIO.Tests
         {
             _doc.LoadXml("<foobar><form lang='x'><text>one</text></form><form lang='z'><text>zzzz</text></form><form lang='x'><text>two</text></form></foobar>");
             LiftMultiText t = _parser.ReadMultiText(_doc.FirstChild);
-            Assert.AreEqual("one; two", t["x"]);
-            Assert.AreEqual("zzzz", t["z"]);
+            Assert.AreEqual("one; two", t["x"].Text);
+            Assert.AreEqual("zzzz", t["z"].Text);
         }
 
 
@@ -102,7 +102,7 @@ namespace LiftIO.Tests
         {
             _doc.LoadXml("<foobar><form lang='x'><text>one <span class='emphasis'>inner text</span> node</text></form></foobar>");
             LiftMultiText t = _parser.ReadMultiText(_doc.FirstChild);
-            Assert.AreEqual("one inner text node", t["x"]);
+            Assert.AreEqual("one inner text node", t["x"].Text);
         }
 
 
@@ -110,10 +110,14 @@ namespace LiftIO.Tests
         public void FirstValueOfSimpleMultiText()
         {
             LiftMultiText t = new LiftMultiText();
-            t.Add("x", "1");
-            t.Add("y", "2");
-            Assert.AreEqual("x", t.FirstValue.Key);
-            Assert.AreEqual("1", t.FirstValue.Value);
+			LiftString s1 = new LiftString();
+			s1.Text = "1";
+			t.Add("x", s1);
+			LiftString s2 = new LiftString();
+			s2.Text = "2";
+			t.Add("y", s2);
+			Assert.AreEqual("x", t.FirstValue.Key);
+            Assert.AreEqual("1", t.FirstValue.Value.Text);
         }
 
         [Test]
@@ -199,8 +203,8 @@ namespace LiftIO.Tests
             Expect.Exactly(1).On(_merger)
                 .Method("GetOrMakeEntry")
                 //.With(Is.Anything)
-                .With(Has.ToString(Is.EqualTo(expectedIdString)))
-                .Will(Return.Value(new Dummy()));
+				.With(Has.ToString(Is.EqualTo(expectedIdString)), Is.EqualTo(0))
+				.Will(Return.Value(new Dummy()));
         }
 
         private void ExpectEmptyEntry()
@@ -252,7 +256,7 @@ namespace LiftIO.Tests
         //        .With(Is.Anything, matcher);
         //}
 
-        private void ExpectFinishEntry()
+		private void ExpectFinishEntry()
         {
             Expect.Exactly(1).On(_merger)
                 .Method("FinishEntry");
@@ -269,11 +273,11 @@ namespace LiftIO.Tests
         //}
 
 
-        private void ExpectMergeInField(Matcher tagMatcher, Matcher dateCreatedMatcher, Matcher dateModifiedMatcher, Matcher multiTextMatcher)
-        {
+		private void ExpectMergeInField(Matcher tagMatcher, Matcher dateCreatedMatcher, Matcher dateModifiedMatcher, Matcher multiTextMatcher, Matcher traitsMatcher)
+		{
             Expect.Exactly(1).On(_merger)
-                .Method("MergeInField").With(Is.Anything, tagMatcher, 
-                dateCreatedMatcher, dateModifiedMatcher, multiTextMatcher);
+                .Method("MergeInField").With(Is.Anything, tagMatcher,
+				dateCreatedMatcher, dateModifiedMatcher, multiTextMatcher, traitsMatcher);
             //  .Method("MergeInField").With(matchers);
         }
 
@@ -413,7 +417,39 @@ namespace LiftIO.Tests
             ParseEntryAndCheck("<entry><citation><form lang='x'><text>hello</text></form><form lang='y'><text>bye</text></form></citation></entry>");
         }
 
-        // private void ExpectEmptyMultiTextMergeIn(string MultiTextPropertyName)
+		[Test]
+		public void EntryWithPronunciation()
+		{
+			ExpectGetOrMakeEntry();
+			ExpectMergeInPronunciation("en__IPA=ai|");
+			ParseEntryAndCheck("<entry><pronunciation><form lang='en__IPA'><text>ai</text></form></pronunciation></entry>");
+		}
+
+		private void ExpectMergeInPronunciation(string value)
+		{
+			Expect.Exactly(1).On(_merger)
+				.Method("MergeInPronunciation")
+				.With(Is.Anything, Has.ToString(Is.EqualTo(value)))
+				.Will(Return.Value(new Dummy()));
+		}
+
+		[Test]
+		public void EntryWithVariant()
+		{
+			ExpectGetOrMakeEntry();
+			ExpectMergeInVariant("en=-d|");
+			ParseEntryAndCheck("<entry><variant><form lang='en'><text>-d</text></form></variant></entry>");
+		}
+
+		private void ExpectMergeInVariant(string value)
+		{
+			Expect.Exactly(1).On(_merger)
+				.Method("MergeInVariant")
+				.With(Is.Anything, Has.ToString(Is.EqualTo(value)))
+				.Will(Return.Value(new Dummy()));
+		}
+
+		// private void ExpectEmptyMultiTextMergeIn(string MultiTextPropertyName)
         //{
         //    Expect.Exactly(1).On(_merger)
         //                    .Method("MergeIn" + MultiTextPropertyName)
@@ -425,9 +461,22 @@ namespace LiftIO.Tests
         {
              Expect.Exactly(1).On(_merger)
                             .Method("MergeIn" + MultiTextPropertyName)
-                            .With(Is.Anything, Has.ToString(Is.EqualTo(value)));
+							.With(Is.Anything, Has.ToString(Is.EqualTo(value)));
        }
-//        private void ExpectMultiTextMergeIn(string MultiTextPropertyName, Matcher matcher)
+
+	   private void ExpectValueOfMergeInTranslationForm(string type, string value)
+	   {
+		   if (type == null)
+			   Expect.Exactly(1).On(_merger)
+							.Method("MergeInTranslationForm")
+							.With(Is.Anything, Is.Null, Has.ToString(Is.EqualTo(value)));
+		   else
+			   Expect.Exactly(1).On(_merger)
+							.Method("MergeInTranslationForm")
+							.With(Is.Anything, Has.ToString(Is.EqualTo(type)), Has.ToString(Is.EqualTo(value)));
+	   }
+
+	   //        private void ExpectMultiTextMergeIn(string MultiTextPropertyName, Matcher matcher)
 //        {
 //             Expect.Exactly(1).On(_merger)
 //                            .Method("MergeIn" + MultiTextPropertyName)
@@ -631,10 +680,11 @@ namespace LiftIO.Tests
                     Is.EqualTo("color"),
                     Is.EqualTo(default(DateTime)),
                     Is.EqualTo(default(DateTime)),
-                    Has.Property("Count", Is.EqualTo(2))
+                    Has.Property("Count", Is.EqualTo(2)),
+					Has.Property("Count", Is.EqualTo(0))
                     );
             ParseEntryAndCheck(
-                    "<entry><field tag='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field></entry>");
+                    "<entry><field type='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field></entry>");
         }
 
         [Test]
@@ -646,10 +696,11 @@ namespace LiftIO.Tests
                     Is.EqualTo("color"),
                     Is.EqualTo(default(DateTime)),
                     Is.EqualTo(default(DateTime)),
-                    Has.Property("Count", Is.EqualTo(2))
+                    Has.Property("Count", Is.EqualTo(2)),
+					Has.Property("Count", Is.EqualTo(0))
                     );
             ParseEntryAndCheck(
-                    "<entry><sense><field tag='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field></sense></entry>");
+                    "<entry><sense><field type='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field></sense></entry>");
         }
 
         [Test]
@@ -662,10 +713,11 @@ namespace LiftIO.Tests
                     Is.EqualTo("color"),
                     Is.EqualTo(default(DateTime)),
                     Is.EqualTo(default(DateTime)),
-                    Has.Property("Count", Is.EqualTo(2))
+                    Has.Property("Count", Is.EqualTo(2)),
+					Has.Property("Count", Is.EqualTo(0))
                     );
             ParseEntryAndCheck(
-                    "<entry><sense><example><field tag='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field></example></sense></entry>");
+                    "<entry><sense><example><field type='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field></example></sense></entry>");
         }
 
 
@@ -677,16 +729,18 @@ namespace LiftIO.Tests
                     Is.EqualTo("color"),
                     Is.EqualTo(default(DateTime)),
                     Is.EqualTo(default(DateTime)),
-                    Has.Property("Count", Is.EqualTo(2))
+                    Has.Property("Count", Is.EqualTo(2)),
+					Has.Property("Count", Is.EqualTo(0))
                     );
             ExpectMergeInField(
                     Is.EqualTo("special"),
                     Is.EqualTo(default(DateTime)),
                     Is.EqualTo(default(DateTime)),
-                    Has.Property("Count", Is.EqualTo(1))
+                    Has.Property("Count", Is.EqualTo(1)),
+					Has.Property("Count", Is.EqualTo(0))
                     );
             ParseEntryAndCheck(
-                    "<entry><field tag='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field><field tag='special'><form lang='en'><text>free</text></form></field></entry>");
+                    "<entry><field type='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field><field type='special'><form lang='en'><text>free</text></form></field></entry>");
         }
 
 
@@ -699,10 +753,11 @@ namespace LiftIO.Tests
                     Is.EqualTo("color"),
                     Is.EqualTo(default(DateTime)),
                     Is.EqualTo(default(DateTime)),
-                    Has.Property("Count", Is.EqualTo(2))
+					Has.Property("Count", Is.EqualTo(2)),
+					Has.Property("Count", Is.EqualTo(0))
                     );
             ParseEntryAndCheck(
-                    "<entry><field tag='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field><field tag='color'><form lang='en'><text>free</text></form></field></entry>");
+                    "<entry><field type='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field><field type='color'><form lang='en'><text>free</text></form></field></entry>");
         }
 
         [Test]
@@ -718,9 +773,10 @@ namespace LiftIO.Tests
                 Is.EqualTo("color"),
                Is.EqualTo(creat),
                Is.EqualTo(mod),
-               Is.Anything
+               Is.Anything,
+				Has.Property("Count", Is.EqualTo(0))
                 );
-            ParseEntryAndCheck(String.Format("<entry><field tag='color' dateCreated='{0}'  dateModified='{1}' ></field></entry>",
+            ParseEntryAndCheck(String.Format("<entry><field type='color' dateCreated='{0}'  dateModified='{1}' ></field></entry>",
                 createdTime,
                 modifiedTime));
         }
@@ -810,7 +866,7 @@ namespace LiftIO.Tests
             ExpectMergeInRelation("synonym", "one");
 
             ParseEntryAndCheck(
-                string.Format("<entry><sense><relation name=\"synonym\" ref=\"one\" /></sense></entry>"));
+                string.Format("<entry><sense><relation type=\"synonym\" ref=\"one\" /></sense></entry>"));
         }
 
         [Test]
@@ -821,7 +877,7 @@ namespace LiftIO.Tests
             ExpectMergeInPicture("bird.jpg");
 
             ParseEntryAndCheck(
-                string.Format("<entry><sense><picture href=\"bird.jpg\" /></sense></entry>"));
+                string.Format("<entry><sense><illustration href=\"bird.jpg\" /></sense></entry>"));
         }
 
 
@@ -833,7 +889,7 @@ namespace LiftIO.Tests
             ExpectMergeInPictureWithCaption("bird.jpg");
 
             ParseEntryAndCheck(
-                string.Format("<entry><sense><picture href=\"bird.jpg\" ><label><form lang='en'><text>bird</text></form></label></picture></sense></entry>"));
+                string.Format("<entry><sense><illustration href=\"bird.jpg\" ><label><form lang='en'><text>bird</text></form></label></illustration></sense></entry>"));
         }
 
         [Test]
@@ -846,9 +902,9 @@ namespace LiftIO.Tests
             //ExpectMergeDefinition();
             ExpectGetOrMakeExample();
   //          ExpectValueOfMergeIn("ExampleForm", "");
-            ExpectValueOfMergeIn("TranslationForm", "x=hello|");
+			ExpectValueOfMergeInTranslationForm("Free Translation", "x=hello|");
 
-            ParseEntryAndCheck("<entry><sense><example><translation><form lang='x'><text>hello</text></form></translation></example></sense></entry>");
+            ParseEntryAndCheck("<entry><sense><example><translation type='Free Translation'><form lang='x'><text>hello</text></form></translation></example></sense></entry>");
             //    "GetOrMakeEntry(;;;)GetOrMakeSense(m,)GetOrMakeExample(m,)MergeInTranslationForm(m,x=hello|)");
         }
 
@@ -862,7 +918,7 @@ namespace LiftIO.Tests
             //ExpectMergeDefinition();
             ExpectGetOrMakeExample();
 //            ExpectValueOfMergeIn("ExampleForm", "");
-            ExpectValueOfMergeIn("TranslationForm", "x=hello|");
+			ExpectValueOfMergeInTranslationForm(null, "x=hello|");
 
             ExpectValueOfMergeIn("Source", "test");
 
