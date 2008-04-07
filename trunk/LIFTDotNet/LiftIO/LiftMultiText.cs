@@ -16,12 +16,12 @@ namespace LiftIO
 		string _class;		// class attribute value for the span, if any
 		string _linkurl;	// href attribute value for the span, if any
 
-		public LiftSpan(int index, int lim, string lang, string sclass, string href)
+		public LiftSpan(int index, int length, string lang, string className, string href)
 		{
 			_index = index;
-			_length = lim;
+			_length = length;
 			_lang = lang;
-			_class = sclass;
+			_class = className;
 			_linkurl = href;
 		}
 

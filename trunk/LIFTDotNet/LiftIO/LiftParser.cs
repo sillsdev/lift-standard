@@ -22,7 +22,6 @@ namespace LiftIO
 
         private bool _cancelNow = false;
         private DateTime _defaultCreationModificationUTC;
-		private int _count;		// number of entries read from file.
 //        private string _defaultLangId="??";
 
 
@@ -38,18 +37,18 @@ namespace LiftIO
         {
             _defaultCreationModificationUTC = defaultCreationModificationUTC;
             XmlNodeList entryNodes = doc.SelectNodes("/lift/entry");
-            _count = 0;
+            int numberOfEntriesRead = 0;
             const int kInterval = 50;
-            int nextProgressPoint = _count + kInterval;
+            int nextProgressPoint = numberOfEntriesRead + kInterval;
             ProgressTotalSteps = entryNodes.Count;
             foreach (XmlNode node in entryNodes)
             {
                 ReadEntry(node);
-                _count++;
-                if (_count >= nextProgressPoint)
+                numberOfEntriesRead++;
+                if (numberOfEntriesRead >= nextProgressPoint)
                 {
-                    ProgressStepsCompleted = _count;
-                    nextProgressPoint = _count + kInterval;
+                    ProgressStepsCompleted = numberOfEntriesRead;
+                    nextProgressPoint = numberOfEntriesRead + kInterval;
                 }
                 if (_cancelNow)
                 {
@@ -204,8 +203,6 @@ namespace LiftIO
 		/// <summary>
 		/// Read the grammatical-info information for either a sense or a reversal.
 		/// </summary>
-		/// <param name="extensible"></param>
-		/// <param name="node"></param>
 		protected void ReadGrammi(TBase senseOrReversal, XmlNode senseNode)
         {
             XmlNode grammiNode = senseNode.SelectSingleNode("grammatical-info");
@@ -311,6 +308,8 @@ namespace LiftIO
 				// REVIEW(SRMc): If you don't think the note element should be valid
 				// inside an example, then remove the next line and the corresponding
 				// chunk from the rng file.
+                // JH says: LIFT ver 0.13 is going to make notes available to all extensibles
+                // todo: remove this when that is true
                 ReadNotes(node, example);
 
                 ReadExtensibleElementDetails(example, node);
@@ -536,17 +535,17 @@ namespace LiftIO
 						// Add the separator if we need it.
 						if (textNode.InnerText.Length > 0)
 							text.AddOrAppend(lang, "", "; ");
-						foreach (XmlNode xn in textNode.ChildNodes)
+						foreach (XmlNode node in textNode.ChildNodes)
 						{
-							if (xn.Name == "span")
+							if (node.Name == "span")
 							{
 								text.AddSpan(lang,
-									GetOptionalAttributeString(xn, "lang"),
-									GetOptionalAttributeString(xn, "class"),
-									GetOptionalAttributeString(xn, "href"),
-									xn.InnerText.Length);
+									GetOptionalAttributeString(node, "lang"),
+									GetOptionalAttributeString(node, "class"),
+									GetOptionalAttributeString(node, "href"),
+									node.InnerText.Length);
 							}
-							text.AddOrAppend(lang, xn.InnerText, "");
+							text.AddOrAppend(lang, node.InnerText, "");
 						}
                     }
 
@@ -592,162 +591,179 @@ namespace LiftIO
 		/// <summary>
 		/// Read a LIFT file, possibly an earlier version.
 		/// </summary>
-		/// <param name="sFilename"></param>
-		public void ReadLIFTFile(string sFilename)
+		/// <param name="pathToLift"></param>
+		public void ReadLIFTFile(string pathToLift)
 		{
 			ProgressTotalSteps = 100;	// we scan the file sequentially, so we don't have a count.
-			const int kInterval = 5;
 			ProgressStepsCompleted = 0;
-			XmlReaderSettings xrset = new XmlReaderSettings();
-			xrset.ValidationType = ValidationType.None;
-			xrset.IgnoreComments = true;
-			string sOrigVersion = String.Empty;
-			using (XmlReader xrdr = XmlReader.Create(sFilename, xrset))
+			XmlReaderSettings readerSettings = new XmlReaderSettings();
+			readerSettings.ValidationType = ValidationType.None;
+			readerSettings.IgnoreComments = true;
+			string liftVersionOfRequestedFile = String.Empty;
+			using (XmlReader reader = XmlReader.Create(pathToLift, readerSettings))
 			{
-				if (xrdr.IsStartElement("lift"))
-					sOrigVersion = xrdr.GetAttribute("version");
+				if (reader.IsStartElement("lift"))
+					liftVersionOfRequestedFile = reader.GetAttribute("version");
 			}
-			if (String.IsNullOrEmpty(sOrigVersion))
+			if (String.IsNullOrEmpty(liftVersionOfRequestedFile))
 			{
 				// we don't have a LIFT file -- what to do??
-				string msg = String.Format("Cannot import {0} because it is not a LIFT file!", sFilename);
+				string msg = String.Format("Cannot import {0} because it is not a LIFT file!", pathToLift);
 				throw new Exception(msg);
 			}
-			string sLiftFile;
-			if (sOrigVersion != LiftIO.Validator.LiftVersion)
-				sLiftFile = LiftIO.Validator.GetCorrectLiftVersionOfFile(sFilename);
+			string pathToResultingLiftFile;
+			if (liftVersionOfRequestedFile != LiftIO.Validator.LiftVersion)
+				pathToResultingLiftFile = LiftIO.Validator.GetCorrectLiftVersionOfFile(pathToLift);
 			else
-				sLiftFile = sFilename;
-			string sVersion = null;
-			string sProducer = null;
-			using (XmlReader xrdr = XmlReader.Create(sLiftFile, xrset))
+				pathToResultingLiftFile = pathToLift;
+		    string producerName;
+			using (XmlReader reader = XmlReader.Create(pathToResultingLiftFile, readerSettings))
 			{
-				if (xrdr.IsStartElement("lift"))
+				if (reader.IsStartElement("lift"))
 				{
-					sVersion = xrdr.GetAttribute("version");
-					sProducer = xrdr.GetAttribute("producer");
+					string sVersion = reader.GetAttribute("version");
+					producerName = reader.GetAttribute("producer");
 					if (sVersion != LiftIO.Validator.LiftVersion)
 					{
 						// we don't have a matching version -- what to do??
 						string msg = String.Format("Cannot import {0}.  It is LIFT version {1}, but we need LIFT version {2}.",
-							sFilename, sOrigVersion, LiftIO.Validator.LiftVersion);
+							pathToLift, liftVersionOfRequestedFile, LiftIO.Validator.LiftVersion);
 						throw new Exception(msg);
 					}
 				}
-				ProgressMessage = "Reading LIFT file header";
-				XmlDocument xd = new XmlDocument();
-				xrdr.ReadStartElement("lift");
-				if (xrdr.IsStartElement("header"))
-				{
-					xrdr.ReadStartElement("header");
-					if (xrdr.IsStartElement("ranges"))
-					{
-						xrdr.ReadStartElement("ranges");
-						while (xrdr.IsStartElement("range"))
-						{
-							string sId = xrdr.GetAttribute("id");
-							string sHref = xrdr.GetAttribute("href");
-							string sGuid = xrdr.GetAttribute("guid");
-							ProgressMessage = String.Format("Reading LIFT range {0}", sId);
-							xrdr.ReadStartElement();
-							if (String.IsNullOrEmpty(sHref))
-							{
-								while (xrdr.IsStartElement("range-element"))
-								{
-									string sRangeElement = xrdr.ReadOuterXml();
-									if (!String.IsNullOrEmpty(sRangeElement))
-									{
-										xd.LoadXml(sRangeElement);
-										this.ReadRangeElement(sId, xd.FirstChild);
-									}
-								}
-							}
-							else
-							{
-								this.ReadExternalRange(sHref, sId, sGuid, xrset);
-							}
-							xrdr.ReadEndElement();	// </range>
-						}
-						xrdr.ReadEndElement();	// </ranges>
-					}
-					if (xrdr.IsStartElement("fields"))
-					{
-						xrdr.ReadStartElement("fields");
-						while (xrdr.IsStartElement("field"))
-						{
-							string sField = xrdr.ReadOuterXml();
-							if (!String.IsNullOrEmpty(sField))
-							{
-								xd.LoadXml(sField);
-								this.ReadFieldDefinition(xd.FirstChild);
-							}
-						}
-						xrdr.ReadEndElement();	// </fields>
-					}
-					xrdr.ReadEndElement();	// </header>
-				}
-				// Process all of the entry elements, reading them into memory one at a time.
-				ProgressMessage = "Reading entries from LIFT file";
-				if (!xrdr.IsStartElement("entry"))
-					xrdr.ReadToFollowing("entry");	// not needed if no <header> element.
-				_count = 0;
-				while (xrdr.IsStartElement("entry"))
-				{
-					string sEntry = xrdr.ReadOuterXml();
-					if (!String.IsNullOrEmpty(sEntry))
-					{
-						xd.LoadXml(sEntry);
-						this.ReadEntry(xd.FirstChild);
-					}
-					++_count;
-					if ((_count % kInterval) == 0)
-						ProgressStepsCompleted = _count / kInterval;
-				}
+				XmlDocument document = new XmlDocument();
+				reader.ReadStartElement("lift");
+				ReadHeader(readerSettings, reader, document);
+
+				ReadEntries(reader, document);
 			}
 		}
 
-		/// <summary>
+        private void ReadEntries(XmlReader reader, XmlDocument document)
+        {
+// Process all of the entry elements, reading them into memory one at a time.
+            ProgressMessage = "Reading entries from LIFT file";
+            if (!reader.IsStartElement("entry"))
+                reader.ReadToFollowing("entry");	// not needed if no <header> element.
+            int numberOfEntriesRead = 0;
+            while (reader.IsStartElement("entry"))
+            {
+                string sEntry = reader.ReadOuterXml();
+                if (!String.IsNullOrEmpty(sEntry))
+                {
+                    document.LoadXml(sEntry);
+                    this.ReadEntry(document.FirstChild);
+                }
+                ++numberOfEntriesRead;
+                const int kProgressInterval = 5;
+                if ((numberOfEntriesRead % kProgressInterval) == 0)
+                    ProgressStepsCompleted = numberOfEntriesRead / kProgressInterval;
+            }
+        }
+
+        private void ReadHeader(XmlReaderSettings readerSettings, XmlReader reader, XmlDocument document)
+        {
+            if (reader.IsStartElement("header"))
+            {
+                ProgressMessage = "Reading LIFT file header";
+                reader.ReadStartElement("header");
+                ReadRanges(reader, document, readerSettings);
+                if (reader.IsStartElement("fields"))
+                {
+                    reader.ReadStartElement("fields");
+                    while (reader.IsStartElement("field"))
+                    {
+                        string sField = reader.ReadOuterXml();
+                        if (!String.IsNullOrEmpty(sField))
+                        {
+                            document.LoadXml(sField);
+                            this.ReadFieldDefinition(document.FirstChild);
+                        }
+                    }
+                    reader.ReadEndElement();	// </fields>
+                }
+                reader.ReadEndElement();	// </header>
+            }
+        }
+
+        private void ReadRanges(XmlReader reader, XmlDocument document, XmlReaderSettings readerSettings)
+        {
+            if (reader.IsStartElement("ranges"))
+            {
+                reader.ReadStartElement("ranges");
+                while (reader.IsStartElement("range"))
+                {
+                    string id = reader.GetAttribute("id");
+                    string href = reader.GetAttribute("href");
+                    string guid = reader.GetAttribute("guid");
+                    ProgressMessage = String.Format("Reading LIFT range {0}", id);
+                    reader.ReadStartElement();
+                    if (String.IsNullOrEmpty(href))
+                    {
+                        while (reader.IsStartElement("range-element"))
+                        {
+                            string sRangeElement = reader.ReadOuterXml();
+                            if (!String.IsNullOrEmpty(sRangeElement))
+                            {
+                                document.LoadXml(sRangeElement);
+                                this.ReadRangeElement(id, document.FirstChild);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        this.ReadExternalRange(href, id, guid, readerSettings);
+                    }
+                    reader.ReadEndElement();	// </range>
+                }
+                reader.ReadEndElement();	// </ranges>
+            }
+        }
+
+        /// <summary>
 		/// Return the number of entries processed from the most recent file.
 		/// </summary>
-		public int EntryCount
-		{
-			get { return _count; }
-		}
+//		this was a confusing way to return the results of a parse operation.
+//        the parser should really return this value, if flex
+//      needs it
+//            public int EntryCount
+//		{
+//			get { return _count; }
+//		}
 
 		/// <summary>
 		/// Read a range from a separate file.
 		/// </summary>
-		/// <param name="sHref"></param>
-		/// <param name="sIdRange"></param>
-		/// <param name="sGuidRange"></param>
-		/// <param name="xrset"></param>
-		public void ReadExternalRange(string sHref, string sIdRange, string sGuidRange,
-			XmlReaderSettings xrset)
+		/// <param name="pathToRangeFile"></param>
+		/// <param name="rangeId"></param>
+		/// <param name="rangeGuid"></param>
+		/// <param name="readerSettings"></param>
+		public void ReadExternalRange(string pathToRangeFile, string rangeId, string rangeGuid,
+			XmlReaderSettings readerSettings)
 		{
-			string sFile = sHref;
-			if (sHref.StartsWith("file://"))
-				sFile = sHref.Substring(7);
-			using (XmlReader xrdr = XmlReader.Create(sFile, xrset))
+			if (pathToRangeFile.StartsWith("file://"))
+                pathToRangeFile = pathToRangeFile.Substring(7);
+            using (XmlReader reader = XmlReader.Create(pathToRangeFile, readerSettings))
 			{
-				XmlDocument xd = new XmlDocument();
-				xrdr.ReadStartElement("lift-ranges");
-				while (xrdr.IsStartElement("range"))
+				XmlDocument document = new XmlDocument();
+				reader.ReadStartElement("lift-ranges");
+				while (reader.IsStartElement("range"))
 				{
-					string sId = xrdr.GetAttribute("id");
-					string sGuid = xrdr.GetAttribute("guid");
-					bool fStore = sId == sIdRange;
-					xrdr.ReadStartElement();
-					while (xrdr.IsStartElement("range-element"))
+					string id = reader.GetAttribute("id");
+				// unused	string guid = reader.GetAttribute("guid");
+					bool foundDesiredRange = id == rangeId;
+					reader.ReadStartElement();
+					while (reader.IsStartElement("range-element"))
 					{
-						string sRangeElement = xrdr.ReadOuterXml();
-						if (fStore)
+						string sRangeElement = reader.ReadOuterXml();
+						if (foundDesiredRange)
 						{
-							xd.LoadXml(sRangeElement);
-							this.ReadRangeElement(sId, xd.FirstChild);
+							document.LoadXml(sRangeElement);
+							this.ReadRangeElement(id, document.FirstChild);
 						}
 					}
-					xrdr.ReadEndElement();
-					if (fStore)
+					reader.ReadEndElement();
+					if (foundDesiredRange)
 						return;		// we've seen the range we wanted from this file.
 				}
 			}
