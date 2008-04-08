@@ -203,7 +203,7 @@ namespace LiftIO.Tests
                     .WithAnyArguments()
                     .Will(Return.Value(null));
             }
-            _parser.ReadFile(_doc, default(DateTime));
+            _parser.ReadLiftDom(_doc, default(DateTime));
             _mocks.VerifyAllExpectationsHaveBeenMet();
         }
         
@@ -1033,7 +1033,7 @@ namespace LiftIO.Tests
 				ExpectGetOrMakeEntry();
 				ExpectFinishEntry();
 			}
-			_parser.ReadFile(_doc, default(DateTime));
+			_parser.ReadLiftDom(_doc, default(DateTime));
 			_mocks.VerifyAllExpectationsHaveBeenMet();
 		}
 
