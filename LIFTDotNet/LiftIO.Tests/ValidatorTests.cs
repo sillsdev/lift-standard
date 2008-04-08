@@ -8,20 +8,9 @@ namespace LiftIO.Tests
     [TestFixture]
     public class ValidatorTests
     {
-        [SetUp]
-        public void Setup()
-        {
-
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-
-        }
-
+      
         [Test]
-        public void ValidatorVersionMatchedEmbeddedSchemaVersion()
+        public void LiftVersion_MatchesEmbeddedSchemaVersion()
         {
             XmlDocument doc = new XmlDocument();
             doc.Load(typeof (LiftMultiText).Assembly.GetManifestResourceStream("LiftIO.lift.rng"));
@@ -32,14 +21,14 @@ namespace LiftIO.Tests
         }
 
         [Test]
-        public void GoodLiftValidates()
+        public void Validate_EmptyFile_Validates()
         {
             string contents = string.Format("<lift version='{0}'></lift>", Validator.LiftVersion);
             Validate(contents, true);
         }
 
         [Test]
-        public void BadLiftDoesNotValidate()
+        public void Validate_BadLift_DoesNotValidate()
         {
             string contents = "<lift version='0.10'><header></header><header></header></lift>";
             Validate(contents, false);

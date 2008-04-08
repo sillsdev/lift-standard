@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Xml;
 
 namespace LiftIO
@@ -30,7 +31,7 @@ namespace LiftIO
         private const string _wsAttributeLabel = "lang";
 
         private bool _cancelNow = false;
-        private DateTime _defaultCreationModificationUTC;
+        private DateTime _defaultCreationModificationUTC=default(DateTime);
 
 
         public LiftParser(ILexiconMerger<TBase, TEntry, TSense, TExample> merger)
@@ -43,11 +44,12 @@ namespace LiftIO
         /// </summary>
         public virtual void ReadLiftDom(XmlDocument doc, DateTime defaultCreationModificationUTC)
         {
-            _defaultCreationModificationUTC = defaultCreationModificationUTC;
+            DefaultCreationModificationUTC = defaultCreationModificationUTC;
+
             XmlNodeList entryNodes = doc.SelectNodes("/lift/entry");
             int numberOfEntriesRead = 0;
-            const int kInterval = 50;
-            int nextProgressPoint = numberOfEntriesRead + kInterval;
+            const int kProgressReportingInterval = 50;
+            int nextProgressPoint = numberOfEntriesRead + kProgressReportingInterval;
             ProgressTotalSteps = entryNodes.Count;
             foreach (XmlNode node in entryNodes)
             {
@@ -56,7 +58,7 @@ namespace LiftIO
                 if (numberOfEntriesRead >= nextProgressPoint)
                 {
                     ProgressStepsCompleted = numberOfEntriesRead;
-                    nextProgressPoint = numberOfEntriesRead + kInterval;
+                    nextProgressPoint = numberOfEntriesRead + kProgressReportingInterval;
                 }
                 if (_cancelNow)
                 {
@@ -65,7 +67,7 @@ namespace LiftIO
             }
         }
 
-		public void ReadRangeElement(string range, XmlNode node)
+        internal void ReadRangeElement(string range, XmlNode node)
 		{
 			string id = GetStringAttribute(node, "id");
 			string guid = GetOptionalAttributeString(node, "guid");
@@ -76,14 +78,14 @@ namespace LiftIO
 			_merger.ProcessRangeElement(range, id, guid, parent, description, label, abbrev);
 		}
 
-		public void ReadFieldDefinition(XmlNode node)
+		internal void ReadFieldDefinition(XmlNode node)
 		{
 			string tag = GetStringAttribute(node, "tag");
 			LiftMultiText description = ReadMultiText(node);
 			_merger.ProcessFieldDefinition(tag, description);
 		}
 
-		public TEntry ReadEntry(XmlNode node)
+        internal TEntry ReadEntry(XmlNode node)
         {
             Extensible extensible = ReadExtensibleElementBasics(node);
             DateTime dateDeleted = GetOptionalDate(node, "dateDeleted", default(DateTime));
@@ -211,7 +213,7 @@ namespace LiftIO
 		/// <summary>
 		/// Read the grammatical-info information for either a sense or a reversal.
 		/// </summary>
-		protected void ReadGrammi(TBase senseOrReversal, XmlNode senseNode)
+		private void ReadGrammi(TBase senseOrReversal, XmlNode senseNode)
         {
             XmlNode grammiNode = senseNode.SelectSingleNode("grammatical-info");
             if (grammiNode != null)
@@ -236,7 +238,7 @@ namespace LiftIO
             return traits;
         }
 
-        public TSense ReadSense(XmlNode node, TEntry entry)
+        private TSense ReadSense(XmlNode node, TEntry entry)
         {
             TSense sense = _merger.GetOrMakeSense(entry, ReadExtensibleElementBasics(node));
 			return FinishReadingSense(node, sense);
@@ -367,7 +369,7 @@ namespace LiftIO
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        protected Extensible ReadExtensibleElementBasics(XmlNode node)
+        private Extensible ReadExtensibleElementBasics(XmlNode node)
         {
             Extensible extensible = new Extensible();
             extensible.Id = GetOptionalAttributeString(node, "id");//actually not part of extensible (as of 8/1/2007)
@@ -390,8 +392,8 @@ namespace LiftIO
                     }
                 }
             }
-            extensible.CreationTime = GetOptionalDate(node, "dateCreated", _defaultCreationModificationUTC);
-            extensible.ModificationTime = GetOptionalDate(node, "dateModified", _defaultCreationModificationUTC);
+            extensible.CreationTime = GetOptionalDate(node, "dateCreated", DefaultCreationModificationUTC);
+            extensible.ModificationTime = GetOptionalDate(node, "dateModified", DefaultCreationModificationUTC);
 
             return extensible;
         }
@@ -403,7 +405,7 @@ namespace LiftIO
         /// <param name="target"></param>
         /// <param name="node"></param>
         /// <returns></returns>
-        protected void ReadExtensibleElementDetails(TBase target, XmlNode node)
+        private void ReadExtensibleElementDetails(TBase target, XmlNode node)
         {
             foreach (XmlNode fieldNode in node.SelectNodes("field"))
             {
@@ -437,7 +439,7 @@ namespace LiftIO
 
 
 
-        protected static string GetStringAttribute(XmlNode form, string attr)
+        private static string GetStringAttribute(XmlNode form, string attr)
         {
             try
             {
@@ -449,7 +451,7 @@ namespace LiftIO
             }
         }
 
-        protected static string GetOptionalAttributeString(XmlNode xmlNode, string name)
+        private static string GetOptionalAttributeString(XmlNode xmlNode, string name)
         {
             XmlAttribute attr = xmlNode.Attributes[name];
             if (attr == null)
@@ -465,7 +467,7 @@ namespace LiftIO
         /// <param name="name"></param>
         /// <param name="defaultDateTime">the time to use if this attribute isn't found</param>
         /// <returns></returns>
-        protected DateTime GetOptionalDate(XmlNode xmlNode, string name, DateTime defaultDateTime)
+        private DateTime GetOptionalDate(XmlNode xmlNode, string name, DateTime defaultDateTime)
         {
             XmlAttribute attr = xmlNode.Attributes[name];
             if (attr == null)
@@ -484,7 +486,7 @@ namespace LiftIO
             }
         }
 
-        protected LiftMultiText LocateAndReadMultiText(XmlNode node, string query)
+        private LiftMultiText LocateAndReadMultiText(XmlNode node, string query)
         {
             XmlNode element;
             if (query == null)
@@ -508,7 +510,7 @@ namespace LiftIO
             return new LiftMultiText();
         }
 
-        protected List<LiftMultiText> LocateAndReadOneOrMoreMultiText(XmlNode node, string query)
+        private List<LiftMultiText> LocateAndReadOneOrMoreMultiText(XmlNode node, string query)
         {
             List<LiftMultiText> results = new List<LiftMultiText>();      
             foreach (XmlNode n in node.SelectNodes(query))
@@ -518,7 +520,7 @@ namespace LiftIO
             return results;
         }
 
-        protected LiftMultiText LocateAndReadOneElementPerFormData(XmlNode node, string query)
+        private LiftMultiText LocateAndReadOneElementPerFormData(XmlNode node, string query)
         {
             Debug.Assert(query != null);
             LiftMultiText text = new LiftMultiText();
@@ -526,7 +528,7 @@ namespace LiftIO
             return text;
         }
 
-        public  LiftMultiText ReadMultiText(XmlNode node)
+        internal  LiftMultiText ReadMultiText(XmlNode node)
         {
             LiftMultiText text = new LiftMultiText();
             ReadFormNodes(node.SelectNodes("form"), text);
@@ -600,38 +602,49 @@ namespace LiftIO
 //
 
 		/// <summary>
-		/// Read a LIFT file, possibly an earlier version.
+		/// Read a LIFT file. Must be the current lift version.
 		/// </summary>
-		/// <param name="pathToLift"></param>
-		public void ReadLIFTFile(string pathToLift)
+        public void ReadLiftFile(string pathToLift)
 		{
-			ProgressTotalSteps = 100;	// we scan the file sequentially, so we don't have a count.
+            if (_defaultCreationModificationUTC == default(DateTime))
+            {
+                _defaultCreationModificationUTC = File.GetLastWriteTimeUtc(pathToLift);
+            }
+
+            ProgressTotalSteps = GetEstimatedNumberOfEntriesInFile(pathToLift);
 			ProgressStepsCompleted = 0;
 
-            string pathToLiftReadForImport = pathToLift;
-            if (GetLiftVersion(pathToLift) != Validator.LiftVersion)
+            if (Validator.GetLiftVersion(pathToLift) != Validator.LiftVersion)
             {
-                pathToLiftReadForImport = Validator.MakeMigratedLiftFileIfNeeded(pathToLift);
+                throw new LiftFormatException("Programmer should migrate the lift file before calling this method.");
             }
          
-		    using (XmlReader reader = XmlReader.Create(pathToLiftReadForImport, NormalReaderSettings))
+		    using (XmlReader reader = XmlReader.Create(pathToLift, NormalReaderSettings))
 			{
-				if (reader.IsStartElement("lift"))
-				{
-					string sVersion = reader.GetAttribute("version");
-					if (sVersion != Validator.LiftVersion)
-					{
-						// we don't have a matching version -- what to do??
-						string msg = String.Format("Cannot import {0}.  It is LIFT version {1}, but we need LIFT version {2}.",
-							pathToLift, GetLiftVersion(pathToLift), Validator.LiftVersion);
-						throw new Exception(msg);
-					}
-				}
 				reader.ReadStartElement("lift");
 				ReadHeader(reader);
 				ReadEntries(reader);
 			}
 		}
+
+        /// <summary>
+        /// Intended to be fast, and only (probably) acurate
+        /// </summary>
+        /// <param name="pathToLift"></param>
+        /// <returns></returns>
+        internal static int GetEstimatedNumberOfEntriesInFile(string pathToLift)
+        {
+            int count = 0;
+            using (FileStream stream = File.OpenRead(pathToLift))
+            {
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string line = reader.ReadLine();
+                    count += System.Text.RegularExpressions.Regex.Matches(line, "<entry").Count;
+                }
+            }
+            return count;
+        }
 
         private static XmlReaderSettings NormalReaderSettings
         {
@@ -644,20 +657,6 @@ namespace LiftIO
             }
         }
 
-        public static string GetLiftVersion(string pathToLift)
-        {
-            string liftVersionOfRequestedFile = String.Empty;
-            using (XmlReader reader = XmlReader.Create(pathToLift, NormalReaderSettings))
-            {
-                if (reader.IsStartElement("lift"))
-                    liftVersionOfRequestedFile = reader.GetAttribute("version");
-            }
-            if (String.IsNullOrEmpty(liftVersionOfRequestedFile))
-            {
-                throw new LiftFormatException(String.Format("Cannot import {0} because this was not recognized as well-formed LIFT file (missing version).", pathToLift));
-            }
-            return liftVersionOfRequestedFile;
-        }
 
         private void ReadEntries(XmlReader reader)
         {
@@ -665,7 +664,11 @@ namespace LiftIO
             ProgressMessage = "Reading entries from LIFT file";
             if (!reader.IsStartElement("entry"))
                 reader.ReadToFollowing("entry");	// not needed if no <header> element.
+
+            const int kProgressReportingInterval = 50;
             int numberOfEntriesRead = 0;
+            int nextProgressPoint = numberOfEntriesRead + kProgressReportingInterval;
+
             while (reader.IsStartElement("entry"))
             {
                 string entryXml = reader.ReadOuterXml();
@@ -673,10 +676,16 @@ namespace LiftIO
                 {
                     this.ReadEntry(GetNodeFromString(entryXml));
                 }
-                ++numberOfEntriesRead;
-                const int kProgressInterval = 5;
-                if ((numberOfEntriesRead % kProgressInterval) == 0)
-                    ProgressStepsCompleted = numberOfEntriesRead / kProgressInterval;
+                numberOfEntriesRead++;
+                if (numberOfEntriesRead >= nextProgressPoint)
+                {
+                    ProgressStepsCompleted = numberOfEntriesRead;
+                    nextProgressPoint = numberOfEntriesRead + kProgressReportingInterval;
+                }
+                if (_cancelNow)
+                {
+                    break;
+                }
             }
         }
 
@@ -764,7 +773,7 @@ namespace LiftIO
 		/// <param name="pathToRangeFile"></param>
 		/// <param name="rangeId"></param>
 		/// <param name="rangeGuid"></param>
-		public void ReadExternalRange(string pathToRangeFile, string rangeId, string rangeGuid)
+		private void ReadExternalRange(string pathToRangeFile, string rangeId, string rangeGuid)
 		{
 			if (pathToRangeFile.StartsWith("file://"))
                 pathToRangeFile = pathToRangeFile.Substring(7);
@@ -868,7 +877,13 @@ namespace LiftIO
 			}
 		}
 
-		private void NotifyError(Exception error)
+        public DateTime DefaultCreationModificationUTC
+        {
+            get { return _defaultCreationModificationUTC; }
+            set { _defaultCreationModificationUTC = value; }
+        }
+
+        private void NotifyError(Exception error)
         {
             if (ParsingWarning != null)
             {
