@@ -66,5 +66,23 @@ namespace LiftIO
                 _subTraits = value;
             }
         }
+
+		public override bool Equals(object obj)
+		{
+			Trait that = obj as Trait;
+			if (that == null)
+				return false;
+			if (this._name != that._name)
+				return false;
+			if (this._value != that._value)
+				return false;
+			// TODO: handle subtraits (which are really annotations, I think)
+			return true;
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
     }
 }

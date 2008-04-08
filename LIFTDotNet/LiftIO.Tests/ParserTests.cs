@@ -103,8 +103,53 @@ namespace LiftIO.Tests
             _doc.LoadXml("<foobar><form lang='x'><text>one <span class='emphasis'>inner text</span> node</text></form></foobar>");
             LiftMultiText t = _parser.ReadMultiText(_doc.FirstChild);
             Assert.AreEqual("one inner text node", t["x"].Text);
+			Assert.AreEqual(1, t["x"].Spans.Count);
+			Assert.AreEqual("emphasis", t["x"].Spans[0].Class);
+			Assert.AreEqual(null, t["x"].Spans[0].Lang);
+			Assert.AreEqual(null, t["x"].Spans[0].LinkURL);
+			Assert.AreEqual(4, t["x"].Spans[0].Index);
+			Assert.AreEqual(10, t["x"].Spans[0].Length);
         }
 
+		[Test]
+		public void MultiTextWithTwoInternalSpans()
+		{
+			// Note that isolated whitespace tends to be swallowed up and ignored when reading XML files.
+			// Thus, a single space between two span elements must be represented by a character entity.
+			_doc.LoadXml("<foobar><form lang='x'><text>one <span class='emphasis'>inner text</span>&#32;<span class='vernacular' lang='y' href='this is a test'>node</span></text></form></foobar>");
+			LiftMultiText t = _parser.ReadMultiText(_doc.FirstChild);
+			Assert.AreEqual("one inner text node", t["x"].Text);
+			Assert.AreEqual(2, t["x"].Spans.Count);
+			Assert.AreEqual("emphasis", t["x"].Spans[0].Class);
+			Assert.AreEqual(null, t["x"].Spans[0].Lang);
+			Assert.AreEqual(null, t["x"].Spans[0].LinkURL);
+			Assert.AreEqual(4, t["x"].Spans[0].Index);
+			Assert.AreEqual(10, t["x"].Spans[0].Length);
+			Assert.AreEqual("vernacular", t["x"].Spans[1].Class);
+			Assert.AreEqual("y", t["x"].Spans[1].Lang);
+			Assert.AreEqual("this is a test", t["x"].Spans[1].LinkURL);
+			Assert.AreEqual(15, t["x"].Spans[1].Index);
+			Assert.AreEqual(4, t["x"].Spans[1].Length);
+		}
+
+		[Test, Ignore("Nested spans are not yet implemented.")]
+		public void MultiTextWithNestedSpan()
+		{
+			_doc.LoadXml("<foobar><form lang='x'><text>one <span class='emphasis'>inner <span class='vernacular' lang='y'>text</span></span> node</text></form></foobar>");
+			LiftMultiText t = _parser.ReadMultiText(_doc.FirstChild);
+			Assert.AreEqual("one inner text node", t["x"].Text);
+			Assert.AreEqual(2, t["x"].Spans.Count);
+			Assert.AreEqual("emphasis", t["x"].Spans[0].Class);
+			Assert.AreEqual(null, t["x"].Spans[0].Lang);
+			Assert.AreEqual(null, t["x"].Spans[0].LinkURL);
+			Assert.AreEqual(4, t["x"].Spans[0].Index);
+			Assert.AreEqual(10, t["x"].Spans[0].Length);
+			Assert.AreEqual("vernacular", t["x"].Spans[1].Class);
+			Assert.AreEqual("y", t["x"].Spans[1].Lang);
+			Assert.AreEqual(null, t["x"].Spans[1].LinkURL);
+			Assert.AreEqual(10, t["x"].Spans[1].Index);
+			Assert.AreEqual(4, t["x"].Spans[1].Length);
+		}
 
         [Test]
         public void FirstValueOfSimpleMultiText()
@@ -939,9 +984,200 @@ namespace LiftIO.Tests
             ParseEntryAndCheck(string.Format("<entry><sense><example><note><form lang='x'><text>hello</text></form></note></example></sense></entry>"));
         }
 
+		[Test]
+		public void EmptyLiftHeaderOk()
+		{
+			SimpleCheckWithHeader("<lift><header/></lift>", 0, 0, 0);
+		}
+
+		[Test]
+		public void EmptyLiftHeaderSectionsOk()
+		{
+			SimpleCheckWithHeader("<lift><header><ranges/><fields/></header></lift>", 0, 0, 0);
+		}
+
+		[Test]
+		public void SimpleRangeElement()
+		{
+			string content = "<range-element id='en'><label><form lang='en'><text>English</text></form></label><abbrev><form lang='en'><text>Eng</text></form></abbrev><description><form lang='en'><text>Standard English</text></form></description></range-element>";
+			Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
+				.With(Is.EqualTo("dialect"), Is.EqualTo("en"), Is.Null, Is.Null,
+					Is.EqualTo(new LiftMultiText("en", "Standard English")),
+					Is.EqualTo(new LiftMultiText("en", "English")),
+					Is.EqualTo(new LiftMultiText("en", "Eng")));
+			_doc.LoadXml(content);
+			_parser.ReadRangeElement("dialect", _doc.FirstChild);
+			_mocks.VerifyAllExpectationsHaveBeenMet();
+		}
+
+		[Test]
+		public void SimpleFieldDefinition()
+		{
+			string content = "<field tag='tone'><form lang='en'><text>the tone information for a pronunciation</text></form></field>";
+			Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
+				.With(Is.EqualTo("tone"), Is.EqualTo(new LiftMultiText("en", "the tone information for a pronunciation")));
+			_doc.LoadXml(content);
+			_parser.ReadFieldDefinition(_doc.FirstChild);
+			_mocks.VerifyAllExpectationsHaveBeenMet();
+		}
+
+		private void SimpleCheckWithHeader(string content, int rangeCount, int fieldCount, int entryCount)
+		{
+			_doc.LoadXml(content);
+			using (_mocks.Ordered)
+			{
+				Expect.Exactly(rangeCount).On(_merger).Method("ProcessRangeElement")
+					.WithAnyArguments();
+				Expect.Exactly(fieldCount).On(_merger).Method("ProcessFieldDefinition")
+					.WithAnyArguments();
+				ExpectGetOrMakeEntry();
+				ExpectFinishEntry();
+			}
+			_parser.ReadFile(_doc, default(DateTime));
+			_mocks.VerifyAllExpectationsHaveBeenMet();
+		}
+
+		[Test]
+		public void SimpleEtymology()
+		{
+			string content = "<entry><etymology source='Greek' type=''><form lang='bam'><text>alphabeta</text></form><gloss lang='en'><text>letters</text></gloss><field type='comment'><form lang='en'><text>this etymology is nonsense</text></form></field></etymology></entry>";
+			_doc.LoadXml(content);
+			using (_mocks.Ordered)
+			{
+				ExpectGetOrMakeEntry();
+				Expect.Exactly(1).On(_merger).Method("MergeInEtymology")
+					.With(Is.Anything, Is.EqualTo("Greek"), Is.EqualTo(new LiftMultiText("bam", "alphabeta")),
+							Is.EqualTo(new LiftMultiText("en", "letters")))
+					.Will(Return.Value(new Dummy()));
+				Expect.Exactly(1).On(_merger).Method("MergeInField")
+					.With(Is.Anything, Is.EqualTo("comment"), Is.EqualTo(DateTime.MinValue), Is.EqualTo(DateTime.MinValue),
+							Is.EqualTo(new LiftMultiText("en", "this etymology is nonsense")), Is.Anything);
+				ExpectFinishEntry();
+			}
+			_parser.ReadEntry(_doc.FirstChild);
+			_mocks.VerifyAllExpectationsHaveBeenMet();
+		}
+
+		[Test]
+		public void SimpleReversal()
+		{
+			string content = "<entry><sense><reversal><form lang='en'><text>sorghum</text></form></reversal></sense></entry>";
+			_doc.LoadXml(content);
+			using (_mocks.Ordered)
+			{
+				ExpectGetOrMakeEntry();
+				ExpectGetOrMakeSense();
+				Expect.Exactly(1).On(_merger).Method("MergeInReversal")
+					.With(Is.Anything, Is.Null, Is.EqualTo(new LiftMultiText("en", "sorghum")), Is.Null);
+				ExpectFinishEntry();
+			}
+			_parser.ReadEntry(_doc.FirstChild);
+			_mocks.VerifyAllExpectationsHaveBeenMet();
+		}
+
+		[Test]
+		public void NestedReversal()
+		{
+			string content = "<entry><sense><reversal type='test'><form lang='en'><text>apple</text></form><main><form lang='en'><text>fruit</text></form></main></reversal></sense></entry>";
+			_doc.LoadXml(content);
+			using (_mocks.Ordered)
+			{
+				ExpectGetOrMakeEntry();
+				ExpectGetOrMakeSense();
+				Expect.Exactly(1).On(_merger).Method("GetOrMakeParentReversal")
+					.With(Is.Null, Is.EqualTo(new LiftMultiText("en", "fruit")), Is.EqualTo("test"));
+				Expect.Exactly(1).On(_merger).Method("MergeInReversal")
+					.With(Is.Anything, Is.Null, Is.EqualTo(new LiftMultiText("en", "apple")), Is.EqualTo("test"));
+				ExpectFinishEntry();
+			}
+			_parser.ReadEntry(_doc.FirstChild);
+			_mocks.VerifyAllExpectationsHaveBeenMet();
+		}
+
+		[Test]
+		public void ReadSubSense()
+		{
+			string content = "<entry><sense><gloss lang='en'><text>destroy</text></gloss><subsense><gloss lang='en'><text>unmake</text></gloss></subsense></sense></entry>";
+			_doc.LoadXml(content);
+			using (_mocks.Ordered)
+			{
+				ExpectGetOrMakeEntry();
+				ExpectGetOrMakeSense();
+				Expect.Exactly(1).On(_merger).Method("MergeInGloss")
+					.With(Is.NotNull, Is.EqualTo(new LiftMultiText("en", "destroy")));
+				Expect.Exactly(1).On(_merger).Method("GetOrMakeSubsense")
+					.Will(Return.Value(new Dummy()));
+				Expect.Exactly(1).On(_merger).Method("MergeInGloss")
+					.With(Is.Anything, Is.EqualTo(new LiftMultiText("en", "unmake")));
+				ExpectFinishEntry();
+			}
+			_parser.ReadEntry(_doc.FirstChild);
+			_mocks.VerifyAllExpectationsHaveBeenMet();
+		}
+
+		[Test]
+		public void ReadExternalLiftFile()
+		{
+			// For this test to work, the files test20080407.lift and test20080407.lift-ranges MUST
+			// be copied to the current working directory.
+			using (_mocks.Ordered)	// Ordered may be too strong is parse details change.
+			{
+				Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
+					.With(Is.EqualTo("etymology"), Is.EqualTo("borrowed"), Is.Null, Is.Null,
+						Is.EqualTo(new LiftMultiText("en", "The word is borrowed from another language")),
+						Is.EqualTo(new LiftMultiText("en", "borrowed")),
+						Is.EqualTo(new LiftMultiText()));
+				Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
+					.With(Is.EqualTo("etymology"), Is.EqualTo("proto"), Is.Null, Is.Null,
+						Is.EqualTo(new LiftMultiText("en", "The proto form of the word in another language")),
+						Is.EqualTo(new LiftMultiText("en", "proto")),
+						Is.EqualTo(new LiftMultiText()));
+				// The following range elements are from an external range file.
+				Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
+					.With(Is.EqualTo("grammatical-info"), Is.EqualTo("Adverb"), Is.NotNull, Is.Null,
+						Is.EqualTo(new LiftMultiText("en", "modify verbs")),
+						Is.EqualTo(new LiftMultiText("en", "Adverb")),
+						Is.EqualTo(new LiftMultiText("en", "adv")));
+				Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
+					.With(Is.EqualTo("grammatical-info"), Is.EqualTo("Noun"), Is.NotNull, Is.Null,
+						Is.EqualTo(new LiftMultiText("en", "substantives and nominals")),
+						Is.EqualTo(new LiftMultiText("en", "Noun")),
+						Is.EqualTo(new LiftMultiText("en", "n")));
+				Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
+					.With(Is.EqualTo("grammatical-info"), Is.EqualTo("Verb"), Is.NotNull, Is.Null,
+						Is.EqualTo(new LiftMultiText("en", "signal events and actions")),
+						Is.EqualTo(new LiftMultiText("en", "Verb")),
+						Is.EqualTo(new LiftMultiText("en", "v")));
+				Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
+					.With(Is.EqualTo("cvPattern"),
+						Is.EqualTo(new LiftMultiText("en", "the syllable pattern for a pronunciation")));
+				Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
+					.With(Is.EqualTo("tone"),
+						Is.EqualTo(new LiftMultiText("en", "the tone information for a pronunciation")));
+				Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
+					.With(Is.EqualTo("ImportResidue"),
+						Is.EqualTo(new LiftMultiText("en", "residue left over from importing")));
+				Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
+					.With(Is.EqualTo("literal_meaning"),
+						Is.EqualTo(new LiftMultiText("en", "literal meaning of an entry")));
+				ExpectGetOrMakeEntry("bird_6db30a98-530e-4614-86d4-237f6984db71/6db30a98-530e-4614-86d4-237f6984db71;2008-03-31T08:04:09Z;2008-03-31T08:04:09Z;");
+				Expect.Exactly(1).On(_merger).Method("MergeInLexemeForm")
+					.With(Is.Anything, Is.EqualTo(new LiftMultiText("x-rtl", "bird")));
+				ExpectGetOrMakeSense();
+				Expect.Exactly(1).On(_merger).Method("MergeInGrammaticalInfo")
+					.With(Is.Anything, Is.EqualTo("Noun"), Is.NotNull);
+				Expect.Exactly(1).On(_merger).Method("MergeInGloss")
+					.With(Is.Anything, Is.EqualTo(new LiftMultiText("en", "bird")));
+				Expect.Exactly(1).On(_merger).Method("MergeInTrait")
+					.With(Is.Anything, Is.EqualTo(new Trait("MorphType", "stem")));
+				Expect.Exactly(1).On(_merger).Method("MergeInTrait")
+					.With(Is.Anything, Is.EqualTo(new Trait("EntryType", "Main Entry")));
+				ExpectFinishEntry();
+			}
+			_parser.ReadLIFTFile("test20080407.lift");
+			_mocks.VerifyAllExpectationsHaveBeenMet();
+		}
   
-
-
         /*
          * 
         /// <summary>
