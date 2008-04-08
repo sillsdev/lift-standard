@@ -5,6 +5,15 @@ using System.Xml;
 
 namespace LiftIO
 {
+    /// <summary>
+    /// This class takes a file or DOM of lift and makes calls on a supplied "merger" object for what it finds there.
+    /// This design allows the same parser to be used for WeSay, FLEx, and unit tests, which all have different
+    /// domain models which they populate based on these calls.
+    /// </summary>
+    /// <typeparam name="TBase"></typeparam>
+    /// <typeparam name="TEntry"></typeparam>
+    /// <typeparam name="TSense"></typeparam>
+    /// <typeparam name="TExample"></typeparam>
     public class LiftParser<TBase, TEntry, TSense, TExample> 
         where TBase : class
         where TEntry : TBase
@@ -22,7 +31,6 @@ namespace LiftIO
 
         private bool _cancelNow = false;
         private DateTime _defaultCreationModificationUTC;
-//        private string _defaultLangId="??";
 
 
         public LiftParser(ILexiconMerger<TBase, TEntry, TSense, TExample> merger)
@@ -33,7 +41,7 @@ namespace LiftIO
         /// <summary>
         /// 
         /// </summary>
-        public virtual void ReadFile(XmlDocument doc, DateTime defaultCreationModificationUTC)
+        public virtual void ReadLiftDom(XmlDocument doc, DateTime defaultCreationModificationUTC)
         {
             _defaultCreationModificationUTC = defaultCreationModificationUTC;
             XmlNodeList entryNodes = doc.SelectNodes("/lift/entry");
@@ -286,7 +294,7 @@ namespace LiftIO
             }
 		}
 
-		private TExample ReadExample(XmlNode node, TSense sense)
+		private void ReadExample(XmlNode node, TSense sense)
         {
             TExample example = _merger.GetOrMakeExample(sense, ReadExtensibleElementBasics(node));
             if (example != null)//not been pruned
@@ -317,7 +325,7 @@ namespace LiftIO
 
                 ReadExtensibleElementDetails(example, node);
             }
-            return example;
+		    return;
         }
 
 		private void ReadReversal(XmlNode node, TSense sense)
@@ -326,7 +334,7 @@ namespace LiftIO
 			XmlNodeList nodelist = node.SelectNodes("main");
 			if (nodelist.Count > 1)
 			{
-				NotifyError(new LiftFormatException(String.Format("Only one <main> element is allowed inside a <reversal> element:\r\n", node.OuterXml)));
+				NotifyError(new LiftFormatException(String.Format("Only one <main> element is allowed inside a <reversal> element:\r\n{0}", node.OuterXml)));
 			}
 			TBase parent = null;
 			if (nodelist.Count == 1)
@@ -342,7 +350,7 @@ namespace LiftIO
 			XmlNodeList nodelist = node.SelectNodes("main");
 			if (nodelist.Count > 1)
 			{
-				NotifyError(new LiftFormatException(String.Format("Only one <main> element is allowed inside a <main> element:\r\n", node.OuterXml)));
+				NotifyError(new LiftFormatException(String.Format("Only one <main> element is allowed inside a <main> element:\r\n{0}", node.OuterXml)));
 			}
 			TBase parent = null;
 			if (nodelist.Count == 1)
@@ -611,38 +619,37 @@ namespace LiftIO
 			if (String.IsNullOrEmpty(liftVersionOfRequestedFile))
 			{
 				// we don't have a LIFT file -- what to do??
-				string msg = String.Format("Cannot import {0} because it is not a LIFT file!", pathToLift);
+				string msg = String.Format("Cannot import {0} because this was not recognized as well-formed LIFT file (missing version).", pathToLift);
 				throw new Exception(msg);
 			}
 			string pathToResultingLiftFile;
-			if (liftVersionOfRequestedFile != LiftIO.Validator.LiftVersion)
-				pathToResultingLiftFile = LiftIO.Validator.MakeMigratedLiftFileIfNeeded(pathToLift);
+			if (liftVersionOfRequestedFile != Validator.LiftVersion)
+				pathToResultingLiftFile = Validator.MakeMigratedLiftFileIfNeeded(pathToLift);
 			else
 				pathToResultingLiftFile = pathToLift;
-		    string producerName;
+		    //unused string producerName;
 			using (XmlReader reader = XmlReader.Create(pathToResultingLiftFile, readerSettings))
 			{
 				if (reader.IsStartElement("lift"))
 				{
 					string sVersion = reader.GetAttribute("version");
-					producerName = reader.GetAttribute("producer");
-					if (sVersion != LiftIO.Validator.LiftVersion)
+				//unused 	producerName = reader.GetAttribute("producer");
+					if (sVersion != Validator.LiftVersion)
 					{
 						// we don't have a matching version -- what to do??
 						string msg = String.Format("Cannot import {0}.  It is LIFT version {1}, but we need LIFT version {2}.",
-							pathToLift, liftVersionOfRequestedFile, LiftIO.Validator.LiftVersion);
+							pathToLift, liftVersionOfRequestedFile, Validator.LiftVersion);
 						throw new Exception(msg);
 					}
 				}
-				XmlDocument document = new XmlDocument();
 				reader.ReadStartElement("lift");
-				ReadHeader(readerSettings, reader, document);
+				ReadHeader(reader);
 
-				ReadEntries(reader, document);
+				ReadEntries(reader);
 			}
 		}
 
-        private void ReadEntries(XmlReader reader, XmlDocument document)
+        private void ReadEntries(XmlReader reader)
         {
 // Process all of the entry elements, reading them into memory one at a time.
             ProgressMessage = "Reading entries from LIFT file";
@@ -651,11 +658,10 @@ namespace LiftIO
             int numberOfEntriesRead = 0;
             while (reader.IsStartElement("entry"))
             {
-                string sEntry = reader.ReadOuterXml();
-                if (!String.IsNullOrEmpty(sEntry))
+                string entryXml = reader.ReadOuterXml();
+                if (!String.IsNullOrEmpty(entryXml))
                 {
-                    document.LoadXml(sEntry);
-                    this.ReadEntry(document.FirstChild);
+                    this.ReadEntry(GetNodeFromString(entryXml));
                 }
                 ++numberOfEntriesRead;
                 const int kProgressInterval = 5;
@@ -664,23 +670,32 @@ namespace LiftIO
             }
         }
 
-        private void ReadHeader(XmlReaderSettings readerSettings, XmlReader reader, XmlDocument document)
+        /// <summary>
+        /// used to adapt between the DOM/XmlNode-based stuff John wrote initially, and the Reader-based stuff Steve added
+        /// </summary>
+        private static XmlNode GetNodeFromString(string xml)
+        {
+            XmlDocument document = new XmlDocument();
+            document.LoadXml(xml);
+            return document.FirstChild;
+        }
+
+        private void ReadHeader(XmlReader reader)
         {
             if (reader.IsStartElement("header"))
             {
                 ProgressMessage = "Reading LIFT file header";
                 reader.ReadStartElement("header");
-                ReadRanges(reader, document, readerSettings);
+                ReadRanges(reader);
                 if (reader.IsStartElement("fields"))
                 {
                     reader.ReadStartElement("fields");
                     while (reader.IsStartElement("field"))
                     {
-                        string sField = reader.ReadOuterXml();
-                        if (!String.IsNullOrEmpty(sField))
+                        string fieldXml = reader.ReadOuterXml();
+                        if (!String.IsNullOrEmpty(fieldXml))
                         {
-                            document.LoadXml(sField);
-                            this.ReadFieldDefinition(document.FirstChild);
+                            this.ReadFieldDefinition(GetNodeFromString(fieldXml));
                         }
                     }
                     reader.ReadEndElement();	// </fields>
@@ -689,7 +704,7 @@ namespace LiftIO
             }
         }
 
-        private void ReadRanges(XmlReader reader, XmlDocument document, XmlReaderSettings readerSettings)
+        private void ReadRanges(XmlReader reader)
         {
             if (reader.IsStartElement("ranges"))
             {
@@ -705,17 +720,16 @@ namespace LiftIO
                     {
                         while (reader.IsStartElement("range-element"))
                         {
-                            string sRangeElement = reader.ReadOuterXml();
-                            if (!String.IsNullOrEmpty(sRangeElement))
+                            string rangeXml = reader.ReadOuterXml();
+                            if (!String.IsNullOrEmpty(rangeXml))
                             {
-                                document.LoadXml(sRangeElement);
-                                this.ReadRangeElement(id, document.FirstChild);
+                                this.ReadRangeElement(id, GetNodeFromString(rangeXml));
                             }
                         }
                     }
                     else
                     {
-                        this.ReadExternalRange(href, id, guid, readerSettings);
+                        this.ReadExternalRange(href, id, guid);
                     }
                     reader.ReadEndElement();	// </range>
                 }
@@ -740,15 +754,17 @@ namespace LiftIO
 		/// <param name="pathToRangeFile"></param>
 		/// <param name="rangeId"></param>
 		/// <param name="rangeGuid"></param>
-		/// <param name="readerSettings"></param>
-		public void ReadExternalRange(string pathToRangeFile, string rangeId, string rangeGuid,
-			XmlReaderSettings readerSettings)
+		public void ReadExternalRange(string pathToRangeFile, string rangeId, string rangeGuid)
 		{
 			if (pathToRangeFile.StartsWith("file://"))
                 pathToRangeFile = pathToRangeFile.Substring(7);
+
+            XmlReaderSettings readerSettings = new XmlReaderSettings();
+            readerSettings.ValidationType = ValidationType.None;
+            readerSettings.IgnoreComments = true;
+
             using (XmlReader reader = XmlReader.Create(pathToRangeFile, readerSettings))
 			{
-				XmlDocument document = new XmlDocument();
 				reader.ReadStartElement("lift-ranges");
 				while (reader.IsStartElement("range"))
 				{
@@ -758,11 +774,10 @@ namespace LiftIO
 					reader.ReadStartElement();
 					while (reader.IsStartElement("range-element"))
 					{
-						string sRangeElement = reader.ReadOuterXml();
-						if (foundDesiredRange)
+						string rangeElementXml = reader.ReadOuterXml();
+						if (foundDesiredRange && !String.IsNullOrEmpty(rangeElementXml))
 						{
-							document.LoadXml(sRangeElement);
-							this.ReadRangeElement(id, document.FirstChild);
+                            this.ReadRangeElement(id, GetNodeFromString(rangeElementXml));
 						}
 					}
 					reader.ReadEndElement();
