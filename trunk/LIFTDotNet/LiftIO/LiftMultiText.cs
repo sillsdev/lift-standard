@@ -25,6 +25,30 @@ namespace LiftIO
 			_linkurl = href;
 		}
 
+		// This must be overridden for tests to pass.
+		public override bool Equals(object obj)
+		{
+			LiftSpan that = obj as LiftSpan;
+			if (that == null)
+				return false;
+			if (this._index != that._index)
+				return false;
+			if (this._length != that._length)
+				return false;
+			if (this._lang != that._lang)
+				return false;
+			if (this._class != that._class)
+				return false;
+			if (this._linkurl != that._linkurl)
+				return false;
+			return true;
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
+
 		public int Index
 		{
 			get { return _index; }
@@ -76,6 +100,29 @@ namespace LiftIO
 		{
 			get { return _spans; }
 		}
+
+		// This must be overridden for tests to pass.
+		public override bool Equals(object obj)
+		{
+			LiftString that = obj as LiftString;
+			if (that == null)
+				return false;
+			if (this.Text != that.Text)
+				return false;
+			if (this.Spans.Count != that.Spans.Count)
+				return false;
+			for (int i = 0; i < this.Spans.Count; ++i)
+			{
+				if (!this.Spans[i].Equals(that.Spans[i]))
+					return false;
+			}
+			return true;
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
 	}
 
 	/// <summary>
@@ -86,6 +133,15 @@ namespace LiftIO
     {
         private List<Trait> _traits = new List<Trait>();
 
+		public LiftMultiText()
+		{
+		}
+
+		public LiftMultiText(string key, string simpleContent)
+		{
+			this.Add(key, new LiftString(simpleContent));
+		}
+
         public override string ToString()
         {
             StringBuilder b = new StringBuilder();
@@ -95,6 +151,30 @@ namespace LiftIO
 			}
             return b.ToString();
         }
+
+		// This must be overridden for tests to pass.
+		public override bool Equals(object obj)
+		{
+			LiftMultiText that = obj as LiftMultiText;
+			if (that == null)
+				return false;
+			if (this.Keys.Count != that.Keys.Count)
+				return false;
+			foreach (string key in this.Keys)
+			{
+				LiftString otherString;
+				if (!that.TryGetValue(key, out otherString))
+					return false;
+				if (!this[key].Equals(otherString))
+					return false;
+			}
+			return true;
+		}
+
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
 
         /// <summary>
         /// For WeSay, which doesn't yet understand structured strings 

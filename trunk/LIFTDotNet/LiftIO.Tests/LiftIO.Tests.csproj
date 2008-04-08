@@ -64,4 +64,8 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <PropertyGroup>
+    <PostBuildEvent>copy $(ProjectDir)test20080407.lift $(TargetDir)
+copy $(ProjectDir)test20080407.lift-ranges $(TargetDir)</PostBuildEvent>
+  </PropertyGroup>
 </Project>
