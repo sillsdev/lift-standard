@@ -607,47 +607,57 @@ namespace LiftIO
 		{
 			ProgressTotalSteps = 100;	// we scan the file sequentially, so we don't have a count.
 			ProgressStepsCompleted = 0;
-			XmlReaderSettings readerSettings = new XmlReaderSettings();
-			readerSettings.ValidationType = ValidationType.None;
-			readerSettings.IgnoreComments = true;
-			string liftVersionOfRequestedFile = String.Empty;
-			using (XmlReader reader = XmlReader.Create(pathToLift, readerSettings))
-			{
-				if (reader.IsStartElement("lift"))
-					liftVersionOfRequestedFile = reader.GetAttribute("version");
-			}
-			if (String.IsNullOrEmpty(liftVersionOfRequestedFile))
-			{
-				// we don't have a LIFT file -- what to do??
-				string msg = String.Format("Cannot import {0} because this was not recognized as well-formed LIFT file (missing version).", pathToLift);
-				throw new Exception(msg);
-			}
-			string pathToResultingLiftFile;
-			if (liftVersionOfRequestedFile != Validator.LiftVersion)
-				pathToResultingLiftFile = Validator.MakeMigratedLiftFileIfNeeded(pathToLift);
-			else
-				pathToResultingLiftFile = pathToLift;
-		    //unused string producerName;
-			using (XmlReader reader = XmlReader.Create(pathToResultingLiftFile, readerSettings))
+
+            string pathToLiftReadForImport = pathToLift;
+            if (GetLiftVersion(pathToLift) != Validator.LiftVersion)
+            {
+                pathToLiftReadForImport = Validator.MakeMigratedLiftFileIfNeeded(pathToLift);
+            }
+         
+		    using (XmlReader reader = XmlReader.Create(pathToLiftReadForImport, NormalReaderSettings))
 			{
 				if (reader.IsStartElement("lift"))
 				{
 					string sVersion = reader.GetAttribute("version");
-				//unused 	producerName = reader.GetAttribute("producer");
 					if (sVersion != Validator.LiftVersion)
 					{
 						// we don't have a matching version -- what to do??
 						string msg = String.Format("Cannot import {0}.  It is LIFT version {1}, but we need LIFT version {2}.",
-							pathToLift, liftVersionOfRequestedFile, Validator.LiftVersion);
+							pathToLift, GetLiftVersion(pathToLift), Validator.LiftVersion);
 						throw new Exception(msg);
 					}
 				}
 				reader.ReadStartElement("lift");
 				ReadHeader(reader);
-
 				ReadEntries(reader);
 			}
 		}
+
+        private static XmlReaderSettings NormalReaderSettings
+        {
+            get
+            {
+                XmlReaderSettings readerSettings = new XmlReaderSettings();
+                readerSettings.ValidationType = ValidationType.None;
+                readerSettings.IgnoreComments = true;
+                return readerSettings;
+            }
+        }
+
+        public static string GetLiftVersion(string pathToLift)
+        {
+            string liftVersionOfRequestedFile = String.Empty;
+            using (XmlReader reader = XmlReader.Create(pathToLift, NormalReaderSettings))
+            {
+                if (reader.IsStartElement("lift"))
+                    liftVersionOfRequestedFile = reader.GetAttribute("version");
+            }
+            if (String.IsNullOrEmpty(liftVersionOfRequestedFile))
+            {
+                throw new LiftFormatException(String.Format("Cannot import {0} because this was not recognized as well-formed LIFT file (missing version).", pathToLift));
+            }
+            return liftVersionOfRequestedFile;
+        }
 
         private void ReadEntries(XmlReader reader)
         {
@@ -759,11 +769,7 @@ namespace LiftIO
 			if (pathToRangeFile.StartsWith("file://"))
                 pathToRangeFile = pathToRangeFile.Substring(7);
 
-            XmlReaderSettings readerSettings = new XmlReaderSettings();
-            readerSettings.ValidationType = ValidationType.None;
-            readerSettings.IgnoreComments = true;
-
-            using (XmlReader reader = XmlReader.Create(pathToRangeFile, readerSettings))
+            using (XmlReader reader = XmlReader.Create(pathToRangeFile, NormalReaderSettings))
 			{
 				reader.ReadStartElement("lift-ranges");
 				while (reader.IsStartElement("range"))
