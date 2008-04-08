@@ -86,6 +86,23 @@ namespace LiftIO.Tests
 
         }
 
+        [Test, ExpectedException(typeof(LiftFormatException))]
+        public void ReadLiftFile_OldVersion_Throws()
+        {
+            using (TempFile f = new TempFile("<lift version='0.10'></lift>"))
+            {
+                _parser.ReadLiftFile(f.Path);
+            }
+        }
+        [Test]
+        public void ReadLiftFile_CurrentVersion_Happy()
+        {
+            using (TempFile f = new TempFile(string.Format("<lift version='{0}'></lift>", Validator.LiftVersion)))
+            {
+                _parser.ReadLiftFile(f.Path);
+            }
+        }
+
 
         [Test]
         public void MultipleFormsInOneLangAreCombined()
@@ -1009,8 +1026,28 @@ namespace LiftIO.Tests
 			_parser.ReadRangeElement("dialect", _doc.FirstChild);
 			_mocks.VerifyAllExpectationsHaveBeenMet();
 		}
+       
 
-		[Test]
+        [Test]
+        public void GetNumberOfEntriesInFile_0Entries_Returns0()
+        {
+            using(TempFile f = new TempFile( "<lift></lift>"))
+            {
+                int count = LiftParser<DummyBase, Dummy, Dummy, Dummy>.GetEstimatedNumberOfEntriesInFile(f.Path);
+                Assert.AreEqual(0, count);
+            }
+        }
+
+        [Test]
+        public void GetNumberOfEntriesInFile_3Entries_Returns3()
+        {
+            string path = Path.GetTempFileName();
+            File.WriteAllText(path, "<lift><entry></entry><entry id='foo'/><entry/></lift>");
+            int count = LiftParser<DummyBase, Dummy, Dummy, Dummy>.GetEstimatedNumberOfEntriesInFile(path);
+            Assert.AreEqual(3, count);
+        }
+
+        [Test]
 		public void SimpleFieldDefinition()
 		{
 			string content = "<field tag='tone'><form lang='en'><text>the tone information for a pronunciation</text></form></field>";
@@ -1174,7 +1211,7 @@ namespace LiftIO.Tests
 					.With(Is.Anything, Is.EqualTo(new Trait("EntryType", "Main Entry")));
 				ExpectFinishEntry();
 			}
-			_parser.ReadLIFTFile("test20080407.lift");
+			_parser.ReadLiftFile("test20080407.lift");
 			_mocks.VerifyAllExpectationsHaveBeenMet();
 		}
   
@@ -1299,4 +1336,39 @@ namespace LiftIO.Tests
         }
     }*/
 
+
+    internal class TempFile : IDisposable
+    {
+        private string _path;
+
+        public TempFile()
+        {
+            _path = System.IO.Path.GetTempFileName();
+        }
+
+
+        public TempFile(string contents):this()
+        {
+            File.WriteAllText(_path, contents);
+        }
+
+        public string Path
+        {
+            get { return _path; }
+        }
+        public void Dispose()
+        {
+            File.Delete(_path);
+        }
+
+        private TempFile(string existingPath, bool dummy)
+        {
+            _path = existingPath;
+        }
+        
+        public static TempFile TrackExisting(string path)
+        {
+            return new TempFile(path, false);
+        }
+    }
 }

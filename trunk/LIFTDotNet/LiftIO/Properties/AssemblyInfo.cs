@@ -37,3 +37,4 @@ using System.Runtime.InteropServices;
 
 [assembly: System.CLSCompliant(true)]
 [assembly: System.Security.Permissions.SecurityPermission(System.Security.Permissions.SecurityAction.RequestMinimum, Execution = true)]
+[assembly: InternalsVisibleTo("LiftIO.Tests")]

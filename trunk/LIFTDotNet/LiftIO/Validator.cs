@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Xml;
 using System.Xml.Xsl;
 using System.IO;
@@ -65,54 +66,24 @@ namespace LiftIO
             }
         }
 
-        //was "GetCorrectLiftVersionOfFile"
+        public static string GetLiftVersion(string pathToLift)
+        {
+            string liftVersionOfRequestedFile = String.Empty;
 
-        /// <summary>
-        /// If the lift file is an older version of lift, creates a new file migrated to the current version
-        /// </summary>
-        /// <param name="pathToOriginalLift"></param>
-        /// <returns>the path to the original file or to a new, migrated one, in the same directory</returns>
-		public static string MakeMigratedLiftFileIfNeeded(string pathToOriginalLift)
-		{
-			XmlReaderSettings readerSettings = new XmlReaderSettings();
-			readerSettings.ValidationType = ValidationType.None;
-			readerSettings.IgnoreComments = true;
-			string version = null;
-			using (XmlReader reader = XmlReader.Create(pathToOriginalLift, readerSettings))
-			{
-				if (reader.IsStartElement("lift"))
-					version = reader.GetAttribute("version");
-			}
-			if (String.IsNullOrEmpty(version) || version == LiftIO.Validator.LiftVersion)
-				return pathToOriginalLift;
-			string[] resources = typeof(LiftMultiText).Assembly.GetManifestResourceNames();
-			string pathToMigratedLift = pathToOriginalLift;
-			while (version != LiftIO.Validator.LiftVersion)
-			{
-				string xslName = null;
-				foreach (string name in resources)
-				{
-					if (name.EndsWith(".xsl") && name.StartsWith("LiftIO.LIFT-" + version + "-"))
-					{
-						xslName = name;
-						break;
-					}
-				}
-				if (xslName == null)
-					break;
-				string nextversion = xslName.Split(new char[] { '-' })[2];
-				nextversion = nextversion.Remove(nextversion.LastIndexOf('.'));
-				string nextfile = String.Format("{0}-{1}", pathToOriginalLift, nextversion);
-				Stream xslstream = typeof(LiftMultiText).Assembly.GetManifestResourceStream(xslName);
-				XslCompiledTransform xsl = new XslCompiledTransform();
-				xsl.Load(new XmlTextReader(xslstream));
-				xsl.Transform(pathToMigratedLift, nextfile);
-				if (pathToMigratedLift != pathToOriginalLift)
-					File.Delete(pathToMigratedLift);
-				pathToMigratedLift = nextfile;
-				version = nextversion;
-			}
-			return pathToMigratedLift;
-		}
-	}
+            XmlReaderSettings readerSettings = new XmlReaderSettings();
+            readerSettings.ValidationType = ValidationType.None;
+            readerSettings.IgnoreComments = true;
+
+            using (XmlReader reader = XmlReader.Create(pathToLift, readerSettings))
+            {
+                if (reader.IsStartElement("lift"))
+                    liftVersionOfRequestedFile = reader.GetAttribute("version");
+            }
+            if (String.IsNullOrEmpty(liftVersionOfRequestedFile))
+            {
+                throw new LiftFormatException(String.Format("Cannot import {0} because this was not recognized as well-formed LIFT file (missing version).", pathToLift));
+            }
+            return liftVersionOfRequestedFile;
+        }   
+    }
 }
