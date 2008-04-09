@@ -42,30 +42,30 @@ namespace LiftIO
         /// <summary>
         /// 
         /// </summary>
-        public virtual void ReadLiftDom(XmlDocument doc, DateTime defaultCreationModificationUTC)
-        {
-            DefaultCreationModificationUTC = defaultCreationModificationUTC;
-
-            XmlNodeList entryNodes = doc.SelectNodes("/lift/entry");
-            int numberOfEntriesRead = 0;
-            const int kProgressReportingInterval = 50;
-            int nextProgressPoint = numberOfEntriesRead + kProgressReportingInterval;
-            ProgressTotalSteps = entryNodes.Count;
-            foreach (XmlNode node in entryNodes)
-            {
-                ReadEntry(node);
-                numberOfEntriesRead++;
-                if (numberOfEntriesRead >= nextProgressPoint)
-                {
-                    ProgressStepsCompleted = numberOfEntriesRead;
-                    nextProgressPoint = numberOfEntriesRead + kProgressReportingInterval;
-                }
-                if (_cancelNow)
-                {
-                    break;
-                }
-            }
-        }
+//        public virtual void ReadLiftDom(XmlDocument doc, DateTime defaultCreationModificationUTC)
+//        {
+//            DefaultCreationModificationUTC = defaultCreationModificationUTC;
+//
+//            XmlNodeList entryNodes = doc.SelectNodes("/lift/entry");
+//            int numberOfEntriesRead = 0;
+//            const int kProgressReportingInterval = 50;
+//            int nextProgressPoint = numberOfEntriesRead + kProgressReportingInterval;
+//            ProgressTotalSteps = entryNodes.Count;
+//            foreach (XmlNode node in entryNodes)
+//            {
+//                ReadEntry(node);
+//                numberOfEntriesRead++;
+//                if (numberOfEntriesRead >= nextProgressPoint)
+//                {
+//                    ProgressStepsCompleted = numberOfEntriesRead;
+//                    nextProgressPoint = numberOfEntriesRead + kProgressReportingInterval;
+//                }
+//                if (_cancelNow)
+//                {
+//                    break;
+//                }
+//            }
+//        }
 
         internal void ReadRangeElement(string range, XmlNode node)
 		{
