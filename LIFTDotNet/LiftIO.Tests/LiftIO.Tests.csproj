@@ -42,7 +42,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MigratorTests.cs" />
+    <Compile Include="Migration\V11To12MigratorTests.cs" />
+    <Compile Include="Migration\MigratorTestBase.cs" />
+    <Compile Include="Migration\V10To11MigratorTests.cs" />
+    <Compile Include="Migration\GeneralMigratorTests.cs" />
     <Compile Include="ExtensibleTests.cs" />
     <Compile Include="LiftMergeTests.cs" />
     <Compile Include="ParserTests.cs" />

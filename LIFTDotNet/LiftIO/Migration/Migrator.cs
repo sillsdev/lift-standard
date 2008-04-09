@@ -59,7 +59,7 @@ namespace LiftIO
             string xslName = null;
             foreach (string name in resources)
             {
-                if (name.EndsWith(".xsl") && name.StartsWith("LiftIO.LIFT-" + sourceVersion + "-"))
+                if (name.EndsWith(".xsl") && name.StartsWith("LiftIO.Migration.LIFT-" + sourceVersion + "-"))
                 {
                     xslName = name;
                     break;
