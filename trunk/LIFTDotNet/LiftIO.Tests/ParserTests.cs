@@ -1067,7 +1067,8 @@ namespace LiftIO.Tests
         public void GetNumberOfEntriesInFile_3Entries_Returns3()
         {
             string path = Path.GetTempFileName();
-            File.WriteAllText(path, "<lift><entry></entry><entry id='foo'/><entry/></lift>");
+            File.WriteAllText(path, @"<lift><entry></entry> 
+                <entry id='foo'/><entry/></lift>");
             int count = LiftParser<DummyBase, Dummy, Dummy, Dummy>.GetEstimatedNumberOfEntriesInFile(path);
             Assert.AreEqual(3, count);
         }

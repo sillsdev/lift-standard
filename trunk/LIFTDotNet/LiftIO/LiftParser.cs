@@ -639,8 +639,11 @@ namespace LiftIO
             {
                 using (StreamReader reader = new StreamReader(stream))
                 {
-                    string line = reader.ReadLine();
-                    count += System.Text.RegularExpressions.Regex.Matches(line, "<entry").Count;
+                    while (reader.Peek() >= 0)
+                    {
+                        string line = reader.ReadLine();
+                        count += System.Text.RegularExpressions.Regex.Matches(line, "<entry").Count;
+                    }
                 }
             }
             return count;

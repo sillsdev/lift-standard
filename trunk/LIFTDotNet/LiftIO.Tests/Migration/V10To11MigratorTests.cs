@@ -39,6 +39,24 @@ namespace LiftIO.Tests.Migration
         }
 
         [Test]
+        public void HasPicture_ChangedToIllustration()
+        {
+            using (TempFile f = new TempFile(@"
+                <lift version='0.10'>
+                      <entry>
+                        <sense>
+                          <illustration href='waterBasket1.png'/>
+                        </sense>
+                      </entry>
+                </lift>"))
+            {
+                string path = Migrator.MigrateToLatestVersion(f.Path);
+                AssertXPathAtLeastOne("//sense/illustration[@href='waterBasket1.png']", path);
+                AssertXPathNotFound("//sense/picture", path);
+            }
+        }
+
+        [Test]
         public void GlossHasTrait_ChangedToAnnotation()
         {
             using (TempFile f = new TempFile(@"
