@@ -185,19 +185,19 @@ namespace LiftIO.Tests
         [Test]
         public void EmptyLiftOk()
         {
-            SimpleCheckGetOrMakeEntry("<lift/>", 0);
+            SimpleCheckGetOrMakeEntry_InsertVersion("<lift V />", 0);
         }
 
         [Test]
         public void EntryMissingIdNotFatal()
         {
-            SimpleCheckGetOrMakeEntry("<lift><entry/></lift>", 1);
+            SimpleCheckGetOrMakeEntry_InsertVersion("<lift V><entry/></lift>", 1);
         }
 
         [Test]
         public void EmptyEntriesOk()
         {
-            SimpleCheckGetOrMakeEntry("<lift><entry/><entry/></lift>", 2);
+            SimpleCheckGetOrMakeEntry_InsertVersion("<lift V><entry/><entry/></lift>", 2);
         }
         [Test]
         public void NotifyOfDeletedEntry()
@@ -210,8 +210,10 @@ namespace LiftIO.Tests
             _mocks.VerifyAllExpectationsHaveBeenMet();
 
         }
-        private void SimpleCheckGetOrMakeEntry(string content, int times)
+        private void SimpleCheckGetOrMakeEntry_InsertVersion(string content, int times)
         {
+            content = content.Replace("<lift V", string.Format("<lift version='{0}' ", Validator.LiftVersion));
+
             _doc.LoadXml(content);
             using (_mocks.Ordered)
             {
@@ -220,7 +222,10 @@ namespace LiftIO.Tests
                     .WithAnyArguments()
                     .Will(Return.Value(null));
             }
-            _parser.ReadLiftDom(_doc, default(DateTime));
+            using (TempFile f = new TempFile(string.Format(content)))
+            {
+                _parser.ReadLiftFile(f.Path);
+            }
             _mocks.VerifyAllExpectationsHaveBeenMet();
         }
         
@@ -1001,32 +1006,52 @@ namespace LiftIO.Tests
             ParseEntryAndCheck(string.Format("<entry><sense><example><note><form lang='x'><text>hello</text></form></note></example></sense></entry>"));
         }
 
+
+        /* These appear to succeed even if the range-reading code is removed
 		[Test]
 		public void EmptyLiftHeaderOk()
 		{
 			SimpleCheckWithHeader("<lift><header/></lift>", 0, 0, 0);
 		}
 
-		[Test]
-		public void EmptyLiftHeaderSectionsOk()
-		{
-			SimpleCheckWithHeader("<lift><header><ranges/><fields/></header></lift>", 0, 0, 0);
-		}
+         [Test]
+                public void EmptyLiftHeaderSectionsOk()
+                {
+                    SimpleCheckWithHeader("<lift><header><ranges/><fields/></header></lift>", 0, 0, 0);
+                }
 
-		[Test]
-		public void SimpleRangeElement()
-		{
-			string content = "<range-element id='en'><label><form lang='en'><text>English</text></form></label><abbrev><form lang='en'><text>Eng</text></form></abbrev><description><form lang='en'><text>Standard English</text></form></description></range-element>";
-			Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
-				.With(Is.EqualTo("dialect"), Is.EqualTo("en"), Is.Null, Is.Null,
-					Is.EqualTo(new LiftMultiText("en", "Standard English")),
-					Is.EqualTo(new LiftMultiText("en", "English")),
-					Is.EqualTo(new LiftMultiText("en", "Eng")));
-			_doc.LoadXml(content);
-			_parser.ReadRangeElement("dialect", _doc.FirstChild);
-			_mocks.VerifyAllExpectationsHaveBeenMet();
-		}
-       
+                [Test]
+                public void SimpleRangeElement()
+                {
+                    string content = "<range-element id='en'><label><form lang='en'><text>English</text></form></label><abbrev><form lang='en'><text>Eng</text></form></abbrev><description><form lang='en'><text>Standard English</text></form></description></range-element>";
+                    Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
+                        .With(Is.EqualTo("dialect"), Is.EqualTo("en"), Is.Null, Is.Null,
+                            Is.EqualTo(new LiftMultiText("en", "Standard English")),
+                            Is.EqualTo(new LiftMultiText("en", "English")),
+                            Is.EqualTo(new LiftMultiText("en", "Eng")));
+                    _doc.LoadXml(content);
+                    _parser.ReadRangeElement("dialect", _doc.FirstChild);
+                    _mocks.VerifyAllExpectationsHaveBeenMet();
+                }
+          
+          
+                private void SimpleCheckWithHeader(string content, int rangeCount, int fieldCount, int entryCount)
+                {
+                    using (_mocks.Ordered)
+                    {
+                        Expect.Exactly(rangeCount).On(_merger).Method("ProcessRangeElement")
+                            .WithAnyArguments();
+                        Expect.Exactly(fieldCount).On(_merger).Method("ProcessFieldDefinition")
+                            .WithAnyArguments();
+                        ExpectGetOrMakeEntry();
+                        ExpectFinishEntry();
+                    }
+                    _doc.LoadXml(content);
+                    _parser.ReadLiftDom(_doc, default(DateTime));
+                    _mocks.VerifyAllExpectationsHaveBeenMet();
+                }
+
+           */
 
         [Test]
         public void GetNumberOfEntriesInFile_0Entries_Returns0()
@@ -1055,22 +1080,6 @@ namespace LiftIO.Tests
 				.With(Is.EqualTo("tone"), Is.EqualTo(new LiftMultiText("en", "the tone information for a pronunciation")));
 			_doc.LoadXml(content);
 			_parser.ReadFieldDefinition(_doc.FirstChild);
-			_mocks.VerifyAllExpectationsHaveBeenMet();
-		}
-
-		private void SimpleCheckWithHeader(string content, int rangeCount, int fieldCount, int entryCount)
-		{
-			_doc.LoadXml(content);
-			using (_mocks.Ordered)
-			{
-				Expect.Exactly(rangeCount).On(_merger).Method("ProcessRangeElement")
-					.WithAnyArguments();
-				Expect.Exactly(fieldCount).On(_merger).Method("ProcessFieldDefinition")
-					.WithAnyArguments();
-				ExpectGetOrMakeEntry();
-				ExpectFinishEntry();
-			}
-			_parser.ReadLiftDom(_doc, default(DateTime));
 			_mocks.VerifyAllExpectationsHaveBeenMet();
 		}
 
