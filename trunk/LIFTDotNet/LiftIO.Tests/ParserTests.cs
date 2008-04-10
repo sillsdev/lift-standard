@@ -1006,52 +1006,87 @@ namespace LiftIO.Tests
             ParseEntryAndCheck(string.Format("<entry><sense><example><note><form lang='x'><text>hello</text></form></note></example></sense></entry>"));
         }
 
-
-        /* These appear to succeed even if the range-reading code is removed
 		[Test]
 		public void EmptyLiftHeaderOk()
 		{
-			SimpleCheckWithHeader("<lift><header/></lift>", 0, 0, 0);
+			SimpleCheckWithHeader("<lift version='{0}'><header/><entry/></lift>",
+				0, 0, 1);
 		}
 
-         [Test]
-                public void EmptyLiftHeaderSectionsOk()
-                {
-                    SimpleCheckWithHeader("<lift><header><ranges/><fields/></header></lift>", 0, 0, 0);
-                }
+		[Test]
+		public void EmptyLiftHeaderOk2()
+		{
+			SimpleCheckWithHeader("<lift version='{0}'><header></header><entry></entry></lift>",
+				0, 0, 1);
+		}
 
-                [Test]
-                public void SimpleRangeElement()
-                {
-                    string content = "<range-element id='en'><label><form lang='en'><text>English</text></form></label><abbrev><form lang='en'><text>Eng</text></form></abbrev><description><form lang='en'><text>Standard English</text></form></description></range-element>";
-                    Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
-                        .With(Is.EqualTo("dialect"), Is.EqualTo("en"), Is.Null, Is.Null,
-                            Is.EqualTo(new LiftMultiText("en", "Standard English")),
-                            Is.EqualTo(new LiftMultiText("en", "English")),
-                            Is.EqualTo(new LiftMultiText("en", "Eng")));
-                    _doc.LoadXml(content);
-                    _parser.ReadRangeElement("dialect", _doc.FirstChild);
-                    _mocks.VerifyAllExpectationsHaveBeenMet();
-                }
-          
-          
-                private void SimpleCheckWithHeader(string content, int rangeCount, int fieldCount, int entryCount)
-                {
-                    using (_mocks.Ordered)
-                    {
-                        Expect.Exactly(rangeCount).On(_merger).Method("ProcessRangeElement")
-                            .WithAnyArguments();
-                        Expect.Exactly(fieldCount).On(_merger).Method("ProcessFieldDefinition")
-                            .WithAnyArguments();
-                        ExpectGetOrMakeEntry();
-                        ExpectFinishEntry();
-                    }
-                    _doc.LoadXml(content);
-                    _parser.ReadLiftDom(_doc, default(DateTime));
-                    _mocks.VerifyAllExpectationsHaveBeenMet();
-                }
+		[Test]
+        public void EmptyLiftHeaderSectionsOk()
+        {
+			SimpleCheckWithHeader("<lift version='{0}'><header><ranges/><fields/></header><entry/></lift>",
+				0, 0, 1);
+        }
 
-           */
+		[Test]
+		public void EmptyLiftHeaderSectionsOk2()
+		{
+			SimpleCheckWithHeader("<lift version='{0}'><header><ranges></ranges><fields></fields></header><entry></entry></lift>",
+				0, 0, 1);
+		}
+
+		[Test]
+		public void EmptyRangeOk()
+		{
+			SimpleCheckWithHeader("<lift version='{0}'><header><ranges><range/></ranges></header></lift>",
+				0, 0, 0);
+		}
+
+		[Test]
+		public void EmptyRangeElementOk()
+		{
+			SimpleCheckWithHeader("<lift version='{0}'><header><ranges><range id='x'><range-element id='y'/></range></ranges></header></lift>",
+				1, 0, 0);
+		}
+
+		[Test]
+		public void EmptyFieldDefinitionOk()
+		{
+			SimpleCheckWithHeader("<lift version='{0}'><header><fields><field tag='z'/></fields></header></lift>",
+				0, 1, 0);
+		}
+
+		private void SimpleCheckWithHeader(string content, int rangeCount, int fieldCount, int entryCount)
+		{
+			using (TempFile f = new TempFile(String.Format(content, Validator.LiftVersion)))
+			{
+				using (_mocks.Unordered)
+				{
+					Expect.Exactly(rangeCount).On(_merger).Method("ProcessRangeElement")
+						.WithAnyArguments();
+					Expect.Exactly(fieldCount).On(_merger).Method("ProcessFieldDefinition")
+						.WithAnyArguments();
+					Expect.Exactly(entryCount).On(_merger).Method("GetOrMakeEntry")
+						.WithAnyArguments().Will(Return.Value(new Dummy()));
+					Expect.Exactly(entryCount).On(_merger).Method("FinishEntry");
+				}
+				_parser.ReadLiftFile(f.Path);
+				_mocks.VerifyAllExpectationsHaveBeenMet();
+			}
+		}
+
+		[Test]
+        public void SimpleRangeElement()
+        {
+            string content = "<range-element id='en'><label><form lang='en'><text>English</text></form></label><abbrev><form lang='en'><text>Eng</text></form></abbrev><description><form lang='en'><text>Standard English</text></form></description></range-element>";
+            Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
+                .With(Is.EqualTo("dialect"), Is.EqualTo("en"), Is.Null, Is.Null,
+                    Is.EqualTo(new LiftMultiText("en", "Standard English")),
+                    Is.EqualTo(new LiftMultiText("en", "English")),
+                    Is.EqualTo(new LiftMultiText("en", "Eng")));
+            _doc.LoadXml(content);
+            _parser.ReadRangeElement("dialect", _doc.FirstChild);
+            _mocks.VerifyAllExpectationsHaveBeenMet();
+        }
 
         [Test]
         public void GetNumberOfEntriesInFile_0Entries_Returns0()
