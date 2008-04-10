@@ -604,7 +604,7 @@ namespace LiftIO
 		/// <summary>
 		/// Read a LIFT file. Must be the current lift version.
 		/// </summary>
-        public void ReadLiftFile(string pathToLift)
+        public int ReadLiftFile(string pathToLift)
 		{
             if (_defaultCreationModificationUTC == default(DateTime))
             {
@@ -618,13 +618,14 @@ namespace LiftIO
             {
                 throw new LiftFormatException("Programmer should migrate the lift file before calling this method.");
             }
-         
+			int numberOfEntriesRead = 0;         
 		    using (XmlReader reader = XmlReader.Create(pathToLift, NormalReaderSettings))
 			{
 				reader.ReadStartElement("lift");
 				ReadHeader(reader);
-				ReadEntries(reader);
+				numberOfEntriesRead = ReadEntries(reader);
 			}
+			return numberOfEntriesRead;
 		}
 
         /// <summary>
@@ -661,7 +662,7 @@ namespace LiftIO
         }
 
 
-        private void ReadEntries(XmlReader reader)
+        private int ReadEntries(XmlReader reader)
         {
 // Process all of the entry elements, reading them into memory one at a time.
             ProgressMessage = "Reading entries from LIFT file";
@@ -690,6 +691,7 @@ namespace LiftIO
                     break;
                 }
             }
+			return numberOfEntriesRead;
         }
 
         /// <summary>
@@ -707,10 +709,12 @@ namespace LiftIO
             if (reader.IsStartElement("header"))
             {
                 ProgressMessage = "Reading LIFT file header";
+				bool headerIsEmpty = reader.IsEmptyElement;
                 reader.ReadStartElement("header");
                 ReadRanges(reader);
                 if (reader.IsStartElement("fields"))
                 {
+					bool fieldsIsEmpty = reader.IsEmptyElement;
                     reader.ReadStartElement("fields");
                     while (reader.IsStartElement("field"))
                     {
@@ -720,9 +724,11 @@ namespace LiftIO
                             this.ReadFieldDefinition(GetNodeFromString(fieldXml));
                         }
                     }
-                    reader.ReadEndElement();	// </fields>
+					if (!fieldsIsEmpty)
+	                    reader.ReadEndElement();	// </fields>
                 }
-                reader.ReadEndElement();	// </header>
+				if (!headerIsEmpty)
+	                reader.ReadEndElement();	// </header>
             }
         }
 
@@ -730,6 +736,7 @@ namespace LiftIO
         {
             if (reader.IsStartElement("ranges"))
             {
+				bool rangesIsEmpty = reader.IsEmptyElement;
                 reader.ReadStartElement("ranges");
                 while (reader.IsStartElement("range"))
                 {
@@ -737,6 +744,7 @@ namespace LiftIO
                     string href = reader.GetAttribute("href");
                     string guid = reader.GetAttribute("guid");
                     ProgressMessage = String.Format("Reading LIFT range {0}", id);
+					bool rangeIsEmpty = reader.IsEmptyElement;
                     reader.ReadStartElement();
                     if (String.IsNullOrEmpty(href))
                     {
@@ -753,9 +761,11 @@ namespace LiftIO
                     {
                         this.ReadExternalRange(href, id, guid);
                     }
-                    reader.ReadEndElement();	// </range>
+					if (!rangeIsEmpty)
+	                    reader.ReadEndElement();	// </range>
                 }
-                reader.ReadEndElement();	// </ranges>
+				if (!rangesIsEmpty)
+	                reader.ReadEndElement();	// </ranges>
             }
         }
 
@@ -789,6 +799,7 @@ namespace LiftIO
 					string id = reader.GetAttribute("id");
 				// unused	string guid = reader.GetAttribute("guid");
 					bool foundDesiredRange = id == rangeId;
+					bool rangeIsEmpty = reader.IsEmptyElement;
 					reader.ReadStartElement();
 					while (reader.IsStartElement("range-element"))
 					{
@@ -798,7 +809,8 @@ namespace LiftIO
                             this.ReadRangeElement(id, GetNodeFromString(rangeElementXml));
 						}
 					}
-					reader.ReadEndElement();
+					if (!rangeIsEmpty)
+						reader.ReadEndElement();
 					if (foundDesiredRange)
 						return;		// we've seen the range we wanted from this file.
 				}
