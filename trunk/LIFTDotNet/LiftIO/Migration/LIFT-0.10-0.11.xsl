@@ -35,7 +35,18 @@
       <xsl:apply-templates/>
     </xsl:copy>
   </xsl:template>
-  
+
+
+  <!-- change field/@tag to field/@type -->
+  <xsl:template match="field">
+    <xsl:copy>
+      <xsl:attribute name="type">
+        <xsl:value-of select="@tag"/>
+      </xsl:attribute>
+      <xsl:copy-of select="@*[not(name(.) = 'tag')]" />
+      <xsl:apply-templates/>
+    </xsl:copy>
+  </xsl:template>
 
 
   <!-- change form/trait to form/annotation -->

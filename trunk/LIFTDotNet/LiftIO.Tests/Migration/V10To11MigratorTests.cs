@@ -79,6 +79,7 @@ namespace LiftIO.Tests.Migration
             }
         }
 
+   
         [Test]
         public void FormHasTrait_ChangedToAnnotation()
         {
@@ -99,6 +100,23 @@ namespace LiftIO.Tests.Migration
                 AssertXPathNotFound("//entry/lexical-unit/form/trait", path);
             }
         }
+
+        [Test]
+        public void FieldHasTag_ChangedToType()
+        {
+            using (TempFile f = new TempFile(@"
+                <lift version='0.10'>
+                      <entry>
+                        <field tag='test'/>
+                      </entry>
+                </lift>"))
+            {
+                string path = Migrator.MigrateToLatestVersion(f.Path);
+                AssertXPathAtLeastOne("//entry/field[@type='test']", path);
+                AssertXPathNotFound("//entry/field[@tag='test']", path);
+            }
+        }
+
 
         [Test]
         public void PreservesProducer()

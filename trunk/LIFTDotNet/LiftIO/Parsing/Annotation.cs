@@ -8,6 +8,7 @@ namespace LiftIO.Parsing
         private string _value;
         private DateTime _when;
         private string _who;
+        private string _forFormInWritingSystem;
 
         public Annotation(string name, string value, DateTime when, string who)
         {
@@ -26,6 +27,20 @@ namespace LiftIO.Parsing
             set
             {
                 _name = value;
+            }
+        }
+        /// <summary>
+        /// This is an index into the forms... !!!!!!!this probably not going to really work
+        /// </summary>
+        public string LanguageHint
+        {
+            get
+            {
+                return _forFormInWritingSystem;
+            }
+            set
+            {
+                _forFormInWritingSystem = value;
             }
         }
 

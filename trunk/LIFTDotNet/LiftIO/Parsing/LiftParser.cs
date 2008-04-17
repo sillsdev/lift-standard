@@ -566,7 +566,7 @@ namespace LiftIO.Parsing
                     foreach (XmlNode annotationNode in formNode.SelectNodes("annotation"))
                     {
                         Annotation annotation = GetAnnotation(annotationNode);
-                        // annotation.LanguageHint = lang;
+                        annotation.LanguageHint = lang;
                         text.Annotations.Add(annotation);
                     }
                 }
@@ -586,7 +586,6 @@ namespace LiftIO.Parsing
             foreach (XmlNode annotationNode in traitNode.SelectNodes("annotation"))
             {
                 Annotation annotation = GetAnnotation(annotationNode);
-                // annotation.LanguageHint = lang;
                 t.Annotations.Add(annotation);
             }
             return t;
