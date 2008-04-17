@@ -1,12 +1,12 @@
 using System;
 using System.Xml;
-using LiftIO;
+using LiftIO.Merging;
 using NUnit.Framework;
 
-namespace LiftIO.Tests
+namespace LiftIO.Tests.Merging
 {
     [TestFixture]
-    public class LiftMergeTests
+    public class LiftVersionControlMergerTests
     {
         private string _ours;
         private string _theirs;

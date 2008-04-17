@@ -3,9 +3,11 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using System.Xml;
+using LiftIO.Merging;
+using LiftIO.Validation;
 using NUnit.Framework;
 
-namespace LiftIO.Tests
+namespace LiftIO.Tests.Merging
 {
     [TestFixture]
     public class SynchronicMergerTests
@@ -71,7 +73,7 @@ namespace LiftIO.Tests
             Assert.AreEqual(2, doc.SelectNodes("//entry").Count);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one']").Count);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one' and @greeting='hello']").Count);
-       }
+        }
 
         [Test]
         public void EdittedEntry_GuidSameIdDifferent_Updated()
@@ -149,7 +151,7 @@ namespace LiftIO.Tests
                 string directory;
                 do
                 {
-                  directory = Path.Combine(driveName, Path.GetRandomFileName());
+                    directory = Path.Combine(driveName, Path.GetRandomFileName());
                 } while (Directory.Exists(directory));
 
                 Directory.CreateDirectory(directory);
@@ -181,59 +183,59 @@ namespace LiftIO.Tests
             XmlDocument doc = GetResult(_directory);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one' and @greeting='hi']").Count);
             ExpectFileCount(2, _directory);
-       }
+        }
 
-       [Test]
-       public void ReadOnlyUpdate_DoesNothing()
-       {
-           string updateFilePath = Path.Combine(this._directory, "two" + SynchronicMerger.ExtensionOfIncrementalFiles);
-           try
-           {
-               WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory);
-               File.SetAttributes(updateFilePath, FileAttributes.ReadOnly);
+        [Test]
+        public void ReadOnlyUpdate_DoesNothing()
+        {
+            string updateFilePath = Path.Combine(this._directory, "two" + SynchronicMerger.ExtensionOfIncrementalFiles);
+            try
+            {
+                WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory);
+                File.SetAttributes(updateFilePath, FileAttributes.ReadOnly);
 
-               Merge(_directory);
-           }
-           finally
-           {
-               File.SetAttributes(updateFilePath, FileAttributes.Normal);
-           }
+                Merge(_directory);
+            }
+            finally
+            {
+                File.SetAttributes(updateFilePath, FileAttributes.Normal);
+            }
 
-           XmlDocument doc = GetResult(_directory);
-           Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one' and @greeting='hi']").Count);
-           ExpectFileCount(2, _directory);
-       }
+            XmlDocument doc = GetResult(_directory);
+            Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one' and @greeting='hi']").Count);
+            ExpectFileCount(2, _directory);
+        }
 
-       [Test, ExpectedException(typeof(IOException))]
-       public void LockedBaseFile_Throws()
-       {
-           string baseFilePath = Path.Combine(this._directory, _baseLiftFileName);
-           WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory);
-           using(File.Open(baseFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-           {
-               Merge(_directory);
-           }
+        [Test, ExpectedException(typeof(IOException))]
+        public void LockedBaseFile_Throws()
+        {
+            string baseFilePath = Path.Combine(this._directory, _baseLiftFileName);
+            WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory);
+            using(File.Open(baseFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+            {
+                Merge(_directory);
+            }
 
-           XmlDocument doc = GetResult(_directory);
-           Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one' and @greeting='hi']").Count);
-           ExpectFileCount(2, _directory);
-       }
+            XmlDocument doc = GetResult(_directory);
+            Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one' and @greeting='hi']").Count);
+            ExpectFileCount(2, _directory);
+        }
 
         [Test, ExpectedException(typeof(IOException))]
         public void LockedUpdate_Throws()
-       {
-           string updateFilePath = Path.Combine(this._directory, "two" + SynchronicMerger.ExtensionOfIncrementalFiles);
+        {
+            string updateFilePath = Path.Combine(this._directory, "two" + SynchronicMerger.ExtensionOfIncrementalFiles);
 
-           WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory);
-           using (File.Open(updateFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-           {
-               Merge(_directory);
-           }
+            WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory);
+            using (File.Open(updateFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+            {
+                Merge(_directory);
+            }
 
-           XmlDocument doc = GetResult(_directory);
-           Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one' and @greeting='hi']").Count);
-           ExpectFileCount(2, _directory);
-       }
+            XmlDocument doc = GetResult(_directory);
+            Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one' and @greeting='hi']").Count);
+            ExpectFileCount(2, _directory);
+        }
 
 
         [Test]
@@ -313,7 +315,7 @@ namespace LiftIO.Tests
             WriteFile(_baseLiftFileName, "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hi'></entry><entry id='two' guid='0ae89610-fc01-4bfd-a0d6-1125b7281d22' greeting='hi'></entry>", _directory);
             WriteFile("second" + SynchronicMerger.ExtensionOfIncrementalFiles, "<entry id='three' guid='0ae89610-fc01-4bfd-a0d6-1125b7281d33'></entry><entry id='one'  guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hello'></entry>", _directory);
             WriteFile("third" + SynchronicMerger.ExtensionOfIncrementalFiles, "<entry id='two'  guid='0ae89610-fc01-4bfd-a0d6-1125b7281d22' greeting='hello'></entry><entry id='four' ></entry>", _directory);
-           XmlDocument doc = MergeAndGetResult(true, _directory);
+            XmlDocument doc = MergeAndGetResult(true, _directory);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one']").Count);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='two']").Count);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='three']").Count);
@@ -359,11 +361,11 @@ namespace LiftIO.Tests
         {
             StreamWriter writer = File.CreateText(Path.Combine(directory,fileName));
             string content = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
-                    +"<lift version =\""
-                    + Validator.LiftVersion
-                    +"\" producer=\"WeSay.1Pt0Alpha\" xmlns:flex=\"http://fieldworks.sil.org\">"
-                    +xmlForEntries
-                    +"</lift>";
+                             +"<lift version =\""
+                             + Validator.LiftVersion
+                             +"\" producer=\"WeSay.1Pt0Alpha\" xmlns:flex=\"http://fieldworks.sil.org\">"
+                             +xmlForEntries
+                             +"</lift>";
             writer.Write(content);
             writer.Close();
             writer.Dispose();

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
+using LiftIO.Parsing;
+using LiftIO.Validation;
 using NMock2;
 using NUnit.Framework;
 
@@ -18,47 +20,6 @@ namespace LiftIO.Tests
         private Mockery _mocks;
         private List<LiftParser<DummyBase, Dummy, Dummy, Dummy>.ErrorArgs> _parsingWarnings;
 
-        /// <summary>
-        /// only handles a single trait
-        /// </summary>
-        class LiftMultiTextTraitMatcher : Matcher
-        {
-            private readonly string _expectedLanguageOfFirstTrait;
-            private readonly string _expectedNameOfFirstTrait;
-            private readonly string _expectedValueOfFirstTrait;
-            private readonly int _expectedCount;
-
-            public LiftMultiTextTraitMatcher(string expectedLanguageOfFirstTrait, string expectedNameOfFirstTrait, string expectedValueOfFirstTrait, int expectedNumberOfTraits)
-            {
-                _expectedLanguageOfFirstTrait = expectedLanguageOfFirstTrait;
-                _expectedCount = expectedNumberOfTraits;
-                _expectedValueOfFirstTrait = expectedValueOfFirstTrait;
-                _expectedNameOfFirstTrait = expectedNameOfFirstTrait;
-            }
-
-            public override bool Matches(object o)
-            {
-                LiftMultiText m = (LiftMultiText)o;
-                if (m.Traits.Count != _expectedCount)
-                {
-                    return false;
-                }
-                Trait t = m.Traits[0];
-                if (_expectedLanguageOfFirstTrait != null && _expectedLanguageOfFirstTrait != string.Empty)
-                {
-                    if (t.LanguageHint != _expectedLanguageOfFirstTrait)
-                    {
-                        return false;
-                    }
-                }
-                return (t.Name == _expectedNameOfFirstTrait && t.Value == _expectedValueOfFirstTrait);
-            }
-
-            public override void DescribeTo(TextWriter writer)
-            {
-                writer.Write(string.Format("TraitMatcher(expectedLanguage={0}, expectedName={1}, expectedValue={2}, numberOfTraits={3})", _expectedLanguageOfFirstTrait, _expectedNameOfFirstTrait, _expectedValueOfFirstTrait,_expectedCount));
-            }
-        }
 
         [SetUp]
         public void Setup()
@@ -645,39 +606,57 @@ namespace LiftIO.Tests
             ParseEntryAndCheck(string.Format("<entry><sense><gloss lang='x'><text>hello</text></gloss></sense></entry>"));
         }
 
+
+
         [Test]
-        public void GlossWithTrait()
+        public void LexicalUnitWithAnnotation()
         {
             ExpectGetOrMakeEntry();
-//            ExpectMergeInLexemeForm(Is.Anything);
-            ExpectGetOrMakeSense();
-            ExpectMultiTextMergeIn("Gloss", new LiftMultiTextTraitMatcher("x","flag","1", 1));
-            //ExpectMergeDefinition();
-
-            ParseEntryAndCheck(string.Format("<entry><sense><gloss lang='x'><text>hello</text><trait name='flag' value='1'><annotation><form lang='x'><text>blah blah</text></form></annotation></trait></gloss></sense></entry>"));
+            ExpectMergeInLexemeForm(new LiftMultiTextAnnotationMatcher(1, "x", "flag", "1", null, default(DateTime)));
+            ParseEntryAndCheck(string.Format("<entry><lexical-unit><form lang='x'><text>blah blah</text><annotation name='flag' value='1'/></form></lexical-unit></entry>"));
         }
 
         [Test]
-        public void LexicalUnitWithTrait()
-        {
-            ExpectGetOrMakeEntry();
-            ExpectMergeInLexemeForm(new LiftMultiTextTraitMatcher("x", "flag", "1", 1));
-            ParseEntryAndCheck(string.Format("<entry><lexical-unit><form lang='x'><text>blah blah</text><trait name='flag' value='1'/></form></lexical-unit></entry>"));
-        }
-
-        /// <summary>
-        /// e.g., a 
-        /// </summary>
-        [Test]
-        public void SenseWithTraitThatHasSubTrait()
+        public void DefinitionWithAnnotation()
         {
             ExpectGetOrMakeEntry();
             //ExpectMergeInLexemeForm(Is.Anything);
             ExpectGetOrMakeSense();
-            ExpectMultiTextMergeIn("Gloss", new LiftMultiTextTraitMatcher("x", "flag", "1", 1));
+            string when= new DateTime(2000,1,1).ToUniversalTime().ToString(Extensible.LiftTimeFormatNoTimeZone);
+            ExpectMultiTextMergeIn("Definition", new LiftMultiTextAnnotationMatcher(1, "x", "flag", "1", "john", DateTime.Parse(when).ToUniversalTime()));
+
+            ParseEntryAndCheck(string.Format(@"
+            <entry>
+                <sense>
+                    <definition>
+                        <form lang='z'>
+                            <text>hello</text>
+                            <annotation name='flag' value='1' who='john' when='{0}'>
+                                <form lang='x'>
+                                    <text>blah blah</text>
+                                </form>
+                            </annotation>
+                        </form>
+                    </definition></sense></entry>", when));
+        }
+
+        [Test]
+        public void SenseWithTraitWithAnnotations()
+        {
+            ExpectGetOrMakeEntry();
+            //ExpectMergeInLexemeForm(Is.Anything);
+            ExpectGetOrMakeSense();
+            string when= new DateTime(2000,1,1).ToUniversalTime().ToString(Extensible.LiftTimeFormatNoTimeZone);
+            ExpectMergeInTrait(new TraitMatcher("dummy", "blah", 2));
             //ExpectMergeDefinition();
 
-            ParseEntryAndCheck(string.Format("<entry><sense><gloss lang='x'><text>hello</text><trait name='flag' value='1'><annotation><form lang='x'><text>blah blah</text></form></annotation></trait></gloss></sense></entry>"));
+            ParseEntryAndCheck(string.Format(@"
+            <entry>
+                <sense>
+                    <trait name='dummy' value ='blah'>
+                        <annotation name='first'/>
+                        <annotation name='second'/>
+                </trait></sense></entry>", when));
         }
 
         [Test]
@@ -697,10 +676,8 @@ namespace LiftIO.Tests
         public void GlossWithTwoLanguages()
         {
             ExpectGetOrMakeEntry();
-            //ExpectMergeInLexemeForm(Is.Anything);
             ExpectGetOrMakeSense();
             ExpectValueOfMergeIn("Gloss", "x=hello|y=bye|");
-            //ExpectMergeDefinition();
 
             ParseEntryAndCheck(string.Format("<entry><sense><gloss lang='x'><text>hello</text></gloss><gloss lang='y'><text>bye</text></gloss></sense></entry>"));
         }
@@ -1006,87 +983,52 @@ namespace LiftIO.Tests
             ParseEntryAndCheck(string.Format("<entry><sense><example><note><form lang='x'><text>hello</text></form></note></example></sense></entry>"));
         }
 
+
+        /* These appear to succeed even if the range-reading code is removed
 		[Test]
 		public void EmptyLiftHeaderOk()
 		{
-			SimpleCheckWithHeader("<lift version='{0}'><header/><entry/></lift>",
-				0, 0, 1);
+			SimpleCheckWithHeader("<lift><header/></lift>", 0, 0, 0);
 		}
 
-		[Test]
-		public void EmptyLiftHeaderOk2()
-		{
-			SimpleCheckWithHeader("<lift version='{0}'><header></header><entry></entry></lift>",
-				0, 0, 1);
-		}
+         [Test]
+                public void EmptyLiftHeaderSectionsOk()
+                {
+                    SimpleCheckWithHeader("<lift><header><ranges/><fields/></header></lift>", 0, 0, 0);
+                }
 
-		[Test]
-        public void EmptyLiftHeaderSectionsOk()
-        {
-			SimpleCheckWithHeader("<lift version='{0}'><header><ranges/><fields/></header><entry/></lift>",
-				0, 0, 1);
-        }
+                [Test]
+                public void SimpleRangeElement()
+                {
+                    string content = "<range-element id='en'><label><form lang='en'><text>English</text></form></label><abbrev><form lang='en'><text>Eng</text></form></abbrev><description><form lang='en'><text>Standard English</text></form></description></range-element>";
+                    Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
+                        .With(Is.EqualTo("dialect"), Is.EqualTo("en"), Is.Null, Is.Null,
+                            Is.EqualTo(new LiftMultiText("en", "Standard English")),
+                            Is.EqualTo(new LiftMultiText("en", "English")),
+                            Is.EqualTo(new LiftMultiText("en", "Eng")));
+                    _doc.LoadXml(content);
+                    _parser.ReadRangeElement("dialect", _doc.FirstChild);
+                    _mocks.VerifyAllExpectationsHaveBeenMet();
+                }
+          
+          
+                private void SimpleCheckWithHeader(string content, int rangeCount, int fieldCount, int entryCount)
+                {
+                    using (_mocks.Ordered)
+                    {
+                        Expect.Exactly(rangeCount).On(_merger).Method("ProcessRangeElement")
+                            .WithAnyArguments();
+                        Expect.Exactly(fieldCount).On(_merger).Method("ProcessFieldDefinition")
+                            .WithAnyArguments();
+                        ExpectGetOrMakeEntry();
+                        ExpectFinishEntry();
+                    }
+                    _doc.LoadXml(content);
+                    _parser.ReadLiftDom(_doc, default(DateTime));
+                    _mocks.VerifyAllExpectationsHaveBeenMet();
+                }
 
-		[Test]
-		public void EmptyLiftHeaderSectionsOk2()
-		{
-			SimpleCheckWithHeader("<lift version='{0}'><header><ranges></ranges><fields></fields></header><entry></entry></lift>",
-				0, 0, 1);
-		}
-
-		[Test]
-		public void EmptyRangeOk()
-		{
-			SimpleCheckWithHeader("<lift version='{0}'><header><ranges><range/></ranges></header></lift>",
-				0, 0, 0);
-		}
-
-		[Test]
-		public void EmptyRangeElementOk()
-		{
-			SimpleCheckWithHeader("<lift version='{0}'><header><ranges><range id='x'><range-element id='y'/></range></ranges></header></lift>",
-				1, 0, 0);
-		}
-
-		[Test]
-		public void EmptyFieldDefinitionOk()
-		{
-			SimpleCheckWithHeader("<lift version='{0}'><header><fields><field tag='z'/></fields></header></lift>",
-				0, 1, 0);
-		}
-
-		private void SimpleCheckWithHeader(string content, int rangeCount, int fieldCount, int entryCount)
-		{
-			using (TempFile f = new TempFile(String.Format(content, Validator.LiftVersion)))
-			{
-				using (_mocks.Unordered)
-				{
-					Expect.Exactly(rangeCount).On(_merger).Method("ProcessRangeElement")
-						.WithAnyArguments();
-					Expect.Exactly(fieldCount).On(_merger).Method("ProcessFieldDefinition")
-						.WithAnyArguments();
-					Expect.Exactly(entryCount).On(_merger).Method("GetOrMakeEntry")
-						.WithAnyArguments().Will(Return.Value(new Dummy()));
-					Expect.Exactly(entryCount).On(_merger).Method("FinishEntry");
-				}
-				_parser.ReadLiftFile(f.Path);
-				_mocks.VerifyAllExpectationsHaveBeenMet();
-			}
-		}
-
-		[Test]
-        public void SimpleRangeElement()
-        {
-            string content = "<range-element id='en'><label><form lang='en'><text>English</text></form></label><abbrev><form lang='en'><text>Eng</text></form></abbrev><description><form lang='en'><text>Standard English</text></form></description></range-element>";
-            Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
-                .With(Is.EqualTo("dialect"), Is.EqualTo("en"), Is.Null, Is.Null,
-                    Is.EqualTo(new LiftMultiText("en", "Standard English")),
-                    Is.EqualTo(new LiftMultiText("en", "English")),
-                    Is.EqualTo(new LiftMultiText("en", "Eng")));
-            _doc.LoadXml(content);
-            _parser.ReadRangeElement("dialect", _doc.FirstChild);
-            _mocks.VerifyAllExpectationsHaveBeenMet();
-        }
+           */
 
         [Test]
         public void GetNumberOfEntriesInFile_0Entries_Returns0()

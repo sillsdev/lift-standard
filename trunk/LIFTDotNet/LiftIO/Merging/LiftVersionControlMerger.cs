@@ -2,9 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
+using LiftIO.Parsing;
 
-namespace LiftIO
+namespace LiftIO.Merging
 {
+    /// <summary>
+    /// This is to be used be version control systems to do an intelligent 3-way merge of lift files
+    /// </summary>
     public class LiftVersionControlMerger
     {
         private readonly string _ourLift;

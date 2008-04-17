@@ -1,4 +1,5 @@
 using System;
+using LiftIO.Parsing;
 using NUnit.Framework;
 
 namespace LiftIO.Tests

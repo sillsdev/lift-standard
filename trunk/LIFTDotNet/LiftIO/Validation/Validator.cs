@@ -1,11 +1,9 @@
 using System;
-using System.Reflection;
 using System.Xml;
-using System.Xml.Xsl;
-using System.IO;
 using Commons.Xml.Relaxng;
+using LiftIO.Parsing;
 
-namespace LiftIO
+namespace LiftIO.Validation
 {
     public class Validator
     {
@@ -21,7 +19,7 @@ namespace LiftIO
         {
             RelaxngValidatingReader reader = new RelaxngValidatingReader(
                 documentReader,
-                new XmlTextReader(typeof(LiftMultiText).Assembly.GetManifestResourceStream("LiftIO.lift.rng")));
+                new XmlTextReader(typeof(LiftMultiText).Assembly.GetManifestResourceStream("LiftIO.Validation.lift.rng")));
             reader.ReportDetails = true;
             string lastGuy="lift";
             try

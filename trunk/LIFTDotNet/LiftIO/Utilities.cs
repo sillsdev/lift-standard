@@ -4,6 +4,7 @@ using System.IO;
 using System.Reflection;
 using System.Xml;
 using System.Xml.Xsl;
+using LiftIO.Validation;
 
 namespace LiftIO
 {

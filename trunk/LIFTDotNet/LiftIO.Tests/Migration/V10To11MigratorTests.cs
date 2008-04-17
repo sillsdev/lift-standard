@@ -1,3 +1,5 @@
+using LiftIO.Migration;
+using LiftIO.Validation;
 using NUnit.Framework;
 
 namespace LiftIO.Tests.Migration

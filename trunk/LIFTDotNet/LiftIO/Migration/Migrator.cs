@@ -3,8 +3,10 @@ using System.IO;
 using System.Reflection;
 using System.Xml;
 using System.Xml.Xsl;
+using LiftIO.Parsing;
+using LiftIO.Validation;
 
-namespace LiftIO
+namespace LiftIO.Migration
 {
     public class Migrator
     {

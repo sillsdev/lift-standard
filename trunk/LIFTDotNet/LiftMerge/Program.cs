@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using LiftIO;
+using LiftVersionControlMerger=LiftIO.Merging.LiftVersionControlMerger;
 
 namespace LiftMerge
 {
@@ -27,7 +27,7 @@ namespace LiftMerge
            Console.WriteLine("LiftMerge...");
            using (StreamWriter output = File.CreateText(outputPath))
             {
-                LiftIO.LiftVersionControlMerger merger =
+                LiftVersionControlMerger merger =
                     new LiftVersionControlMerger(File.ReadAllText(localPath), File.ReadAllText(otherPath), File.ReadAllText(basePath));
                
                 //output.WriteLine("<!-- Processed by LiftMerge {0}, {1}, {2} -->", basePath, localPath, otherPath);
