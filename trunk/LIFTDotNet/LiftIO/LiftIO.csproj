@@ -38,6 +38,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Merging\DropTheirsMergeStrategy.cs" />
+    <Compile Include="Merging\IMergeStrategy.cs" />
+    <Compile Include="Merging\PoorMansMergeStrategy.cs" />
     <Compile Include="Parsing\Annotation.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Parsing\Extensible.cs" />

@@ -13,38 +13,42 @@ namespace LiftIO.Merging
     {
         private readonly string _ourLift;
         private readonly string _theirLift;
-        private readonly string _commonAncestorLift;
+        private readonly string _ancestorLift;
         private readonly List<string> _processedIds = new List<string>();
-        private readonly XmlDocument _ours;
-        private readonly XmlDocument _theirs;
-        private readonly XmlDocument _ancestor;
+        private readonly XmlDocument _ourDom;
+        private readonly XmlDocument _theirDom;
+        private readonly XmlDocument _ancestorDom;
+        private IMergeStrategy _mergingStrategy;
 
-        public LiftVersionControlMerger(string ours, string theirs, string common)
+        public LiftVersionControlMerger(string ourLiftPath, string theirLiftPath, string ancestorLiftPath, IMergeStrategy mergeStrategy)
         {
-            _ourLift = ours;
-            _theirLift = theirs;
-            _commonAncestorLift = common;
-            _ours = new XmlDocument();
-            _theirs = new XmlDocument();
-            _ancestor = new XmlDocument();
+            _ourLift = ourLiftPath;
+            _theirLift = theirLiftPath;
+            _ancestorLift = ancestorLiftPath;
+            _ourDom = new XmlDocument();
+            _theirDom = new XmlDocument();
+            _ancestorDom = new XmlDocument();
+
+            _mergingStrategy = mergeStrategy;
         }
+
         public string GetMergedLift()
         {
-            _ours.LoadXml(_ourLift);
-            _theirs.LoadXml(_theirLift);
-            _ancestor.LoadXml(_commonAncestorLift);
+            _ourDom.LoadXml(_ourLift);
+            _theirDom.LoadXml(_theirLift);
+            _ancestorDom.LoadXml(_ancestorLift);
 
             StringBuilder builder = new StringBuilder();
             using (XmlWriter writer = XmlWriter.Create(builder))
             {
                 WriteStartOfLiftElement( writer);
-                foreach (XmlNode e in _ours.SelectNodes("lift/entry"))
+                foreach (XmlNode e in _ourDom.SelectNodes("lift/entry"))
                 {
                     ProcessEntry(writer, e);
                 }
 
                 //now process any remaining elements in "theirs"
-                foreach (XmlNode e in _theirs.SelectNodes("lift/entry"))
+                foreach (XmlNode e in _theirDom.SelectNodes("lift/entry"))
                 {
                     string id = GetId(e);
                     if (!_processedIds.Contains(id))
@@ -66,7 +70,7 @@ namespace LiftIO.Merging
         private void ProcessEntry(XmlWriter writer, XmlNode ourEntry)
         {
             string id = GetId(ourEntry);
-            XmlNode theirEntry = FindEntry(_theirs, id);
+            XmlNode theirEntry = FindEntry(_theirDom, id);
             if (theirEntry == null)
             {
                 ProcessEntryWeKnowDoesntNeedMerging(ourEntry, id, writer);
@@ -77,14 +81,15 @@ namespace LiftIO.Merging
             }
             else
             {
-                writer.WriteRaw(MakeMergedEntry(ourEntry, theirEntry));
+                XmlNode commonEntry = FindEntry(_ancestorDom, id);
+                writer.WriteRaw(_mergingStrategy.MakeMergedEntry(ourEntry, theirEntry, commonEntry));
             }
             _processedIds.Add(id);
         }
 
         private void ProcessEntryWeKnowDoesntNeedMerging(XmlNode entry, string id, XmlWriter writer)
         {
-            if(FindEntry(_ancestor,id) ==null)
+            if(FindEntry(_ancestorDom,id) ==null)
             {
                 writer.WriteRaw(entry.OuterXml); //it's new
             }
@@ -94,26 +99,14 @@ namespace LiftIO.Merging
             }
         }
 
-        private static string MakeMergedEntry(XmlNode ourEntry, XmlNode theirEntry)
-        {
-            XmlNode mergeNoteFieldNode = ourEntry.OwnerDocument.CreateElement("field");
-            AddAttribute(mergeNoteFieldNode, "tag", "mergeConflict");
-            AddDateCreatedAttribute(mergeNoteFieldNode);
-            StringBuilder b = new StringBuilder();
-            b.Append("<trait name='looserData'>");
-            b.AppendFormat("<![CDATA[{0}]]>", theirEntry.OuterXml);
-            b.Append("</trait>");
-            mergeNoteFieldNode.InnerXml = b.ToString();
-            ourEntry.AppendChild(mergeNoteFieldNode);
-            return ourEntry.OuterXml;
-        }
 
-        private static void AddDateCreatedAttribute(XmlNode elementNode)
+
+        internal static void AddDateCreatedAttribute(XmlNode elementNode)
         {
             AddAttribute(elementNode, "dateCreated", DateTime.Now.ToString(Extensible.LiftTimeFormatNoTimeZone));
         }
 
-        private static void AddAttribute(XmlNode element, string name, string value)
+        internal static void AddAttribute(XmlNode element, string name, string value)
         {
             XmlAttribute attr = element.OwnerDocument.CreateAttribute(name);
             attr.Value = value;
@@ -143,7 +136,7 @@ namespace LiftIO.Merging
 
         private void WriteStartOfLiftElement(XmlWriter writer)
         {
-            XmlNode liftNode = _ours.SelectSingleNode("lift");
+            XmlNode liftNode = _ourDom.SelectSingleNode("lift");
 
             writer.WriteStartElement(liftNode.Name);
             foreach (XmlAttribute attribute in liftNode.Attributes)
