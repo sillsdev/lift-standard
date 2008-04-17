@@ -81,7 +81,7 @@ namespace LiftIO.Parsing
 
         internal void ReadFieldDefinition(XmlNode node)
         {
-            string tag = GetStringAttribute(node, "tag");
+            string tag = GetStringAttribute(node, "tag"); //NB: Tag is correct (as of v12).  Changed to "type" only on *instances* of <field> element
             LiftMultiText description = ReadMultiText(node);
             _merger.ProcessFieldDefinition(tag, description);
         }

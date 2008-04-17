@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Merging\PoorMansMergingStrategyTests.cs" />
     <Compile Include="Migration\V11To12MigratorTests.cs" />
     <Compile Include="Migration\MigratorTestBase.cs" />
     <Compile Include="Migration\V10To11MigratorTests.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="Merging\SynchronicMergerTests.cs" />
     <Compile Include="UtilityTests.cs" />
     <Compile Include="Validation\ValidatorTests.cs" />
+    <Compile Include="XmlTestHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LiftIO\LiftIO.csproj">
