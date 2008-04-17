@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
+using LiftIO.Validation;
 
-namespace LiftIO
+namespace LiftIO.Merging
 {
     /// <summary>
     /// Class to merge two or more LIFT files that are created incrementally, such that
@@ -14,7 +15,7 @@ namespace LiftIO
     /// </summary>
     public class SynchronicMerger
     {
-      //  private string _pathToBaseLiftFile;
+        //  private string _pathToBaseLiftFile;
         public const  string ExtensionOfIncrementalFiles = ".lift.update";
 
         /// <summary>
@@ -209,18 +210,18 @@ namespace LiftIO
 
         static private void TestWriting(XmlWriter w)
         {
-         //  w.WriteStartDocument();
+            //  w.WriteStartDocument();
             w.WriteStartElement("start");
             w.WriteElementString("one", "hello");
             w.WriteElementString("two", "bye");
             w.WriteEndElement();
-        //   w.WriteEndDocument();
+            //   w.WriteEndDocument();
         }
-       static public void TestWritingFile()
+        static public void TestWritingFile()
         {
             XmlWriterSettings settings = new XmlWriterSettings();
             settings.Indent = true;
-         // nb:  don't use XmlTextWriter.Create, that's broken. Ignores the indent setting
+            // nb:  don't use XmlTextWriter.Create, that's broken. Ignores the indent setting
             using (XmlWriter writer = XmlWriter.Create("C:\\test.xml", settings))
             {
                 TestWriting(writer);
@@ -243,26 +244,26 @@ namespace LiftIO
         static private void MergeInNewFile(string olderFilePath, string newerFilePath, string outputPath)
         {
 
-                XmlDocument newerDoc = new XmlDocument();
-                newerDoc.Load(newerFilePath);
-                XmlWriterSettings settings = new XmlWriterSettings();
-                settings.NewLineOnAttributes = true; //ugly, but great for merging with revision control systems
-                settings.Indent = true;
-                settings.IndentChars = "\t";
+            XmlDocument newerDoc = new XmlDocument();
+            newerDoc.Load(newerFilePath);
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.NewLineOnAttributes = true; //ugly, but great for merging with revision control systems
+            settings.Indent = true;
+            settings.IndentChars = "\t";
 
-                // nb:  don't use XmlTextWriter.Create, that's broken. Ignores the indent setting
-                using (XmlWriter writer = XmlWriter.Create(outputPath /*Console.Out*/, settings))
+            // nb:  don't use XmlTextWriter.Create, that's broken. Ignores the indent setting
+            using (XmlWriter writer = XmlWriter.Create(outputPath /*Console.Out*/, settings))
+            {
+                //For each entry in the new guy, read through the whole base file
+                using (XmlReader olderReader = XmlTextReader.Create(olderFilePath))
                 {
-                    //For each entry in the new guy, read through the whole base file
-                    using (XmlReader olderReader = XmlTextReader.Create(olderFilePath))
+                    //bool elementWasReplaced = false;
+                    while (!olderReader.EOF)
                     {
-                        //bool elementWasReplaced = false;
-                        while (!olderReader.EOF)
-                        {
-                            ProcessOlderNode(olderReader, newerDoc, writer);
-                        }
+                        ProcessOlderNode(olderReader, newerDoc, writer);
                     }
                 }
+            }
 
         }
 
@@ -293,17 +294,17 @@ namespace LiftIO
                 writer.WriteAttributes(olderReader, true);
                 foreach(XmlNode n in newerDoc.SelectNodes("//entry")) 
                 {
-                   writer.WriteNode(n.CreateNavigator(), true /*REVIEW*/);//REVIEW CreateNavigator
+                    writer.WriteNode(n.CreateNavigator(), true /*REVIEW*/);//REVIEW CreateNavigator
                 }
                 //write out the closing lift element
                 writer.WriteEndElement();
                 olderReader.Read();
             }
 
-            //hit the end, write out any remaing new elements
+                //hit the end, write out any remaing new elements
 
             else if (olderReader.Name == "lift" &&
-                olderReader.NodeType == XmlNodeType.EndElement)
+                     olderReader.NodeType == XmlNodeType.EndElement)
             {
                 foreach (XmlNode n in newerDoc.SelectNodes("//entry")) //REVIEW CreateNavigator
                 {
@@ -328,7 +329,7 @@ namespace LiftIO
                         olderReader.Skip(); //skip the old one
                         writer.WriteNode(match.CreateNavigator(), true); //REVIEW CreateNavigator
                         match.ParentNode.RemoveChild(match);
-                   }
+                    }
                     else
                     {
                         writer.WriteNode(olderReader, true);
@@ -354,6 +355,4 @@ namespace LiftIO
        
 
     }
-
-
 }

@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 
-namespace LiftIO
+namespace LiftIO.Parsing
 {
     /// <summary>
     /// See LIFT documentation for explanation of what this is.

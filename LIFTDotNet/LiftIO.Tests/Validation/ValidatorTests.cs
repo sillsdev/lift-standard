@@ -1,9 +1,11 @@
 using System;
 using System.IO;
 using System.Xml;
+using LiftIO.Parsing;
+using LiftIO.Validation;
 using NUnit.Framework;
 
-namespace LiftIO.Tests
+namespace LiftIO.Tests.Validation
 {
     [TestFixture]
     public class ValidatorTests
@@ -13,7 +15,7 @@ namespace LiftIO.Tests
         public void LiftVersion_MatchesEmbeddedSchemaVersion()
         {
             XmlDocument doc = new XmlDocument();
-            doc.Load(typeof (LiftMultiText).Assembly.GetManifestResourceStream("LiftIO.lift.rng"));
+            doc.Load(typeof (LiftMultiText).Assembly.GetManifestResourceStream("LiftIO.Validation.lift.rng"));
             string query = String.Format("//x:attribute/x:value[.='{0}']", Validator.LiftVersion);
             XmlNamespaceManager m = new XmlNamespaceManager(doc.NameTable);
             m.AddNamespace("x", "http://relaxng.org/ns/structure/1.0");
@@ -71,5 +73,4 @@ namespace LiftIO.Tests
         }
 
     }
-
 }

@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
+using LiftIO.Validation;
 
-namespace LiftIO
+namespace LiftIO.Parsing
 {
     /// <summary>
     /// This class takes a file or DOM of lift and makes calls on a supplied "merger" object for what it finds there.
@@ -25,7 +26,7 @@ namespace LiftIO
         public event EventHandler<ErrorArgs> ParsingWarning;
         public event EventHandler<StepsArgs> SetTotalNumberSteps;
         public event EventHandler<ProgressEventArgs> SetStepsCompleted;
-		public event EventHandler<MessageArgs> SetProgressMessage;
+        public event EventHandler<MessageArgs> SetProgressMessage;
 
         private readonly ILexiconMerger<TBase, TEntry, TSense, TExample> _merger;
         private const string _wsAttributeLabel = "lang";
@@ -68,22 +69,22 @@ namespace LiftIO
 //        }
 
         internal void ReadRangeElement(string range, XmlNode node)
-		{
-			string id = GetStringAttribute(node, "id");
-			string guid = GetOptionalAttributeString(node, "guid");
-			string parent = GetOptionalAttributeString(node, "parent");
-			LiftMultiText description = LocateAndReadMultiText(node, "description");
-			LiftMultiText label = LocateAndReadMultiText(node, "label");
-			LiftMultiText abbrev = LocateAndReadMultiText(node, "abbrev");
-			_merger.ProcessRangeElement(range, id, guid, parent, description, label, abbrev);
-		}
+        {
+            string id = GetStringAttribute(node, "id");
+            string guid = GetOptionalAttributeString(node, "guid");
+            string parent = GetOptionalAttributeString(node, "parent");
+            LiftMultiText description = LocateAndReadMultiText(node, "description");
+            LiftMultiText label = LocateAndReadMultiText(node, "label");
+            LiftMultiText abbrev = LocateAndReadMultiText(node, "abbrev");
+            _merger.ProcessRangeElement(range, id, guid, parent, description, label, abbrev);
+        }
 
-		internal void ReadFieldDefinition(XmlNode node)
-		{
-			string tag = GetStringAttribute(node, "tag");
-			LiftMultiText description = ReadMultiText(node);
-			_merger.ProcessFieldDefinition(tag, description);
-		}
+        internal void ReadFieldDefinition(XmlNode node)
+        {
+            string tag = GetStringAttribute(node, "tag");
+            LiftMultiText description = ReadMultiText(node);
+            _merger.ProcessFieldDefinition(tag, description);
+        }
 
         internal TEntry ReadEntry(XmlNode node)
         {
@@ -95,15 +96,15 @@ namespace LiftIO
                 return default(TEntry);
             }
 
-			int homograph = 0;
-			string order = GetOptionalAttributeString(node, "order");
-			if (!String.IsNullOrEmpty(order))
-			{
-				if (!Int32.TryParse(order, out homograph))
-					homograph = 0;
-			}
-			TEntry entry = _merger.GetOrMakeEntry(extensible, homograph);
-			if (entry == null)// pruned
+            int homograph = 0;
+            string order = GetOptionalAttributeString(node, "order");
+            if (!String.IsNullOrEmpty(order))
+            {
+                if (!Int32.TryParse(order, out homograph))
+                    homograph = 0;
+            }
+            TEntry entry = _merger.GetOrMakeEntry(extensible, homograph);
+            if (entry == null)// pruned
             {
                 return entry;
             }
@@ -132,20 +133,20 @@ namespace LiftIO
                 ReadRelation(n, entry);
             }
 
-			foreach (XmlNode n in node.SelectNodes("variant"))
-			{
-				ReadVariant(n, entry);
-			}
+            foreach (XmlNode n in node.SelectNodes("variant"))
+            {
+                ReadVariant(n, entry);
+            }
 			
-			foreach (XmlNode n in node.SelectNodes("pronunciation"))
-			{
-				ReadPronunciation(n, entry);
-			}
+            foreach (XmlNode n in node.SelectNodes("pronunciation"))
+            {
+                ReadPronunciation(n, entry);
+            }
 
-			foreach (XmlNode n in node.SelectNodes("etymology"))
-			{
-				ReadEtymology(n, entry);
-			}
+            foreach (XmlNode n in node.SelectNodes("etymology"))
+            {
+                ReadEtymology(n, entry);
+            }
 
             ReadExtensibleElementDetails(entry, node);
             _merger.FinishEntry(entry);
@@ -154,13 +155,13 @@ namespace LiftIO
 
         private void ReadNotes(XmlNode node, TBase e)
         {
-			// REVIEW (SRMc): Should we detect multiple occurrences of the same
-			// type of note?  See ReadExtensibleElementDetails() for how field
-			// elements are handled in this regard.
+            // REVIEW (SRMc): Should we detect multiple occurrences of the same
+            // type of note?  See ReadExtensibleElementDetails() for how field
+            // elements are handled in this regard.
             foreach (XmlNode noteNode in node.SelectNodes("note"))
             {
                 string noteType = GetOptionalAttributeString(noteNode, "type");
-				LiftMultiText noteText = ReadMultiText(noteNode);
+                LiftMultiText noteText = ReadMultiText(noteNode);
                 _merger.MergeInNote(e, noteType, noteText);
             }
         }
@@ -173,33 +174,33 @@ namespace LiftIO
             _merger.MergeInRelation(parent, relationFieldName, targetId);
         }
 
-		private void ReadPronunciation(XmlNode node, TEntry entry)
-		{
-			LiftMultiText contents = ReadMultiText(node);
-			TBase pronunciation = _merger.MergeInPronunciation(entry, contents);
-			if (pronunciation != null)
-				ReadExtensibleElementDetails(pronunciation, node);
-		}
+        private void ReadPronunciation(XmlNode node, TEntry entry)
+        {
+            LiftMultiText contents = ReadMultiText(node);
+            TBase pronunciation = _merger.MergeInPronunciation(entry, contents);
+            if (pronunciation != null)
+                ReadExtensibleElementDetails(pronunciation, node);
+        }
 
-		private void ReadVariant(XmlNode node, TEntry entry)
-		{
-			LiftMultiText contents = ReadMultiText(node);
-			TBase variant = _merger.MergeInVariant(entry, contents);
-			if (variant != null)
-				ReadExtensibleElementDetails(variant, node);
-		}
+        private void ReadVariant(XmlNode node, TEntry entry)
+        {
+            LiftMultiText contents = ReadMultiText(node);
+            TBase variant = _merger.MergeInVariant(entry, contents);
+            if (variant != null)
+                ReadExtensibleElementDetails(variant, node);
+        }
 
-		private void ReadEtymology(XmlNode node, TEntry entry)
-		{
-			string source = GetOptionalAttributeString(node, "source");
-			LiftMultiText form = LocateAndReadMultiText(node, null);
-			LiftMultiText gloss = LocateAndReadOneElementPerFormData(node, "gloss");
-			TBase etymology = _merger.MergeInEtymology(entry, source, form, gloss);
-			if (etymology != null)
-				ReadExtensibleElementDetails(etymology, node);
-		}
+        private void ReadEtymology(XmlNode node, TEntry entry)
+        {
+            string source = GetOptionalAttributeString(node, "source");
+            LiftMultiText form = LocateAndReadMultiText(node, null);
+            LiftMultiText gloss = LocateAndReadOneElementPerFormData(node, "gloss");
+            TBase etymology = _merger.MergeInEtymology(entry, source, form, gloss);
+            if (etymology != null)
+                ReadExtensibleElementDetails(etymology, node);
+        }
 
-		private void ReadPicture(XmlNode n, TSense parent)
+        private void ReadPicture(XmlNode n, TSense parent)
         {
             string href = GetStringAttribute(n, "href");
             LiftMultiText caption = LocateAndReadMultiText(n, "label");
@@ -210,10 +211,10 @@ namespace LiftIO
             _merger.MergeInPicture(parent, href, caption);
         }
 
-		/// <summary>
-		/// Read the grammatical-info information for either a sense or a reversal.
-		/// </summary>
-		private void ReadGrammi(TBase senseOrReversal, XmlNode senseNode)
+        /// <summary>
+        /// Read the grammatical-info information for either a sense or a reversal.
+        /// </summary>
+        private void ReadGrammi(TBase senseOrReversal, XmlNode senseNode)
         {
             XmlNode grammiNode = senseNode.SelectSingleNode("grammatical-info");
             if (grammiNode != null)
@@ -228,7 +229,7 @@ namespace LiftIO
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        private static List<Trait> GetTraitList(XmlNode node)
+        private List<Trait> GetTraitList(XmlNode node)
         {
             List<Trait> traits = new List<Trait>();
             foreach (XmlNode traitNode in node.SelectNodes("trait"))
@@ -238,14 +239,14 @@ namespace LiftIO
             return traits;
         }
 
-        private TSense ReadSense(XmlNode node, TEntry entry)
+        private void ReadSense(XmlNode node, TEntry entry)
         {
             TSense sense = _merger.GetOrMakeSense(entry, ReadExtensibleElementBasics(node));
-			return FinishReadingSense(node, sense);
-		}
+            FinishReadingSense(node, sense);
+        }
 
-		private TSense FinishReadingSense(XmlNode node, TSense sense)
-		{
+        private void FinishReadingSense(XmlNode node, TSense sense)
+        {
             if (sense != null)//not been pruned
             {
                 ReadGrammi(sense, node);
@@ -270,33 +271,33 @@ namespace LiftIO
                 {
                     ReadRelation(n, sense);
                 }
-				foreach (XmlNode n in node.SelectNodes("illustration"))
+                foreach (XmlNode n in node.SelectNodes("illustration"))
                 {
                     ReadPicture(n, sense);
                 }
-				foreach (XmlNode n in node.SelectNodes("reversal"))
-				{
-					ReadReversal(n, sense);
-				}
-				foreach (XmlNode n in node.SelectNodes("subsense"))
-				{
-					ReadSubsense(n, sense);
-				}
-				ReadExtensibleElementDetails(sense, node);
+                foreach (XmlNode n in node.SelectNodes("reversal"))
+                {
+                    ReadReversal(n, sense);
+                }
+                foreach (XmlNode n in node.SelectNodes("subsense"))
+                {
+                    ReadSubsense(n, sense);
+                }
+                ReadExtensibleElementDetails(sense, node);
             }
-            return sense;
+            // return sense;
         }
 
-		private void ReadSubsense(XmlNode node, TSense sense)
-		{
-			TSense subsense = _merger.GetOrMakeSubsense(sense, ReadExtensibleElementBasics(node));
+        private void ReadSubsense(XmlNode node, TSense sense)
+        {
+            TSense subsense = _merger.GetOrMakeSubsense(sense, ReadExtensibleElementBasics(node));
             if (subsense != null)//wesay can't handle these in April 2008
             {
                 FinishReadingSense(node, subsense);
             }
-		}
+        }
 
-		private void ReadExample(XmlNode node, TSense sense)
+        private void ReadExample(XmlNode node, TSense sense)
         {
             TExample example = _merger.GetOrMakeExample(sense, ReadExtensibleElementBasics(node));
             if (example != null)//not been pruned
@@ -306,65 +307,65 @@ namespace LiftIO
                 {
                     _merger.MergeInExampleForm(example, exampleSentence);
                 }
-				foreach (XmlNode n in node.SelectNodes("translation"))
-				{
-					LiftMultiText translation = ReadMultiText(n);
-					string type = GetOptionalAttributeString(n, "type");
-					_merger.MergeInTranslationForm(example, type, translation);
-				}
+                foreach (XmlNode n in node.SelectNodes("translation"))
+                {
+                    LiftMultiText translation = ReadMultiText(n);
+                    string type = GetOptionalAttributeString(n, "type");
+                    _merger.MergeInTranslationForm(example, type, translation);
+                }
                 string source = GetOptionalAttributeString(node, "source");
                 if (source != null)
                 {
                     _merger.MergeInSource(example, source);
                 }
 
-				// REVIEW(SRMc): If you don't think the note element should be valid
-				// inside an example, then remove the next line and the corresponding
-				// chunk from the rng file.
+                // REVIEW(SRMc): If you don't think the note element should be valid
+                // inside an example, then remove the next line and the corresponding
+                // chunk from the rng file.
                 // JH says: LIFT ver 0.13 is going to make notes available to all extensibles
                 // todo: remove this when that is true
                 ReadNotes(node, example);
 
                 ReadExtensibleElementDetails(example, node);
             }
-		    return;
+            return;
         }
 
-		private void ReadReversal(XmlNode node, TSense sense)
-		{
-			string type = GetOptionalAttributeString(node, "type");
-			XmlNodeList nodelist = node.SelectNodes("main");
-			if (nodelist.Count > 1)
-			{
-				NotifyError(new LiftFormatException(String.Format("Only one <main> element is allowed inside a <reversal> element:\r\n{0}", node.OuterXml)));
-			}
-			TBase parent = null;
-			if (nodelist.Count == 1)
-				parent = ReadParentReversal(type, nodelist[0]);
-			LiftMultiText text = ReadMultiText(node);
-			TBase reversal = _merger.MergeInReversal(sense, parent, text, type);
-			if (reversal != null)
-				ReadGrammi(reversal, node);
-		}
+        private void ReadReversal(XmlNode node, TSense sense)
+        {
+            string type = GetOptionalAttributeString(node, "type");
+            XmlNodeList nodelist = node.SelectNodes("main");
+            if (nodelist.Count > 1)
+            {
+                NotifyError(new LiftFormatException(String.Format("Only one <main> element is allowed inside a <reversal> element:\r\n{0}", node.OuterXml)));
+            }
+            TBase parent = null;
+            if (nodelist.Count == 1)
+                parent = ReadParentReversal(type, nodelist[0]);
+            LiftMultiText text = ReadMultiText(node);
+            TBase reversal = _merger.MergeInReversal(sense, parent, text, type);
+            if (reversal != null)
+                ReadGrammi(reversal, node);
+        }
 
-		private TBase ReadParentReversal(string type, XmlNode node)
-		{
-			XmlNodeList nodelist = node.SelectNodes("main");
-			if (nodelist.Count > 1)
-			{
-				NotifyError(new LiftFormatException(String.Format("Only one <main> element is allowed inside a <main> element:\r\n{0}", node.OuterXml)));
-			}
-			TBase parent = null;
-			if (nodelist.Count == 1)
-				parent = ReadParentReversal(type, nodelist[0]);
-			LiftMultiText text = ReadMultiText(node);
-			TBase reversal = _merger.GetOrMakeParentReversal(parent, text, type);
-			if (reversal != null)
-				ReadGrammi(reversal, node);
-			return reversal;
-		}
+        private TBase ReadParentReversal(string type, XmlNode node)
+        {
+            XmlNodeList nodelist = node.SelectNodes("main");
+            if (nodelist.Count > 1)
+            {
+                NotifyError(new LiftFormatException(String.Format("Only one <main> element is allowed inside a <main> element:\r\n{0}", node.OuterXml)));
+            }
+            TBase parent = null;
+            if (nodelist.Count == 1)
+                parent = ReadParentReversal(type, nodelist[0]);
+            LiftMultiText text = ReadMultiText(node);
+            TBase reversal = _merger.GetOrMakeParentReversal(parent, text, type);
+            if (reversal != null)
+                ReadGrammi(reversal, node);
+            return reversal;
+        }
 
-		/// <summary>
+        /// <summary>
         /// read enough for finding a potential match to merge with
         /// </summary>
         /// <param name="node"></param>
@@ -374,7 +375,7 @@ namespace LiftIO
             Extensible extensible = new Extensible();
             extensible.Id = GetOptionalAttributeString(node, "id");//actually not part of extensible (as of 8/1/2007)
 
-           //todo: figure out how to actually look it up:
+            //todo: figure out how to actually look it up:
             //      string flexPrefix = node.OwnerDocument.GetPrefixOfNamespace("http://fieldworks.sil.org");
 //            string flexPrefix = "flex";
 //            if (flexPrefix != null && flexPrefix != string.Empty)
@@ -416,13 +417,13 @@ namespace LiftIO
                     // a fatal error
                     throw new LiftFormatException(String.Format("Field with same type ({0}) as sibling not allowed. Context:{1}", fieldType, fieldNode.ParentNode.OuterXml));
                 }
-				//todo: read annotations           
-				this._merger.MergeInField(target,
-                                         fieldType,
-                                         GetOptionalDate(fieldNode, "dateCreated", default(DateTime)),
-                                         GetOptionalDate(fieldNode, "dateModified", default(DateTime)),
-                                         ReadMultiText(fieldNode),
-										 GetTraitList(fieldNode));
+                //todo: read annotations           
+                this._merger.MergeInField(target,
+                                          fieldType,
+                                          GetOptionalDate(fieldNode, "dateCreated", default(DateTime)),
+                                          GetOptionalDate(fieldNode, "dateModified", default(DateTime)),
+                                          ReadMultiText(fieldNode),
+                                          GetTraitList(fieldNode));
             }
 
             ReadTraits(node, target);
@@ -451,9 +452,9 @@ namespace LiftIO
             }
         }
 
-        private static string GetOptionalAttributeString(XmlNode xmlNode, string name)
+        private static string GetOptionalAttributeString(XmlNode xmlNode, string attributeName)
         {
-            XmlAttribute attr = xmlNode.Attributes[name];
+            XmlAttribute attr = xmlNode.Attributes[attributeName];
             if (attr == null)
                 return null;
             return attr.Value;
@@ -464,12 +465,12 @@ namespace LiftIO
         /// careful, can't return null, so give MinValue
         /// </summary>
         /// <param name="xmlNode"></param>
-        /// <param name="name"></param>
+        /// <param name="attributeName"></param>
         /// <param name="defaultDateTime">the time to use if this attribute isn't found</param>
         /// <returns></returns>
-        private DateTime GetOptionalDate(XmlNode xmlNode, string name, DateTime defaultDateTime)
+        private DateTime GetOptionalDate(XmlNode xmlNode, string attributeName, DateTime defaultDateTime)
         {
-            XmlAttribute attr = xmlNode.Attributes[name];
+            XmlAttribute attr = xmlNode.Attributes[attributeName];
             if (attr == null)
                 return defaultDateTime;
 
@@ -509,16 +510,16 @@ namespace LiftIO
             }
             return new LiftMultiText();
         }
-
-        private List<LiftMultiText> LocateAndReadOneOrMoreMultiText(XmlNode node, string query)
-        {
-            List<LiftMultiText> results = new List<LiftMultiText>();      
-            foreach (XmlNode n in node.SelectNodes(query))
-            {
-                results.Add(ReadMultiText(n));
-            }
-            return results;
-        }
+//
+//        private List<LiftMultiText> LocateAndReadOneOrMoreMultiText(XmlNode node, string query)
+//        {
+//            List<LiftMultiText> results = new List<LiftMultiText>();      
+//            foreach (XmlNode n in node.SelectNodes(query))
+//            {
+//                results.Add(ReadMultiText(n));
+//            }
+//            return results;
+//        }
 
         private LiftMultiText LocateAndReadOneElementPerFormData(XmlNode node, string query)
         {
@@ -545,28 +546,28 @@ namespace LiftIO
                     XmlNode textNode= formNode.SelectSingleNode("text");
                     if (textNode != null)
                     {
-						// Add the separator if we need it.
-						if (textNode.InnerText.Length > 0)
-							text.AddOrAppend(lang, "", "; ");
-						foreach (XmlNode node in textNode.ChildNodes)
-						{
-							if (node.Name == "span")
-							{
-								text.AddSpan(lang,
-									GetOptionalAttributeString(node, "lang"),
-									GetOptionalAttributeString(node, "class"),
-									GetOptionalAttributeString(node, "href"),
-									node.InnerText.Length);
-							}
-							text.AddOrAppend(lang, node.InnerText, "");
-						}
+                        // Add the separator if we need it.
+                        if (textNode.InnerText.Length > 0)
+                            text.AddOrAppend(lang, "", "; ");
+                        foreach (XmlNode node in textNode.ChildNodes)
+                        {
+                            if (node.Name == "span")
+                            {
+                                text.AddSpan(lang,
+                                             GetOptionalAttributeString(node, "lang"),
+                                             GetOptionalAttributeString(node, "class"),
+                                             GetOptionalAttributeString(node, "href"),
+                                             node.InnerText.Length);
+                            }
+                            text.AddOrAppend(lang, node.InnerText, "");
+                        }
                     }
 
-                    foreach (XmlNode traitNode in formNode.SelectNodes("trait"))
+                    foreach (XmlNode annotationNode in formNode.SelectNodes("annotation"))
                     {
-                        Trait trait = GetTrait(traitNode);
-                        trait.LanguageHint = lang;
-                        text.Traits.Add(trait);
+                        Annotation annotation = GetAnnotation(annotationNode);
+                        // annotation.LanguageHint = lang;
+                        text.Annotations.Add(annotation);
                     }
                 }
                 catch (Exception e)
@@ -577,10 +578,26 @@ namespace LiftIO
             }
         }
 
-        private static Trait GetTrait(XmlNode traitNode)
+        private Trait GetTrait(XmlNode traitNode)
         {
-            return new Trait(GetStringAttribute(traitNode, "name"),
-                             GetStringAttribute(traitNode, "value"));
+            Trait t = new Trait(GetStringAttribute(traitNode, "name"),
+                                GetStringAttribute(traitNode, "value"));
+
+            foreach (XmlNode annotationNode in traitNode.SelectNodes("annotation"))
+            {
+                Annotation annotation = GetAnnotation(annotationNode);
+                // annotation.LanguageHint = lang;
+                t.Annotations.Add(annotation);
+            }
+            return t;
+        }
+
+        private  Annotation GetAnnotation(XmlNode annotationNode)
+        {
+            return new Annotation(GetOptionalAttributeString(annotationNode, "name"),
+                                  GetOptionalAttributeString(annotationNode, "value"),
+                                  GetOptionalDate(annotationNode, "when", default(DateTime)),
+                                  GetOptionalAttributeString(annotationNode, "who"));
         }
 
         //private static bool NodeContentIsJustAString(XmlNode node)
@@ -601,32 +618,31 @@ namespace LiftIO
 //        }
 //
 
-		/// <summary>
-		/// Read a LIFT file. Must be the current lift version.
-		/// </summary>
-        public int ReadLiftFile(string pathToLift)
-		{
+        /// <summary>
+        /// Read a LIFT file. Must be the current lift version.
+        /// </summary>
+        public void ReadLiftFile(string pathToLift)
+        {
             if (_defaultCreationModificationUTC == default(DateTime))
             {
                 _defaultCreationModificationUTC = File.GetLastWriteTimeUtc(pathToLift);
             }
 
             ProgressTotalSteps = GetEstimatedNumberOfEntriesInFile(pathToLift);
-			ProgressStepsCompleted = 0;
+            ProgressStepsCompleted = 0;
 
             if (Validator.GetLiftVersion(pathToLift) != Validator.LiftVersion)
             {
                 throw new LiftFormatException("Programmer should migrate the lift file before calling this method.");
             }
-			int numberOfEntriesRead = 0;         
-		    using (XmlReader reader = XmlReader.Create(pathToLift, NormalReaderSettings))
-			{
-				reader.ReadStartElement("lift");
-				ReadHeader(reader);
-				numberOfEntriesRead = ReadEntries(reader);
-			}
-			return numberOfEntriesRead;
-		}
+         
+            using (XmlReader reader = XmlReader.Create(pathToLift, NormalReaderSettings))
+            {
+                reader.ReadStartElement("lift");
+                ReadHeader(reader);
+                ReadEntries(reader);
+            }
+        }
 
         /// <summary>
         /// Intended to be fast, and only (probably) acurate
@@ -662,7 +678,7 @@ namespace LiftIO
         }
 
 
-        private int ReadEntries(XmlReader reader)
+        private void ReadEntries(XmlReader reader)
         {
 // Process all of the entry elements, reading them into memory one at a time.
             ProgressMessage = "Reading entries from LIFT file";
@@ -691,7 +707,6 @@ namespace LiftIO
                     break;
                 }
             }
-			return numberOfEntriesRead;
         }
 
         /// <summary>
@@ -709,12 +724,10 @@ namespace LiftIO
             if (reader.IsStartElement("header"))
             {
                 ProgressMessage = "Reading LIFT file header";
-				bool headerIsEmpty = reader.IsEmptyElement;
                 reader.ReadStartElement("header");
                 ReadRanges(reader);
                 if (reader.IsStartElement("fields"))
                 {
-					bool fieldsIsEmpty = reader.IsEmptyElement;
                     reader.ReadStartElement("fields");
                     while (reader.IsStartElement("field"))
                     {
@@ -724,11 +737,9 @@ namespace LiftIO
                             this.ReadFieldDefinition(GetNodeFromString(fieldXml));
                         }
                     }
-					if (!fieldsIsEmpty)
-	                    reader.ReadEndElement();	// </fields>
+                    reader.ReadEndElement();	// </fields>
                 }
-				if (!headerIsEmpty)
-	                reader.ReadEndElement();	// </header>
+                reader.ReadEndElement();	// </header>
             }
         }
 
@@ -736,7 +747,6 @@ namespace LiftIO
         {
             if (reader.IsStartElement("ranges"))
             {
-				bool rangesIsEmpty = reader.IsEmptyElement;
                 reader.ReadStartElement("ranges");
                 while (reader.IsStartElement("range"))
                 {
@@ -744,7 +754,6 @@ namespace LiftIO
                     string href = reader.GetAttribute("href");
                     string guid = reader.GetAttribute("guid");
                     ProgressMessage = String.Format("Reading LIFT range {0}", id);
-					bool rangeIsEmpty = reader.IsEmptyElement;
                     reader.ReadStartElement();
                     if (String.IsNullOrEmpty(href))
                     {
@@ -761,17 +770,15 @@ namespace LiftIO
                     {
                         this.ReadExternalRange(href, id, guid);
                     }
-					if (!rangeIsEmpty)
-	                    reader.ReadEndElement();	// </range>
+                    reader.ReadEndElement();	// </range>
                 }
-				if (!rangesIsEmpty)
-	                reader.ReadEndElement();	// </ranges>
+                reader.ReadEndElement();	// </ranges>
             }
         }
 
         /// <summary>
-		/// Return the number of entries processed from the most recent file.
-		/// </summary>
+        /// Return the number of entries processed from the most recent file.
+        /// </summary>
 //		this was a confusing way to return the results of a parse operation.
 //        the parser should really return this value, if flex
 //      needs it
@@ -780,42 +787,40 @@ namespace LiftIO
 //			get { return _count; }
 //		}
 
-		/// <summary>
-		/// Read a range from a separate file.
-		/// </summary>
-		/// <param name="pathToRangeFile"></param>
-		/// <param name="rangeId"></param>
-		/// <param name="rangeGuid"></param>
-		private void ReadExternalRange(string pathToRangeFile, string rangeId, string rangeGuid)
-		{
-			if (pathToRangeFile.StartsWith("file://"))
+        /// <summary>
+        /// Read a range from a separate file.
+        /// </summary>
+        /// <param name="pathToRangeFile"></param>
+        /// <param name="rangeId"></param>
+        /// <param name="rangeGuid"></param>
+        private void ReadExternalRange(string pathToRangeFile, string rangeId, string rangeGuid)
+        {
+            if (pathToRangeFile.StartsWith("file://"))
                 pathToRangeFile = pathToRangeFile.Substring(7);
 
             using (XmlReader reader = XmlReader.Create(pathToRangeFile, NormalReaderSettings))
-			{
-				reader.ReadStartElement("lift-ranges");
-				while (reader.IsStartElement("range"))
-				{
-					string id = reader.GetAttribute("id");
-				// unused	string guid = reader.GetAttribute("guid");
-					bool foundDesiredRange = id == rangeId;
-					bool rangeIsEmpty = reader.IsEmptyElement;
-					reader.ReadStartElement();
-					while (reader.IsStartElement("range-element"))
-					{
-						string rangeElementXml = reader.ReadOuterXml();
-						if (foundDesiredRange && !String.IsNullOrEmpty(rangeElementXml))
-						{
+            {
+                reader.ReadStartElement("lift-ranges");
+                while (reader.IsStartElement("range"))
+                {
+                    string id = reader.GetAttribute("id");
+                    // unused	string guid = reader.GetAttribute("guid");
+                    bool foundDesiredRange = id == rangeId;
+                    reader.ReadStartElement();
+                    while (reader.IsStartElement("range-element"))
+                    {
+                        string rangeElementXml = reader.ReadOuterXml();
+                        if (foundDesiredRange && !String.IsNullOrEmpty(rangeElementXml))
+                        {
                             this.ReadRangeElement(id, GetNodeFromString(rangeElementXml));
-						}
-					}
-					if (!rangeIsEmpty)
-						reader.ReadEndElement();
-					if (foundDesiredRange)
-						return;		// we've seen the range we wanted from this file.
-				}
-			}
-		}
+                        }
+                    }
+                    reader.ReadEndElement();
+                    if (foundDesiredRange)
+                        return;		// we've seen the range we wanted from this file.
+                }
+            }
+        }
 
 
         #region Progress
@@ -842,18 +847,18 @@ namespace LiftIO
             }
         }
 
-		public class MessageArgs : EventArgs
-		{
-			private string _msg;
+        public class MessageArgs : EventArgs
+        {
+            private string _msg;
 
-			public string Message
-			{
-				get { return this._msg; }
-				set { _msg = value; }
-			}
-		}
+            public string Message
+            {
+                get { return this._msg; }
+                set { _msg = value; }
+            }
+        }
 
-		private int ProgressStepsCompleted
+        private int ProgressStepsCompleted
         {
             set
             {
@@ -879,18 +884,18 @@ namespace LiftIO
             }
         }
 
-		private string ProgressMessage
-		{
-			set
-			{
-				if (SetProgressMessage != null)
-				{
-					MessageArgs e = new MessageArgs();
-					e.Message = value;
-					SetProgressMessage.Invoke(this, e);
-				}
-			}
-		}
+        private string ProgressMessage
+        {
+            set
+            {
+                if (SetProgressMessage != null)
+                {
+                    MessageArgs e = new MessageArgs();
+                    e.Message = value;
+                    SetProgressMessage.Invoke(this, e);
+                }
+            }
+        }
 
         public DateTime DefaultCreationModificationUTC
         {
@@ -929,8 +934,7 @@ namespace LiftIO
             }
         }
 
-#endregion
+        #endregion
 
     }
-
 }

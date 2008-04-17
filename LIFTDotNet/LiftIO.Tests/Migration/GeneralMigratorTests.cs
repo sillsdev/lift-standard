@@ -1,6 +1,8 @@
 using System;
 using System.IO;
 using System.Xml;
+using LiftIO.Migration;
+using LiftIO.Validation;
 using NUnit.Framework;
 
 namespace LiftIO.Tests.Migration
