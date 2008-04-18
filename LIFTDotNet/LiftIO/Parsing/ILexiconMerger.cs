@@ -22,15 +22,15 @@ namespace LiftIO.Parsing
         TEntry GetOrMakeEntry(Extensible info, int order);
         void EntryWasDeleted(Extensible info, DateTime dateDeleted);
         TSense GetOrMakeSense(TEntry entry, Extensible info);
-        TSense GetOrMakeSubsense(TSense sense, Extensible info);
+        TSense GetOrMakeSubsense(TSense sense, Extensible info, string rawXml);
         TExample GetOrMakeExample(TSense sense, Extensible info);
 
         void MergeInLexemeForm(TEntry entry, LiftMultiText contents);
         void MergeInCitationForm(TEntry entry, LiftMultiText contents);
         // These may be stored as a separate object, which can then contain fields or traits.
         // Thus we need the proper object back on which to store these embedded values.
-        TBase MergeInPronunciation(TEntry entry, LiftMultiText contents);
-        TBase MergeInVariant(TEntry entry, LiftMultiText contents);
+        TBase MergeInPronunciation(TEntry entry, LiftMultiText contents, string rawXml);
+        TBase MergeInVariant(TEntry entry, LiftMultiText contents, string rawXml);
 
         void MergeInGloss(TSense sense, LiftMultiText multiText);
         void MergeInDefinition(TSense sense, LiftMultiText liftMultiText);
@@ -63,7 +63,7 @@ namespace LiftIO.Parsing
         /// <summary>
         /// Handle LIFT's "relation" entity (currently missing several attributes)
         /// </summary>
-        void MergeInRelation(TBase extensible, string relationTypeName, string targetId);
+        void MergeInRelation(TBase extensible, string relationTypeName, string targetId, string rawXml);
 
         /// <summary>
         /// Handle LIFT's "note" entity. NB: This may be called multiple times (w/ different notes).
@@ -97,7 +97,7 @@ namespace LiftIO.Parsing
         /// <param name="contents"></param>
         /// <param name="type"></param>
         /// <returns>the reversal object</returns>
-        TBase MergeInReversal(TSense sense, TBase parent, LiftMultiText contents, string type);
+        TBase MergeInReversal(TSense sense, TBase parent, LiftMultiText contents, string type, string rawXml);
 
         /// <summary>
         /// Handle LIFT's "etymology" entity.
@@ -107,7 +107,7 @@ namespace LiftIO.Parsing
         /// <param name="form"></param>
         /// <param name="gloss"></param>
         /// <returns>the etymology object</returns>
-        TBase MergeInEtymology(TEntry entry, string source, LiftMultiText form, LiftMultiText gloss);
+        TBase MergeInEtymology(TEntry entry, string source, LiftMultiText form, LiftMultiText gloss, string rawXml);
 
         /// <summary>
         /// Process a range element from the header (possibly from a separate range file).  The
@@ -131,4 +131,20 @@ namespace LiftIO.Parsing
         /// <param name="description"></param>
         void ProcessFieldDefinition(string tag, LiftMultiText description);
     }
+
+//    /// <summary>
+//    /// This helps apps that don't want to model everything, but want to round-trip everything
+//    /// </summary>
+//    /// <typeparam name="TBase"></typeparam>
+//    /// <typeparam name="TEntry"></typeparam>
+//    /// <typeparam name="TSense"></typeparam>
+//    /// <typeparam name="TExample"></typeparam>
+//    public interface ILimittedMerger<TBase, TEntry, TSense, TExample>
+//    {
+//        bool DoesPreferXmlForPhonetic { get;}
+//        void MergeInPronunciation(TEntry entry, string xml);
+//
+//        bool DoesPreferXmlForEtymology { get;}
+//        void MergeInEtymology(TEntry entry, string xml);
+//    }
 }
