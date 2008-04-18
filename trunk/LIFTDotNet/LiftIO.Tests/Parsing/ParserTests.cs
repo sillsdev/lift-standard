@@ -305,7 +305,7 @@ namespace LiftIO.Tests
 		{
             Expect.Exactly(1).On(_merger)
                 .Method("MergeInField").With(Is.Anything, tagMatcher,
-				dateCreatedMatcher, dateModifiedMatcher, multiTextMatcher, traitsMatcher);
+                dateCreatedMatcher, dateModifiedMatcher, multiTextMatcher, traitsMatcher);
             //  .Method("MergeInField").With(matchers);
         }
 
@@ -327,7 +327,7 @@ namespace LiftIO.Tests
         {
             Expect.Exactly(1).On(_merger)
                 .Method("MergeInRelation")
-                .With(Is.Anything, Is.EqualTo(relationType), Is.EqualTo(targetId));  
+                .With(Is.Anything, Is.EqualTo(relationType), Is.EqualTo(targetId), Is.Anything);  
        }
  
        private void ExpectMergeInPicture(string href)
@@ -453,11 +453,40 @@ namespace LiftIO.Tests
 			ParseEntryAndCheck("<entry><pronunciation><form lang='en__IPA'><text>ai</text></form></pronunciation></entry>");
 		}
 
+        [Test]
+        public void EntryWithPronunciationWithFields()
+        {
+            ExpectGetOrMakeEntry();
+            ExpectMergeInPronunciation("");
+            ExpectMergeInField(
+                    Is.EqualTo("cvPattern"),
+                    Is.EqualTo(default(DateTime)),
+                    Is.EqualTo(default(DateTime)),
+                    Has.Property("Count", Is.EqualTo(1)),//multitext
+                    Has.Property("Count", Is.EqualTo(0))//traits
+                    );
+            ParseEntryAndCheck(@"<entry><pronunciation>
+                    <field type='cvPattern'>
+                        <form lang='en'>
+                            <text>acvpattern</text>
+                        </form>
+                    </field>
+                </pronunciation></entry>");
+        }
+
+        [Test, Ignore("Not implemented yet")]
+        public void EntryWithPronunciationWithMedia()
+        {
+            ExpectGetOrMakeEntry();
+            ExpectMergeInPronunciation("en__IPA=ai|");//TODO: this is not going to test it
+            ParseEntryAndCheck("<entry><pronunciation><media href='blah.mp3'/></pronunciation></entry>");
+        }
+
 		private void ExpectMergeInPronunciation(string value)
 		{
 			Expect.Exactly(1).On(_merger)
 				.Method("MergeInPronunciation")
-				.With(Is.Anything, Has.ToString(Is.EqualTo(value)))
+                .With(Is.Anything, Has.ToString(Is.EqualTo(value)), Is.Anything)
 				.Will(Return.Value(new Dummy()));
 		}
 
@@ -473,7 +502,7 @@ namespace LiftIO.Tests
 		{
 			Expect.Exactly(1).On(_merger)
 				.Method("MergeInVariant")
-				.With(Is.Anything, Has.ToString(Is.EqualTo(value)))
+                .With(Is.Anything, Has.ToString(Is.EqualTo(value)), Is.Anything)
 				.Will(Return.Value(new Dummy()));
 		}
 
@@ -1071,7 +1100,7 @@ namespace LiftIO.Tests
 				ExpectGetOrMakeEntry();
 				Expect.Exactly(1).On(_merger).Method("MergeInEtymology")
 					.With(Is.Anything, Is.EqualTo("Greek"), Is.EqualTo(new LiftMultiText("bam", "alphabeta")),
-							Is.EqualTo(new LiftMultiText("en", "letters")))
+							Is.EqualTo(new LiftMultiText("en", "letters")), Is.Anything)
 					.Will(Return.Value(new Dummy()));
 				Expect.Exactly(1).On(_merger).Method("MergeInField")
 					.With(Is.Anything, Is.EqualTo("comment"), Is.EqualTo(DateTime.MinValue), Is.EqualTo(DateTime.MinValue),
@@ -1092,7 +1121,7 @@ namespace LiftIO.Tests
 				ExpectGetOrMakeEntry();
 				ExpectGetOrMakeSense();
 				Expect.Exactly(1).On(_merger).Method("MergeInReversal")
-					.With(Is.Anything, Is.Null, Is.EqualTo(new LiftMultiText("en", "sorghum")), Is.Null);
+                    .With(Is.Anything, Is.Null, Is.EqualTo(new LiftMultiText("en", "sorghum")), Is.Null, Is.Anything);
 				ExpectFinishEntry();
 			}
 			_parser.ReadEntry(_doc.FirstChild);
@@ -1111,7 +1140,7 @@ namespace LiftIO.Tests
 				Expect.Exactly(1).On(_merger).Method("GetOrMakeParentReversal")
 					.With(Is.Null, Is.EqualTo(new LiftMultiText("en", "fruit")), Is.EqualTo("test"));
 				Expect.Exactly(1).On(_merger).Method("MergeInReversal")
-					.With(Is.Anything, Is.Null, Is.EqualTo(new LiftMultiText("en", "apple")), Is.EqualTo("test"));
+                    .With(Is.Anything, Is.Null, Is.EqualTo(new LiftMultiText("en", "apple")), Is.EqualTo("test"), Is.Anything);
 				ExpectFinishEntry();
 			}
 			_parser.ReadEntry(_doc.FirstChild);

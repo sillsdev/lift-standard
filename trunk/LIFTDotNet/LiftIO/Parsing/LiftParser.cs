@@ -29,15 +29,16 @@ namespace LiftIO.Parsing
         public event EventHandler<MessageArgs> SetProgressMessage;
 
         private readonly ILexiconMerger<TBase, TEntry, TSense, TExample> _merger;
+      //  private readonly ILimittedMerger<TBase, TEntry, TSense, TExample> _limitedMerger;
         private const string _wsAttributeLabel = "lang";
 
         private bool _cancelNow = false;
         private DateTime _defaultCreationModificationUTC=default(DateTime);
 
-
         public LiftParser(ILexiconMerger<TBase, TEntry, TSense, TExample> merger)
         {
             _merger = merger;
+         //   _limitedMerger = _merger as ILimittedMerger<TBase, TEntry, TSense, TExample>;
         }
     
         /// <summary>
@@ -171,13 +172,20 @@ namespace LiftIO.Parsing
             string targetId = GetStringAttribute(n, "ref");
             string relationFieldName = GetStringAttribute(n, "type");
 
-            _merger.MergeInRelation(parent, relationFieldName, targetId);
+            _merger.MergeInRelation(parent, relationFieldName, targetId, n.OuterXml);
         }
 
         private void ReadPronunciation(XmlNode node, TEntry entry)
         {
+//            if (_limitedMerger != null && _limitedMerger.DoesPreferXmlForPhonetic)
+//            {
+//                _limitedMerger.MergeInPronunciation(entry, node.OuterXml);
+//                return;
+//            }
+
             LiftMultiText contents = ReadMultiText(node);
-            TBase pronunciation = _merger.MergeInPronunciation(entry, contents);
+            //todo: media
+            TBase pronunciation = _merger.MergeInPronunciation(entry, contents, node.OuterXml);
             if (pronunciation != null)
                 ReadExtensibleElementDetails(pronunciation, node);
         }
@@ -185,17 +193,23 @@ namespace LiftIO.Parsing
         private void ReadVariant(XmlNode node, TEntry entry)
         {
             LiftMultiText contents = ReadMultiText(node);
-            TBase variant = _merger.MergeInVariant(entry, contents);
+            TBase variant = _merger.MergeInVariant(entry, contents, node.OuterXml);
             if (variant != null)
                 ReadExtensibleElementDetails(variant, node);
         }
 
         private void ReadEtymology(XmlNode node, TEntry entry)
         {
+//            if (_limitedMerger != null && _limitedMerger.DoesPreferXmlForEtymology)
+//            {
+//                _limitedMerger.MergeInEtymology(entry, node.OuterXml);
+//                return;
+//            }
+
             string source = GetOptionalAttributeString(node, "source");
             LiftMultiText form = LocateAndReadMultiText(node, null);
             LiftMultiText gloss = LocateAndReadOneElementPerFormData(node, "gloss");
-            TBase etymology = _merger.MergeInEtymology(entry, source, form, gloss);
+            TBase etymology = _merger.MergeInEtymology(entry, source, form, gloss, node.OuterXml);
             if (etymology != null)
                 ReadExtensibleElementDetails(etymology, node);
         }
@@ -290,7 +304,7 @@ namespace LiftIO.Parsing
 
         private void ReadSubsense(XmlNode node, TSense sense)
         {
-            TSense subsense = _merger.GetOrMakeSubsense(sense, ReadExtensibleElementBasics(node));
+            TSense subsense = _merger.GetOrMakeSubsense(sense, ReadExtensibleElementBasics(node), node.OuterXml);
             if (subsense != null)//wesay can't handle these in April 2008
             {
                 FinishReadingSense(node, subsense);
@@ -343,7 +357,7 @@ namespace LiftIO.Parsing
             if (nodelist.Count == 1)
                 parent = ReadParentReversal(type, nodelist[0]);
             LiftMultiText text = ReadMultiText(node);
-            TBase reversal = _merger.MergeInReversal(sense, parent, text, type);
+            TBase reversal = _merger.MergeInReversal(sense, parent, text, type, node.OuterXml);
             if (reversal != null)
                 ReadGrammi(reversal, node);
         }
