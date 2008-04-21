@@ -45,12 +45,9 @@ namespace LiftIO.Parsing
         /// <summary>
         /// Handle LIFT's "field" entity which can be found on any subclass of "extensible"
         /// </summary>
-        /// 
-        ///review: a field can also have @value? how does that compare to multitext
-        ///todo: field also has @date
-        void MergeInField(TBase extensible, string tagAttribute, DateTime dateCreated, 
+        void MergeInField(TBase extensible, string typeAttribute, DateTime dateCreated, 
                           DateTime dateModified, 
-                          LiftMultiText contents, List<Trait> traits);
+                          LiftMultiText contents, List<Trait> traits/*, todo: annotations */);
 
         /// <summary>
         /// Handle LIFT's "trait" entity,

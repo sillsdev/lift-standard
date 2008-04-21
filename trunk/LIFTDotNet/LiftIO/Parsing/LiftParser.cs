@@ -431,7 +431,6 @@ namespace LiftIO.Parsing
                     // a fatal error
                     throw new LiftFormatException(String.Format("Field with same type ({0}) as sibling not allowed. Context:{1}", fieldType, fieldNode.ParentNode.OuterXml));
                 }
-                //todo: read annotations           
                 this._merger.MergeInField(target,
                                           fieldType,
                                           GetOptionalDate(fieldNode, "dateCreated", default(DateTime)),
