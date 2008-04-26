@@ -126,9 +126,15 @@ namespace LiftIO.Parsing
     public class LiftMultiText : Dictionary<string, LiftString>
     {
         private List<Annotation> _annotations = new List<Annotation>();
+        private string _OriginalRawXml;
 
         public LiftMultiText()
         {
+        }
+
+        public LiftMultiText(string rawXml)
+        {
+            _OriginalRawXml = rawXml;
         }
 
         public LiftMultiText(string key, string simpleContent)
@@ -217,6 +223,11 @@ namespace LiftIO.Parsing
             }
         }
 
+        public string OriginalRawXml
+        {
+            get { return _OriginalRawXml; }
+        }
+
         public void Prepend(string key, string prepend)
         {
             LiftString existing;
@@ -258,6 +269,12 @@ namespace LiftIO.Parsing
                 alternative.Text = newValue;
                 this[key] = alternative;
             }
+        }
+
+
+        public void Merge(LiftMultiText theirs, LiftMultiText ancestor)
+        {
+
         }
 
         /// <summary>

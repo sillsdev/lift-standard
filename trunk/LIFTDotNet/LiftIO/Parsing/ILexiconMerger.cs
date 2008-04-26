@@ -21,7 +21,7 @@ namespace LiftIO.Parsing
     {
         TEntry GetOrMakeEntry(Extensible info, int order);
         void EntryWasDeleted(Extensible info, DateTime dateDeleted);
-        TSense GetOrMakeSense(TEntry entry, Extensible info);
+        TSense GetOrMakeSense(TEntry entry, Extensible info, string rawXml);
         TSense GetOrMakeSubsense(TSense sense, Extensible info, string rawXml);
         TExample GetOrMakeExample(TSense sense, Extensible info);
 
