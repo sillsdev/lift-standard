@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Merging\LiftSavvyMergingStrategyTests.cs" />
     <Compile Include="Merging\PoorMansMergingStrategyTests.cs" />
     <Compile Include="Migration\V11To12MigratorTests.cs" />
     <Compile Include="Migration\MigratorTestBase.cs" />

@@ -50,7 +50,7 @@ namespace LiftIO.Tests.Merging
         {
             string ours = @"<?xml version='1.0' encoding='utf-8'?>
                     <lift version='0.10' producer='WeSay 1.0.0.0'>
-                        <entry id='newSensesCollision'>
+                        <entry id='test'>
                             <sense>
                                  <gloss lang='a'>
                                     <text>ourSense</text>
@@ -61,7 +61,7 @@ namespace LiftIO.Tests.Merging
 
             string theirs = @"<?xml version='1.0' encoding='utf-8'?>
                     <lift version='0.10' producer='WeSay 1.0.0.0'>
-                        <entry id='newSensesCollision'>
+                        <entry id='test'>
                             <sense>
                                  <gloss lang='a'>
                                     <text>theirSense</text>
@@ -71,13 +71,13 @@ namespace LiftIO.Tests.Merging
                     </lift>";
             string ancestor = @"<?xml version='1.0' encoding='utf-8'?>
                     <lift version='0.10' producer='WeSay 1.0.0.0'>
-                        <entry id='newSensesCollision'/>
+                        <entry id='test'/>
                     </lift>";
             LiftVersionControlMerger merger = new LiftVersionControlMerger(ours, theirs, ancestor, new PoorMansMergeStrategy());
             string result = merger.GetMergedLift();
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='newSensesCollision']");
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='newSensesCollision' and sense/gloss/text='ourSense']");
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='newSensesCollision' and sense/gloss/text='theirSense']");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test']");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test' and sense/gloss/text='ourSense']");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test' and sense/gloss/text='theirSense']");
         }
     }
 }
