@@ -255,7 +255,7 @@ namespace LiftIO.Parsing
 
         private void ReadSense(XmlNode node, TEntry entry)
         {
-            TSense sense = _merger.GetOrMakeSense(entry, ReadExtensibleElementBasics(node));
+            TSense sense = _merger.GetOrMakeSense(entry, ReadExtensibleElementBasics(node), node.OuterXml);
             FinishReadingSense(node, sense);
         }
 
