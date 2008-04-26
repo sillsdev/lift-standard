@@ -38,6 +38,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Merging\LiftSavvyMergeStrategy.cs" />
     <Compile Include="Merging\DropTheirsMergeStrategy.cs" />
     <Compile Include="Merging\IMergeStrategy.cs" />
     <Compile Include="Merging\PoorMansMergeStrategy.cs" />
