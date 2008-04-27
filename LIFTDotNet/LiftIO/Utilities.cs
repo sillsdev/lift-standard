@@ -209,6 +209,12 @@ namespace LiftIO
 //            XmlWriter w = XmlWriter.Create(builder);
             
 
+            return AreXmlElementsEqual(on, tn);
+        }
+
+        public static bool AreXmlElementsEqual(XmlNode on, XmlNode tn)
+        {
+            //todo: this is overy strict
             return on.OuterXml == tn.OuterXml;
         }
 
@@ -230,6 +236,27 @@ namespace LiftIO
             if (attr == null)
                 return null;
             return attr.Value;
+        }
+
+        public static XmlNode GetDocumentNodeFromRawXml(string outerXml, XmlNode nodeMaker)
+        {
+            if(string.IsNullOrEmpty(outerXml))
+            {
+                throw new ArgumentException();
+            }
+            XmlDocument doc = nodeMaker as XmlDocument;
+            if(doc == null)
+            {
+                doc = nodeMaker.OwnerDocument;
+            }
+            using (StringReader sr = new StringReader(outerXml))
+            {
+                using (XmlReader r = XmlReader.Create(sr))
+                {
+                    r.Read();
+                    return doc.ReadNode(r);
+                }
+            }
         }
     }
 }
