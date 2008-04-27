@@ -52,31 +52,10 @@ namespace LiftIO.Merging
             XmlNode sense =entry.SelectSingleNode("sense[@id='" + info.Id + "']");
             if (sense == null)
             {
-                sense = GetDocumentNodeFromRawXml(rawXml, _ourEntry);
+                sense = Utilities.GetDocumentNodeFromRawXml(rawXml, _ourEntry);
                 _ourEntry.AppendChild(sense);
             }
             return sense;
-        }
-
-        private static XmlNode GetDocumentNodeFromRawXml(string outerXml, XmlNode nodeMaker)
-        {
-            if(string.IsNullOrEmpty(outerXml))
-            {
-                throw new ArgumentException();
-            }
-            XmlDocument doc = nodeMaker as XmlDocument;
-            if(doc == null)
-            {
-                doc = nodeMaker.OwnerDocument;
-            }
-            using (StringReader sr = new StringReader(outerXml))
-            {
-                using (XmlReader r = XmlReader.Create(sr))
-                {
-                    r.Read();
-                    return doc.ReadNode(r);
-                }
-            }
         }
 
         public XmlNode GetOrMakeSubsense(XmlNode sense, Extensible info, string rawXml)
@@ -93,80 +72,49 @@ namespace LiftIO.Merging
         {
             Debug.Assert(entry == _ourEntry);
 
-            XmlNode ourLexicalUnitNode = _ourEntry.SelectSingleNode("lexical-unit");
-            if (ourLexicalUnitNode != null && theirs.OriginalRawXml == ourLexicalUnitNode.OuterXml)
-            {
-                return; // no change
-            }
+            MergeMultiTextElement("lexical-unit", theirs);
+        }
 
-            if(ourLexicalUnitNode==null) // just take theirs
+        private void MergeMultiTextElement(string xpathToSingularElement, LiftMultiText theirs)
+        {
+            XmlNode ourNode = _ourEntry.SelectSingleNode(xpathToSingularElement);
+            XmlNode ancestorNode = _ancestorEntry.SelectSingleNode(xpathToSingularElement);
+
+            if (ourNode != null && Utilities.AreXmlElementsEqual(ourNode.OuterXml, theirs.OriginalRawXml))
             {
-                _ourEntry.AppendChild(GetDocumentNodeFromRawXml(theirs.OriginalRawXml, _ourEntry));
                 return;
             }
 
-            //actually have to merge
-
-//            LiftMultiText ours = GetOrCreateMultiText(_ourEntry, "lexical-unit");
-//            LiftMultiText ancestor = GetOrCreateMultiText(_ancestorEntry, "lexical-unit");
-//            ours.Merge(theirs, ancestor);
-//            _ourEntry.AppendChild(GetDocumentNodeFromRawXml(ours.OriginalRawXml));
-
-            //another way
-            XmlNode merged = MergeMultiTextNodes(ourLexicalUnitNode, GetDocumentNodeFromRawXml(theirs.OriginalRawXml, _ourEntry));
-            _ourEntry.AppendChild(merged);
-        }
-
-        internal static XmlNode MergeMultiTextNodes(string ours, string theirs)
-        {
-            return MergeMultiTextNodes(ours,theirs,null);
-        }
-
-
-        internal static XmlNode MergeMultiTextNodes(string ours, string theirs, XmlNode optionalNodeMaker)
-        {
-            if(string.IsNullOrEmpty(ours) && string.IsNullOrEmpty(theirs))
+            if(ourNode==null && ancestorNode ==null) // just take theirs
             {
-                return null;
+                _ourEntry.AppendChild(Utilities.GetDocumentNodeFromRawXml(theirs.OriginalRawXml, _ourEntry));
+                return;
             }
 
-            if (optionalNodeMaker == null)
-                optionalNodeMaker = new XmlDocument();
-
-            if (string.IsNullOrEmpty(ours))
+            if(ourNode==null && theirs != null)
             {
-                return GetDocumentNodeFromRawXml(theirs, optionalNodeMaker);
-            }
-
-            if (string.IsNullOrEmpty(theirs))
-            {
-                return GetDocumentNodeFromRawXml(ours, optionalNodeMaker);
-            }
-
-  
-            return MergeMultiTextNodes(GetDocumentNodeFromRawXml(ours, optionalNodeMaker), GetDocumentNodeFromRawXml(theirs, optionalNodeMaker));
-        }
-
-        internal static XmlNode MergeMultiTextNodes(XmlNode ours, XmlNode theirs)
-        {
-            foreach (XmlNode theirForm in theirs.SelectNodes("./form"))
-            {
-                string lang = Utilities.GetStringAttribute(theirForm, "lang");
-                XmlNode ourMatch = ours.SelectSingleNode("./form[@lang='" + lang + "']");
-                if(ourMatch == null)
+                bool theyDidSomethingNew = Utilities.AreXmlElementsEqual(theirs.OriginalRawXml, ancestorNode.OuterXml);
+                if(theyDidSomethingNew)
                 {
-                    ours.AppendChild(theirForm);
-                }
-                else if(false)//todo we exist but are empty, swap in theirs
-                {
+                    //todo conflict
+                    return;
                 }
                 else
                 {
-                    //log conflict
+                    //we just deleted it, and they didn't touch it
+                    return;
                 }
             }
-            return ours;
+
+            //actually have to merge
+            XmlNode merged = MultiTextMerger.MergeMultiTextPieces(ourNode, 
+                                                 Utilities.GetDocumentNodeFromRawXml(theirs.OriginalRawXml, _ourEntry),
+                                                 ancestorNode);
+            _ourEntry.ReplaceChild(merged,ourNode);
+            _ourEntry.AppendChild(merged);
         }
+
+        
 
 
 //        private LiftMultiText GetOrCreateMultiText(XmlNode node, string xpath)
