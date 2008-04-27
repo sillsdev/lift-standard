@@ -31,6 +31,7 @@ namespace LiftIO.Merging
         }
 
 
+
         #region ILexiconMerger<XmlNode,XmlNode,XmlNode,XmlNode> Members
 
         public XmlNode GetOrMakeEntry(Extensible info, int order)
@@ -51,19 +52,29 @@ namespace LiftIO.Merging
             XmlNode sense =entry.SelectSingleNode("sense[@id='" + info.Id + "']");
             if (sense == null)
             {
-                sense = GetDocumentNodeFromRawXml(rawXml);
+                sense = GetDocumentNodeFromRawXml(rawXml, _ourEntry);
                 _ourEntry.AppendChild(sense);
             }
             return sense;
         }
 
-        private XmlNode GetDocumentNodeFromRawXml(string outerXml)
+        private static XmlNode GetDocumentNodeFromRawXml(string outerXml, XmlNode nodeMaker)
         {
+            if(string.IsNullOrEmpty(outerXml))
+            {
+                throw new ArgumentException();
+            }
+            XmlDocument doc = nodeMaker as XmlDocument;
+            if(doc == null)
+            {
+                doc = nodeMaker.OwnerDocument;
+            }
             using (StringReader sr = new StringReader(outerXml))
             {
                 using (XmlReader r = XmlReader.Create(sr))
                 {
-                    return _ourEntry.OwnerDocument.ReadNode(r);
+                    r.Read();
+                    return doc.ReadNode(r);
                 }
             }
         }
@@ -90,7 +101,7 @@ namespace LiftIO.Merging
 
             if(ourLexicalUnitNode==null) // just take theirs
             {
-                _ourEntry.AppendChild(GetDocumentNodeFromRawXml(theirs.OriginalRawXml));
+                _ourEntry.AppendChild(GetDocumentNodeFromRawXml(theirs.OriginalRawXml, _ourEntry));
                 return;
             }
 
@@ -102,13 +113,59 @@ namespace LiftIO.Merging
 //            _ourEntry.AppendChild(GetDocumentNodeFromRawXml(ours.OriginalRawXml));
 
             //another way
-            XmlNode merged = MergeMultiTextNodes(ourLexicalUnitNode, theirs.OriginalRawXml);
+            XmlNode merged = MergeMultiTextNodes(ourLexicalUnitNode, GetDocumentNodeFromRawXml(theirs.OriginalRawXml, _ourEntry));
             _ourEntry.AppendChild(merged);
         }
 
-        private XmlNode MergeMultiTextNodes(XmlNode node, string xml)
+        internal static XmlNode MergeMultiTextNodes(string ours, string theirs)
         {
-            return null;
+            return MergeMultiTextNodes(ours,theirs,null);
+        }
+
+
+        internal static XmlNode MergeMultiTextNodes(string ours, string theirs, XmlNode optionalNodeMaker)
+        {
+            if(string.IsNullOrEmpty(ours) && string.IsNullOrEmpty(theirs))
+            {
+                return null;
+            }
+
+            if (optionalNodeMaker == null)
+                optionalNodeMaker = new XmlDocument();
+
+            if (string.IsNullOrEmpty(ours))
+            {
+                return GetDocumentNodeFromRawXml(theirs, optionalNodeMaker);
+            }
+
+            if (string.IsNullOrEmpty(theirs))
+            {
+                return GetDocumentNodeFromRawXml(ours, optionalNodeMaker);
+            }
+
+  
+            return MergeMultiTextNodes(GetDocumentNodeFromRawXml(ours, optionalNodeMaker), GetDocumentNodeFromRawXml(theirs, optionalNodeMaker));
+        }
+
+        internal static XmlNode MergeMultiTextNodes(XmlNode ours, XmlNode theirs)
+        {
+            foreach (XmlNode theirForm in theirs.SelectNodes("./form"))
+            {
+                string lang = Utilities.GetStringAttribute(theirForm, "lang");
+                XmlNode ourMatch = ours.SelectSingleNode("./form[@lang='" + lang + "']");
+                if(ourMatch == null)
+                {
+                    ours.AppendChild(theirForm);
+                }
+                else if(false)//todo we exist but are empty, swap in theirs
+                {
+                }
+                else
+                {
+                    //log conflict
+                }
+            }
+            return ours;
         }
 
 

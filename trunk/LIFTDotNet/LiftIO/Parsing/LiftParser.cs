@@ -71,9 +71,9 @@ namespace LiftIO.Parsing
 
         internal void ReadRangeElement(string range, XmlNode node)
         {
-            string id = GetStringAttribute(node, "id");
-            string guid = GetOptionalAttributeString(node, "guid");
-            string parent = GetOptionalAttributeString(node, "parent");
+            string id = Utilities.GetStringAttribute(node, "id");
+            string guid = Utilities.GetOptionalAttributeString(node, "guid");
+            string parent = Utilities.GetOptionalAttributeString(node, "parent");
             LiftMultiText description = LocateAndReadMultiText(node, "description");
             LiftMultiText label = LocateAndReadMultiText(node, "label");
             LiftMultiText abbrev = LocateAndReadMultiText(node, "abbrev");
@@ -82,7 +82,7 @@ namespace LiftIO.Parsing
 
         internal void ReadFieldDefinition(XmlNode node)
         {
-            string tag = GetStringAttribute(node, "tag"); //NB: Tag is correct (as of v12).  Changed to "type" only on *instances* of <field> element
+            string tag = Utilities.GetStringAttribute(node, "tag"); //NB: Tag is correct (as of v12).  Changed to "type" only on *instances* of <field> element
             LiftMultiText description = ReadMultiText(node);
             _merger.ProcessFieldDefinition(tag, description);
         }
@@ -98,7 +98,7 @@ namespace LiftIO.Parsing
             }
 
             int homograph = 0;
-            string order = GetOptionalAttributeString(node, "order");
+            string order = Utilities.GetOptionalAttributeString(node, "order");
             if (!String.IsNullOrEmpty(order))
             {
                 if (!Int32.TryParse(order, out homograph))
@@ -161,7 +161,7 @@ namespace LiftIO.Parsing
             // elements are handled in this regard.
             foreach (XmlNode noteNode in node.SelectNodes("note"))
             {
-                string noteType = GetOptionalAttributeString(noteNode, "type");
+                string noteType = Utilities.GetOptionalAttributeString(noteNode, "type");
                 LiftMultiText noteText = ReadMultiText(noteNode);
                 _merger.MergeInNote(e, noteType, noteText);
             }
@@ -169,8 +169,8 @@ namespace LiftIO.Parsing
 
         private void ReadRelation(XmlNode n, TBase parent)
         {
-            string targetId = GetStringAttribute(n, "ref");
-            string relationFieldName = GetStringAttribute(n, "type");
+            string targetId = Utilities.GetStringAttribute(n, "ref");
+            string relationFieldName = Utilities.GetStringAttribute(n, "type");
 
             _merger.MergeInRelation(parent, relationFieldName, targetId, n.OuterXml);
         }
@@ -206,7 +206,7 @@ namespace LiftIO.Parsing
 //                return;
 //            }
 
-            string source = GetOptionalAttributeString(node, "source");
+            string source = Utilities.GetOptionalAttributeString(node, "source");
             LiftMultiText form = LocateAndReadMultiText(node, null);
             LiftMultiText gloss = LocateAndReadOneElementPerFormData(node, "gloss");
             TBase etymology = _merger.MergeInEtymology(entry, source, form, gloss, node.OuterXml);
@@ -216,7 +216,7 @@ namespace LiftIO.Parsing
 
         private void ReadPicture(XmlNode n, TSense parent)
         {
-            string href = GetStringAttribute(n, "href");
+            string href = Utilities.GetStringAttribute(n, "href");
             LiftMultiText caption = LocateAndReadMultiText(n, "label");
             if(caption.IsEmpty)
             {
@@ -233,7 +233,7 @@ namespace LiftIO.Parsing
             XmlNode grammiNode = senseNode.SelectSingleNode("grammatical-info");
             if (grammiNode != null)
             {
-                string val = GetStringAttribute(grammiNode, "value");
+                string val = Utilities.GetStringAttribute(grammiNode, "value");
                 _merger.MergeInGrammaticalInfo(senseOrReversal, val, GetTraitList(grammiNode));
             }
         }
@@ -324,10 +324,10 @@ namespace LiftIO.Parsing
                 foreach (XmlNode n in node.SelectNodes("translation"))
                 {
                     LiftMultiText translation = ReadMultiText(n);
-                    string type = GetOptionalAttributeString(n, "type");
+                    string type = Utilities.GetOptionalAttributeString(n, "type");
                     _merger.MergeInTranslationForm(example, type, translation);
                 }
-                string source = GetOptionalAttributeString(node, "source");
+                string source = Utilities.GetOptionalAttributeString(node, "source");
                 if (source != null)
                 {
                     _merger.MergeInSource(example, source);
@@ -347,7 +347,7 @@ namespace LiftIO.Parsing
 
         private void ReadReversal(XmlNode node, TSense sense)
         {
-            string type = GetOptionalAttributeString(node, "type");
+            string type = Utilities.GetOptionalAttributeString(node, "type");
             XmlNodeList nodelist = node.SelectNodes("main");
             if (nodelist.Count > 1)
             {
@@ -387,14 +387,14 @@ namespace LiftIO.Parsing
         private Extensible ReadExtensibleElementBasics(XmlNode node)
         {
             Extensible extensible = new Extensible();
-            extensible.Id = GetOptionalAttributeString(node, "id");//actually not part of extensible (as of 8/1/2007)
+            extensible.Id = Utilities.GetOptionalAttributeString(node, "id");//actually not part of extensible (as of 8/1/2007)
 
             //todo: figure out how to actually look it up:
             //      string flexPrefix = node.OwnerDocument.GetPrefixOfNamespace("http://fieldworks.sil.org");
 //            string flexPrefix = "flex";
 //            if (flexPrefix != null && flexPrefix != string.Empty)
             {
-                string guidString = GetOptionalAttributeString(node, /*flexPrefix + ":guid"*/"guid");
+                string guidString = Utilities.GetOptionalAttributeString(node, /*flexPrefix + ":guid"*/"guid");
                 if (guidString != null)
                 {
                     try
@@ -424,7 +424,7 @@ namespace LiftIO.Parsing
         {
             foreach (XmlNode fieldNode in node.SelectNodes("field"))
             {
-                string fieldType = GetStringAttribute(fieldNode, "type");
+                string fieldType = Utilities.GetStringAttribute(fieldNode, "type");
                 string priorFieldWithSameTag = String.Format("preceding-sibling::field[@type='{0}']", fieldType);
                 if(fieldNode.SelectSingleNode(priorFieldWithSameTag) != null)
                 {
@@ -449,28 +449,6 @@ namespace LiftIO.Parsing
             {
                 _merger.MergeInTrait(target,GetTrait(traitNode));
             }
-        }
-
-
-
-        private static string GetStringAttribute(XmlNode form, string attr)
-        {
-            try
-            {
-                return form.Attributes[attr].Value;
-            }
-            catch(NullReferenceException)
-            {
-                throw new LiftFormatException(string.Format("Expected a {0} attribute on {1}.", attr, form.OuterXml));
-            }
-        }
-
-        private static string GetOptionalAttributeString(XmlNode xmlNode, string attributeName)
-        {
-            XmlAttribute attr = xmlNode.Attributes[attributeName];
-            if (attr == null)
-                return null;
-            return attr.Value;
         }
 
 
@@ -555,7 +533,7 @@ namespace LiftIO.Parsing
             {
                 try
                 {
-                    string lang = GetStringAttribute(formNode, _wsAttributeLabel);
+                    string lang = Utilities.GetStringAttribute(formNode, _wsAttributeLabel);
                     XmlNode textNode= formNode.SelectSingleNode("text");
                     if (textNode != null)
                     {
@@ -567,9 +545,9 @@ namespace LiftIO.Parsing
                             if (node.Name == "span")
                             {
                                 text.AddSpan(lang,
-                                             GetOptionalAttributeString(node, "lang"),
-                                             GetOptionalAttributeString(node, "class"),
-                                             GetOptionalAttributeString(node, "href"),
+                                             Utilities.GetOptionalAttributeString(node, "lang"),
+                                             Utilities.GetOptionalAttributeString(node, "class"),
+                                             Utilities.GetOptionalAttributeString(node, "href"),
                                              node.InnerText.Length);
                             }
                             text.AddOrAppend(lang, node.InnerText, "");
@@ -593,8 +571,8 @@ namespace LiftIO.Parsing
 
         private Trait GetTrait(XmlNode traitNode)
         {
-            Trait t = new Trait(GetStringAttribute(traitNode, "name"),
-                                GetStringAttribute(traitNode, "value"));
+            Trait t = new Trait(Utilities.GetStringAttribute(traitNode, "name"),
+                                Utilities.GetStringAttribute(traitNode, "value"));
 
             foreach (XmlNode annotationNode in traitNode.SelectNodes("annotation"))
             {
@@ -606,10 +584,10 @@ namespace LiftIO.Parsing
 
         private  Annotation GetAnnotation(XmlNode annotationNode)
         {
-            return new Annotation(GetOptionalAttributeString(annotationNode, "name"),
-                                  GetOptionalAttributeString(annotationNode, "value"),
+            return new Annotation(Utilities.GetOptionalAttributeString(annotationNode, "name"),
+                                  Utilities.GetOptionalAttributeString(annotationNode, "value"),
                                   GetOptionalDate(annotationNode, "when", default(DateTime)),
-                                  GetOptionalAttributeString(annotationNode, "who"));
+                                  Utilities.GetOptionalAttributeString(annotationNode, "who"));
         }
 
         //private static bool NodeContentIsJustAString(XmlNode node)

@@ -120,10 +120,7 @@ namespace LiftIO.Merging
                 && !(GetModifiedDate(theirEntry) == default(DateTime)))
                 return true;
 
-            if(ourEntry.OuterXml == theirEntry.OuterXml) // it'd be nice to have something tolerant for this
-                return true;
-
-            return false;
+            return Utilities.AreXmlElementsEqual(ourEntry.OuterXml, theirEntry.OuterXml);
         }
 
         private static DateTime GetModifiedDate(XmlNode entry)

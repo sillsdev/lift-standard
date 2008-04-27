@@ -30,7 +30,7 @@ namespace LiftIO.Tests
 //        }
 
         [Test]
-        public void ExistingGuidsUnchanged()
+        public void ProcessLiftForLaterMerging_ExistingGuidsUnchanged()
         {
             using (TempFile f =  TempFile.CreateWithXmlHeader("<entry guid='123abc'/>"))
             {
@@ -40,7 +40,7 @@ namespace LiftIO.Tests
         }
 
         [Test]
-        public void MissingGuidsAdded()
+        public void ProcessLiftForLaterMerging_MissingGuidsAdded()
         {
             using (TempFile file =  TempFile.CreateWithXmlHeader("<entry id='one'/><entry id='two'/>"))
             {
@@ -52,7 +52,7 @@ namespace LiftIO.Tests
 
 
         [Test]
-        public void MissingHumanReadableIdsAdded_NoGuid()
+        public void ProcessLiftForLaterMerging_MissingHumanReadableIdsAdded_NoGuid()
         {
             using (TempFile f =  TempFile.CreateWithXmlHeader("<entry><lexical-unit><form lang='v'><text>kindness</text></form></lexical-unit></entry>"))
             {
@@ -62,7 +62,7 @@ namespace LiftIO.Tests
         }
 
         [Test]
-        public void MissingHumanReadableIdsAdded_AlreadyHadGuid()
+        public void ProcessLiftForLaterMerging_MissingHumanReadableIdsAdded_AlreadyHadGuid()
         {
             using (TempFile f = TempFile.CreateWithXmlHeader("<entry guid='6b4269b9-f5d4-4e48-ad91-17109d9882e4'><lexical-unit ><form lang='v'><text>kindness</text></form></lexical-unit></entry>"))
             {
@@ -72,7 +72,7 @@ namespace LiftIO.Tests
         }
 
         [Test]
-        public void NoIdAddedIf_NoLexemeFormToUse()
+        public void ProcessLiftForLaterMerging_NoIdAddedIf_NoLexemeFormToUse()
         {
             using (TempFile f = TempFile.CreateWithXmlHeader("<entry></entry>"))
             {
@@ -82,7 +82,7 @@ namespace LiftIO.Tests
         }
 
         [Test]
-        public void InnerContentsUntouched()
+        public void ProcessLiftForLaterMerging_InnerContentsUntouched()
         {
             using (TempFile f = TempFile.CreateWithXmlHeader("<entry id='one'><sense id='foo'><example/></sense></entry>"))
             {
@@ -91,7 +91,25 @@ namespace LiftIO.Tests
             }
         }
 
-      
+
+        [Test, Ignore("Not Yet")]
+        public void AreXmlElementsEqual_ElementClosing_Match()
+        {
+            string ours = @"<open></open>";
+
+            string theirs = @"<open/>";
+            Assert.IsTrue(Utilities.AreXmlElementsEqual(ours,theirs));
+        }
+
+        [Test, Ignore("Not Yet")]
+        public void AreXmlElementsEqual_DifferentAttributeOrder_Match()
+        {
+            string ours = "<foo one='1' two='2'/>";
+
+            string theirs =  "<foo two='2' one='1'/>";
+
+            Assert.IsTrue(Utilities.AreXmlElementsEqual(ours, theirs));
+        }
     }
 
 }
