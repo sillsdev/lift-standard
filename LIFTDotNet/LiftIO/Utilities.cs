@@ -2,6 +2,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Xml;
 using System.Xml.Xsl;
 using LiftIO.Validation;
@@ -188,6 +189,47 @@ namespace LiftIO
                     break;
             }
             reader.Read();
+        }
+
+        public static bool AreXmlElementsEqual(string ours, string theirs)
+        {
+            StringReader osr = new StringReader(ours);
+            XmlReader or = XmlReader.Create(osr);
+            XmlDocument od = new XmlDocument();
+            XmlNode on = od.ReadNode(or);
+            on.Normalize();
+
+            StringReader tsr = new StringReader(theirs);
+            XmlReader tr = XmlReader.Create(tsr);
+            XmlDocument td = new XmlDocument();
+            XmlNode tn = td.ReadNode(tr);
+            tn.Normalize();//doesn't do much
+
+//            StringBuilder builder = new StringBuilder();
+//            XmlWriter w = XmlWriter.Create(builder);
+            
+
+            return on.OuterXml == tn.OuterXml;
+        }
+
+        public static string GetStringAttribute(XmlNode form, string attr) 
+        {
+            try
+            {
+                return form.Attributes[attr].Value;
+            }
+            catch(NullReferenceException)
+            {
+                throw new LiftFormatException(string.Format("Expected a {0} attribute on {1}.", attr, form.OuterXml));
+            }
+        }
+
+        public static string GetOptionalAttributeString(XmlNode xmlNode, string attributeName) 
+        {
+            XmlAttribute attr = xmlNode.Attributes[attributeName];
+            if (attr == null)
+                return null;
+            return attr.Value;
         }
     }
 }

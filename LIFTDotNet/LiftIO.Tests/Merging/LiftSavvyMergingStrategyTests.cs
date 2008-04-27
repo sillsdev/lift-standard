@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using System.Xml;
 using LiftIO.Merging;
 using NUnit.Framework;
 
@@ -9,39 +11,76 @@ namespace LiftIO.Tests.Merging
     [TestFixture]
     public class LiftSavvyMergingStrategyTests
     {
-        [Test, Ignore("not yet")]
-        public void OursDidNotChange_TheyHaveAddedLexemeFormAlternative_GetsAdded()
+   
+        [Test]
+        public void MergeMultiTextNodes_OneIsEmpty_GetNonEmptyOne()
         {
-            string ours = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10' producer='WeSay 1.0.0.0'>
-                        <entry id='test'>
-                            <lexical-unit>
+            string ours = @"";
+
+            string theirs = @"<lexical-unit>
+                                <form lang='one'>
+                                    <text>theirs</text>
+                                </form>
+                            </lexical-unit>";
+
+            XmlNode result= LiftSavvyMergeStrategy.MergeMultiTextNodes(ours, theirs);
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result.OuterXml, "lexical-unit/form[@lang='one']/text[text()='theirs']");
+
+             result = LiftSavvyMergeStrategy.MergeMultiTextNodes(theirs, ours);
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result.OuterXml, "lexical-unit/form[@lang='one']/text[text()='theirs']");
+        }
+
+        [Test]
+        public void MergeMultiTextNodes_EachHasDifferentAlternatives_GetBoth()
+        {
+            string red = @"<lexical-unit>
                                 <form lang='one'>
                                     <text>first</text>
                                 </form>
-                            </lexical-unit>
-                        </entry>
-                    </lift>";
+                            </lexical-unit>";
 
-            string theirs = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10' producer='WeSay 1.0.0.0'>
-                        <entry id='test'>
-                            <lexical-unit>
+            string blue = @"<lexical-unit>
+                                <form lang='two'>
+                                    <text>second</text>
+                                </form>
+                            </lexical-unit>";
+
+            XmlNode result = LiftSavvyMergeStrategy.MergeMultiTextNodes(red, blue);
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result.OuterXml, "lexical-unit/form[@lang='one']/text[text()='first']");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result.OuterXml, "lexical-unit/form[@lang='two']/text[text()='second']");
+
+            result = LiftSavvyMergeStrategy.MergeMultiTextNodes(blue, red);
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result.OuterXml, "lexical-unit/form[@lang='one']/text[text()='first']");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result.OuterXml, "lexical-unit/form[@lang='two']/text[text()='second']");
+        }
+
+        [Test]
+        public void MergeMultiTextNodes_OneAddedAnAlternatives_GetBoth()
+        {
+            string red = @"<lexical-unit>
+                                <form lang='one'>
+                                    <text>first</text>
+                                </form>
+                            </lexical-unit>";
+
+            string blue = @"<lexical-unit>
                                 <form lang='one'>
                                     <text>first</text>
                                 </form>
                                 <form lang='two'>
                                     <text>second</text>
                                 </form>
-                            </lexical-unit>
-                        </entry>
-                    </lift>"; 
-            string ancestor = ours;
-            LiftVersionControlMerger merger = new LiftVersionControlMerger(ours, theirs, ancestor, new LiftSavvyMergeStrategy());
-            string result = merger.GetMergedLift();
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry/lexical-unit/form[@lang='one']/text[text()='first']");
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry/lexical-unit/form[@lang='two']/text[text()='second']");
+                            </lexical-unit>";
+
+            XmlNode result = LiftSavvyMergeStrategy.MergeMultiTextNodes(red, blue);
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result.OuterXml, "lexical-unit/form[@lang='one']/text[text()='first']");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result.OuterXml, "lexical-unit/form[@lang='two']/text[text()='second']");
+
+            result = LiftSavvyMergeStrategy.MergeMultiTextNodes(blue, red);
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result.OuterXml, "lexical-unit/form[@lang='one']/text[text()='first']");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result.OuterXml, "lexical-unit/form[@lang='two']/text[text()='second']");
         }
+
 
         [Test]
         public void EachHasNewSense_BothSensesCoveyed()
