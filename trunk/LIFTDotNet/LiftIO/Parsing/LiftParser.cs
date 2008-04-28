@@ -325,7 +325,7 @@ namespace LiftIO.Parsing
                 {
                     LiftMultiText translation = ReadMultiText(n);
                     string type = Utilities.GetOptionalAttributeString(n, "type");
-                    _merger.MergeInTranslationForm(example, type, translation);
+                    _merger.MergeInTranslationForm(example, type, translation, node.OuterXml);
                 }
                 string source = Utilities.GetOptionalAttributeString(node, "source");
                 if (source != null)
