@@ -37,7 +37,7 @@ namespace LiftIO.Parsing
         void MergeInPicture(TSense sense, string href, LiftMultiText caption);
 
         void MergeInExampleForm(TExample example, LiftMultiText multiText);//, string optionalSource);
-        void MergeInTranslationForm(TExample example, string type, LiftMultiText multiText);
+        void MergeInTranslationForm(TExample example, string type, LiftMultiText multiText, string rawXml);
         void MergeInSource(TExample example, string source);
 
         void FinishEntry(TEntry entry);

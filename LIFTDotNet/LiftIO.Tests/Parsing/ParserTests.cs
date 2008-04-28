@@ -526,11 +526,11 @@ namespace LiftIO.Tests
 		   if (type == null)
 			   Expect.Exactly(1).On(_merger)
 							.Method("MergeInTranslationForm")
-							.With(Is.Anything, Is.Null, Has.ToString(Is.EqualTo(value)));
+							.With(Is.Anything, Is.Null, Has.ToString(Is.EqualTo(value)), Is.Anything);
 		   else
 			   Expect.Exactly(1).On(_merger)
 							.Method("MergeInTranslationForm")
-							.With(Is.Anything, Has.ToString(Is.EqualTo(type)), Has.ToString(Is.EqualTo(value)));
+                            .With(Is.Anything, Has.ToString(Is.EqualTo(type)), Has.ToString(Is.EqualTo(value)), Is.Anything);
 	   }
 
 	   //        private void ExpectMultiTextMergeIn(string MultiTextPropertyName, Matcher matcher)

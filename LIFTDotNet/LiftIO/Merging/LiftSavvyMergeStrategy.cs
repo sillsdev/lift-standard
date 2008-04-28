@@ -165,7 +165,7 @@ namespace LiftIO.Merging
             
         }
 
-        public void MergeInTranslationForm(XmlNode example, string type, LiftMultiText multiText)
+        public void MergeInTranslationForm(XmlNode example, string type, LiftMultiText multiText, string rawXml)
         {
             
         }
