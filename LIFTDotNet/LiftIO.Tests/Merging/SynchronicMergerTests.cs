@@ -32,6 +32,12 @@ namespace LiftIO.Tests.Merging
             Directory.Delete(_directory, true);
         }
 
+        private static string GetNextUpdateFileName()
+        {
+            // Linux filesystem only has resolution of 1 second so we add this to filename so will sort correctly
+            return _baseLiftFileName + DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH'-'mm'-'ss'-'FFFFFFF UTC ") + SynchronicMerger.ExtensionOfIncrementalFiles;
+        }
+
         [Test]
         public void OneFile_NoUpdates_LeftUntouched()
         {
@@ -59,7 +65,7 @@ namespace LiftIO.Tests.Merging
         public void NewEntries_Added()
         {
             WriteFile(_baseLiftFileName, "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1'></entry><entry id='two' guid='0ae89610-fc01-4bfd-a0d6-1125b7281d22'></entry>", _directory);
-            WriteFile("two"+SynchronicMerger.ExtensionOfIncrementalFiles, "<entry id='three3'></entry><entry id='four'></entry>", _directory);
+            WriteFile(GetNextUpdateFileName(), "<entry id='three3'></entry><entry id='four'></entry>", _directory);
             XmlDocument doc = MergeAndGetResult(true, _directory);
             Assert.AreEqual(4, doc.SelectNodes("//entry").Count);
         }
@@ -68,7 +74,7 @@ namespace LiftIO.Tests.Merging
         public void EdittedEntry_Updated()
         {
             WriteFile(_baseLiftFileName, "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hi'></entry><entry id='two' guid='0ae89610-fc01-4bfd-a0d6-1125b7281d22'></entry>", _directory);
-            WriteFile("two" + SynchronicMerger.ExtensionOfIncrementalFiles, "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hello'></entry>", _directory);
+            WriteFile(GetNextUpdateFileName(), "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hello'></entry>", _directory);
             XmlDocument doc = MergeAndGetResult(true, _directory);
             Assert.AreEqual(2, doc.SelectNodes("//entry").Count);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one']").Count);
@@ -79,7 +85,7 @@ namespace LiftIO.Tests.Merging
         public void EdittedEntry_GuidSameIdDifferent_Updated()
         {
             WriteFile(_baseLiftFileName, "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hi'></entry><entry id='two' guid='0ae89610-fc01-4bfd-a0d6-1125b7281d22'></entry>", _directory);
-            WriteFile("two" + SynchronicMerger.ExtensionOfIncrementalFiles, "<entry id='one1' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hello'></entry>", _directory);
+            WriteFile(GetNextUpdateFileName(), "<entry id='one1' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hello'></entry>", _directory);
             XmlDocument doc = MergeAndGetResult(true, _directory);
             Assert.AreEqual(2, doc.SelectNodes("//entry").Count);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one1']").Count);
@@ -90,7 +96,7 @@ namespace LiftIO.Tests.Merging
         public void EdittedEntry_IdSameGuidDifferent_Updated()
         {
             WriteFile(_baseLiftFileName, "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hi'></entry><entry id='two' guid='0ae89610-fc01-4bfd-a0d6-1125b7281d22'></entry>", _directory);
-            WriteFile("two" + SynchronicMerger.ExtensionOfIncrementalFiles, "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd2' greeting='hello'></entry>", _directory);
+            WriteFile(GetNextUpdateFileName(), "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd2' greeting='hello'></entry>", _directory);
             XmlDocument doc = MergeAndGetResult(true, _directory);
             Assert.AreEqual(3, doc.SelectNodes("//entry").Count);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one']").Count);
@@ -103,7 +109,7 @@ namespace LiftIO.Tests.Merging
         public void BaseHasEntryWithoutGuid_Throws()
         {
             WriteFile(_baseLiftFileName, "<entry id='one' greeting='hi'></entry><entry id='two' guid='0ae89610-fc01-4bfd-a0d6-1125b7281d22'></entry>", _directory);
-            WriteFile("two" + SynchronicMerger.ExtensionOfIncrementalFiles, "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd2' greeting='hello'></entry>", _directory);
+            WriteFile(GetNextUpdateFileName(), "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd2' greeting='hello'></entry>", _directory);
             Merge(_directory);
         }
 
@@ -112,7 +118,7 @@ namespace LiftIO.Tests.Merging
         public void ExistingBackup_Ok()
         {
             File.CreateText(Path.Combine(_directory, _baseLiftFileName + ".bak")).Dispose();
-            WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory);
+            WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory, GetNextUpdateFileName());
             XmlDocument doc = MergeAndGetResult(true, _directory);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one' and @greeting='hello']").Count);
         }
@@ -156,7 +162,7 @@ namespace LiftIO.Tests.Merging
 
                 Directory.CreateDirectory(directory);
                 File.CreateText(Path.Combine(directory, _baseLiftFileName + ".bak")).Dispose();
-                WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(directory);
+                WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(directory, GetNextUpdateFileName());
                 XmlDocument doc = MergeAndGetResult(true, directory);
                 Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one' and @greeting='hello']").Count);
                 Directory.Delete(directory, true);
@@ -170,7 +176,7 @@ namespace LiftIO.Tests.Merging
             string baseFilePath = Path.Combine(this._directory, _baseLiftFileName);
             try
             {
-                WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory);
+                WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory, GetNextUpdateFileName());
                 File.SetAttributes(baseFilePath, FileAttributes.ReadOnly);
 
                 Merge(_directory);
@@ -188,10 +194,10 @@ namespace LiftIO.Tests.Merging
         [Test]
         public void ReadOnlyUpdate_DoesNothing()
         {
-            string updateFilePath = Path.Combine(this._directory, "two" + SynchronicMerger.ExtensionOfIncrementalFiles);
+            string updateFilePath = Path.Combine(this._directory, GetNextUpdateFileName());
             try
             {
-                WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory);
+                WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory, updateFilePath);
                 File.SetAttributes(updateFilePath, FileAttributes.ReadOnly);
 
                 Merge(_directory);
@@ -210,7 +216,7 @@ namespace LiftIO.Tests.Merging
         public void LockedBaseFile_Throws()
         {
             string baseFilePath = Path.Combine(this._directory, _baseLiftFileName);
-            WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory);
+            WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory, GetNextUpdateFileName());
             using(File.Open(baseFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
             {
                 Merge(_directory);
@@ -224,9 +230,9 @@ namespace LiftIO.Tests.Merging
         [Test, ExpectedException(typeof(IOException))]
         public void LockedUpdate_Throws()
         {
-            string updateFilePath = Path.Combine(this._directory, "two" + SynchronicMerger.ExtensionOfIncrementalFiles);
+            string updateFilePath = Path.Combine(this._directory, GetNextUpdateFileName());
 
-            WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory);
+            WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory, updateFilePath);
             using (File.Open(updateFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
             {
                 Merge(_directory);
@@ -244,7 +250,7 @@ namespace LiftIO.Tests.Merging
             string backupFilePath = Path.Combine(this._directory, _baseLiftFileName + ".bak");
             File.CreateText(backupFilePath).Dispose();
 
-            WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory);
+            WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory, GetNextUpdateFileName());
             File.SetAttributes(backupFilePath, FileAttributes.ReadOnly);
             Merge(_directory);
             XmlDocument doc = GetResult(_directory);
@@ -259,7 +265,7 @@ namespace LiftIO.Tests.Merging
             string backupFilePath = Path.Combine(this._directory, _baseLiftFileName + ".bak");
             File.CreateText(backupFilePath).Dispose();
 
-            WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory);
+            WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(_directory, GetNextUpdateFileName());
             using (File.Open(backupFilePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
             {
                 Merge(_directory);
@@ -269,10 +275,10 @@ namespace LiftIO.Tests.Merging
             ExpectFileCount(3, _directory); //lift, locked bak and new unlocked bak2
         }
 
-        static private void WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(string directory)
+        static private void WriteBaseAndUpdateFilesSoMergedWillHaveHelloInsteadOfHi(string directory, string updateFile)
         {
             WriteFile(_baseLiftFileName, "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hi'></entry><entry id='two' guid='0ae89610-fc01-4bfd-a0d6-1125b7281d22'></entry>", directory);
-            WriteFile("two" + SynchronicMerger.ExtensionOfIncrementalFiles, "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hello'></entry>", directory);
+            WriteFile(updateFile, "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hello'></entry>", directory);
         }
 
         /// <summary>
@@ -288,7 +294,7 @@ namespace LiftIO.Tests.Merging
                 writer.Write(content);
                 writer.Close();
             }
-            WriteFile("two" + SynchronicMerger.ExtensionOfIncrementalFiles, "<entry id='one' greeting='hello'></entry>", _directory);
+            WriteFile(GetNextUpdateFileName(), "<entry id='one' greeting='hello'></entry>", _directory);
             XmlDocument doc = MergeAndGetResult(true, _directory);
             Assert.AreEqual(1, doc.SelectNodes("//lift[@preserveMe='foo']").Count);
             Assert.AreEqual(1, doc.SelectNodes("//entry").Count);
@@ -300,7 +306,7 @@ namespace LiftIO.Tests.Merging
         public void EditOneAddOne()
         {
             WriteFile(_baseLiftFileName, "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hi'></entry><entry id='two' guid='0ae89610-fc01-4bfd-a0d6-1125b7281d22'></entry>", _directory);
-            WriteFile("second" + SynchronicMerger.ExtensionOfIncrementalFiles, "<entry id='three'></entry><entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hello'></entry>", _directory);
+            WriteFile(GetNextUpdateFileName(), "<entry id='three'></entry><entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hello'></entry>", _directory);
             XmlDocument doc = MergeAndGetResult(true, _directory);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one']").Count);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='two']").Count);
@@ -313,8 +319,8 @@ namespace LiftIO.Tests.Merging
         public void ThreeFiles()
         {
             WriteFile(_baseLiftFileName, "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hi'></entry><entry id='two' guid='0ae89610-fc01-4bfd-a0d6-1125b7281d22' greeting='hi'></entry>", _directory);
-            WriteFile("second" + SynchronicMerger.ExtensionOfIncrementalFiles, "<entry id='three' guid='0ae89610-fc01-4bfd-a0d6-1125b7281d33'></entry><entry id='one'  guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hello'></entry>", _directory);
-            WriteFile("third" + SynchronicMerger.ExtensionOfIncrementalFiles, "<entry id='two'  guid='0ae89610-fc01-4bfd-a0d6-1125b7281d22' greeting='hello'></entry><entry id='four' ></entry>", _directory);
+            WriteFile(GetNextUpdateFileName(), "<entry id='three' guid='0ae89610-fc01-4bfd-a0d6-1125b7281d33'></entry><entry id='one'  guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hello'></entry>", _directory);
+            WriteFile(GetNextUpdateFileName(), "<entry id='two'  guid='0ae89610-fc01-4bfd-a0d6-1125b7281d22' greeting='hello'></entry><entry id='four' ></entry>", _directory);
             XmlDocument doc = MergeAndGetResult(true, _directory);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one']").Count);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='two']").Count);
@@ -322,8 +328,8 @@ namespace LiftIO.Tests.Merging
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='four']").Count);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='two' and @greeting='hello']").Count);
             Assert.AreEqual(4, doc.SelectNodes("//entry").Count);
-
         }
+
         private XmlDocument MergeAndGetResult(bool isBackupFileExpected, string directory)
         {
             Merge(directory);
@@ -359,7 +365,7 @@ namespace LiftIO.Tests.Merging
 
         static private string WriteFile(string fileName, string xmlForEntries, string directory)
         {
-            StreamWriter writer = File.CreateText(Path.Combine(directory,fileName));
+            StreamWriter writer = File.CreateText(Path.Combine(directory, fileName));
             string content = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
                              +"<lift version =\""
                              + Validator.LiftVersion
