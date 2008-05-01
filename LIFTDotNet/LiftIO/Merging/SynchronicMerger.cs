@@ -348,7 +348,13 @@ namespace LiftIO.Merging
         {
             public int Compare(FileInfo x, FileInfo y)
             {
-                return DateTime.Compare(x.LastWriteTime, y.LastWriteTime);
+                int timecomparison = DateTime.Compare(x.LastWriteTimeUtc, y.LastWriteTimeUtc);
+                if (timecomparison == 0)
+                {
+                    // if timestamps are the same, then sort by name
+                    return StringComparer.OrdinalIgnoreCase.Compare(x.FullName, y.FullName);
+                }
+                return timecomparison;
             }
         }
 
