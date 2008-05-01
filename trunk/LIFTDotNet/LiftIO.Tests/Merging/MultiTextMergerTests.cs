@@ -4,6 +4,7 @@ using System.Text;
 using System.Xml;
 using LiftIO.Merging;
 using NUnit.Framework;
+using XmlUnit;
 
 namespace LiftIO.Tests.Merging
 {

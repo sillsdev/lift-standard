@@ -43,6 +43,13 @@
     <Compile Include="Merging\IMergeStrategy.cs" />
     <Compile Include="Merging\MultiTextMerger.cs" />
     <Compile Include="Merging\PoorMansMergeStrategy.cs" />
+    <Compile Include="Merging\xmldiff\DiffConfiguration.cs" />
+    <Compile Include="Merging\xmldiff\Difference.cs" />
+    <Compile Include="Merging\xmldiff\Differences.cs" />
+    <Compile Include="Merging\xmldiff\DifferenceType.cs" />
+    <Compile Include="Merging\xmldiff\DiffResult.cs" />
+    <Compile Include="Merging\xmldiff\XmlDiff.cs" />
+    <Compile Include="Merging\xmldiff\XmlInput.cs" />
     <Compile Include="Parsing\Annotation.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Parsing\Extensible.cs" />
