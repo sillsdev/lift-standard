@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Xml;
 using System.Xml.Xsl;
+using LiftIO.Merging.XmlDiff;
 using LiftIO.Validation;
 
 namespace LiftIO
@@ -214,8 +215,9 @@ namespace LiftIO
 
         public static bool AreXmlElementsEqual(XmlNode on, XmlNode tn)
         {
-            //todo: this is overy strict
-            return on.OuterXml == tn.OuterXml;
+            XmlDiff diff = new XmlDiff(new XmlInput(on.OuterXml), new XmlInput(tn.OuterXml));
+            DiffResult d = diff.Compare();
+            return (d == null || d.Difference == null || !d.Difference.MajorDifference);
         }
 
         public static string GetStringAttribute(XmlNode form, string attr) 

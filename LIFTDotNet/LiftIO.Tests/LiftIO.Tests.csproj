@@ -40,11 +40,16 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
+    <Reference Include="xmlunit, Version=0.3.1.0, Culture=neutral">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\xmlunit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Merging\LiftSavvyMergingStrategyTests.cs" />
     <Compile Include="Merging\MultiTextMergerTests.cs" />
     <Compile Include="Merging\PoorMansMergingStrategyTests.cs" />
+    <Compile Include="Merging\xmldiff\XmlDiffTests.cs" />
     <Compile Include="Migration\V11To12MigratorTests.cs" />
     <Compile Include="Migration\MigratorTestBase.cs" />
     <Compile Include="Migration\V10To11MigratorTests.cs" />
