@@ -38,7 +38,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="xmlunit, Version=0.3.1.0, Culture=neutral">
       <SpecificVersion>False</SpecificVersion>
@@ -71,6 +70,14 @@
       <Name>LiftIO</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="test20080407.lift">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="test20080407.lift-ranges">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -80,7 +87,7 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>copy $(ProjectDir)test20080407.lift $(TargetDir)
-copy $(ProjectDir)test20080407.lift-ranges $(TargetDir)</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>
