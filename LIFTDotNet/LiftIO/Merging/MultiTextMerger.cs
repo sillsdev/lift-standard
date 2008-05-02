@@ -94,6 +94,27 @@ namespace LiftIO.Merging
                     //log conflict
                 }
             }
+
+            // deal with their deletions
+            foreach (XmlNode ourForm in ours.SelectNodes("./form"))
+            {
+                string lang = Utilities.GetStringAttribute(ourForm, "lang");
+                XmlNode theirForm = theirs.SelectSingleNode("./form[@lang='" + lang + "']");
+                XmlNode ancestorForm = ancestor.SelectSingleNode("./form[@lang='" + lang + "']");
+
+                if (theirForm == null && ancestorForm != null)
+                {
+                    if (Utilities.AreXmlElementsEqual(ourForm, ancestorForm))
+                    {
+                        ours.RemoveChild(ourForm);                        
+                    }
+                    else
+                    {
+                        //todo log conflict
+                    }
+                }
+            }
+
             return ours;
         }
     }

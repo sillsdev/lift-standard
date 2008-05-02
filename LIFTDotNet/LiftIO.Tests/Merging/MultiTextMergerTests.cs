@@ -139,7 +139,7 @@ namespace LiftIO.Tests.Merging
         }
 
         [Test]
-        public void MergeMultiTextNodes_OneDeletedAForm_FormRemoved()
+        public void WeDeletedAForm_FormRemoved()
         {
             string red = @"<lexical-unit></lexical-unit>";
             string blue = @"<lexical-unit>
@@ -149,9 +149,21 @@ namespace LiftIO.Tests.Merging
                             </lexical-unit>";
             string ancestor = blue;
 
-            CheckOneWay(red, blue, ancestor, "lexical-unit[ not(form)]");
-            CheckOneWay(blue, red, ancestor, "lexical-unit[form]");
-            //todo change ancestor so we have a conflict
+            CheckOneWay(blue, red, ancestor, "lexical-unit[ not(form)]");
+        }
+
+        [Test]
+        public void TheyDeleteAForm_FormRemoved()
+        {
+            string red = @"<lexical-unit></lexical-unit>";
+            string blue = @"<lexical-unit>
+                                <form lang='one'>
+                                    <text>first</text>
+                                </form>
+                            </lexical-unit>";
+            string ancestor = blue;
+
+            CheckOneWay(blue, red, ancestor, "lexical-unit[ not(form)]");
         }
 
     }
