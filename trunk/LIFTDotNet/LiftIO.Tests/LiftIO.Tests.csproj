@@ -45,6 +45,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Merging\XmlMergerTests.cs" />
     <Compile Include="Merging\LiftSavvyMergingStrategyTests.cs" />
     <Compile Include="Merging\MultiTextMergerTests.cs" />
     <Compile Include="Merging\PoorMansMergingStrategyTests.cs" />
