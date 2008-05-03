@@ -114,6 +114,8 @@ namespace LiftIO.Tests.Merging
                                 </form>
                             </lexical-unit>";
 
+            Assert.IsFalse(Utilities.AreXmlElementsEqual(red, blue));
+
             CheckBothWays(red, blue, ancestor,
                 "lexical-unit/form[@lang='one']/text[text()='first']");
         }

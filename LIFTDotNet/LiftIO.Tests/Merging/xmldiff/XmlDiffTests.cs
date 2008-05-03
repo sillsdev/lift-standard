@@ -65,7 +65,22 @@ namespace LiftIO.Tests.Merging.XmlDiff
             string[] input2 = {"<b><a/></b>", "<a><c/></a>", "<a><b><c/></b></a>"};
             AssertExpectedResult(input1, input2, false);
         }
-        
+
+        [Test]
+        public void foo()
+        {
+            string[] input1 = { "<a/>" };
+            string[] input2 = { "<a/>" };
+            AssertExpectedResult(input2[0], input1[0], true);
+        }
+
+
+        [Test]
+        public void NotEqualResultForElementsWhereSecondGoesDeeper()
+        {
+            AssertExpectedResult("<a/>", "<a><b/></a>", false);
+        }
+
         [Test] public void NotEqualResultForDifferentNumberOfAttributes() { 
             string[] input1 = {"<a><b x=\"1\"/></a>", "<a><b x=\"1\"/></a>"};
             string[] input2 = {"<a><b/></a>", "<a><b x=\"1\" y=\"2\"/></a>"};

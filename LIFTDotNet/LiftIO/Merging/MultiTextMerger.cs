@@ -41,53 +41,59 @@ namespace LiftIO.Merging
 
         internal static XmlNode MergeMultiTextPieces(XmlNode ours, XmlNode theirs, XmlNode ancestor)
         {
-            foreach (XmlNode theirForm in theirs.SelectNodes("./form"))
-            {
-                string lang = Utilities.GetStringAttribute(theirForm, "lang");
-                XmlNode ourForm = ours.SelectSingleNode("./form[@lang='" + lang + "']");
-                XmlNode ancestorForm = ancestor.SelectSingleNode("./form[@lang='" + lang + "']");
+            MergeAttributes(ref ours, theirs, ancestor);
+            return MergeElements(ours, theirs, ancestor, "lang");
+        }
 
-                if (ourForm == null)
+        private static void MergeAttributes(ref XmlNode ours, XmlNode theirs, XmlNode ancestor)
+        {
+            
+        }
+
+        private static XmlNode MergeElements(XmlNode ours, XmlNode theirs, XmlNode ancestor, string keyAttribute)
+        {
+            foreach (XmlNode theirElement in theirs.ChildNodes)
+            {
+                if(theirElement.NodeType != XmlNodeType.Element)
                 {
-                    if(ancestorForm == null)
+                    continue;
+                }
+                string key = Utilities.GetStringAttribute(theirElement, keyAttribute);
+                string xpath = string.Format("{0}[@{1}='{2}']", theirElement.Name, keyAttribute, key);
+                XmlNode ourElement = ours.SelectSingleNode(xpath);
+                XmlNode ancestorElement = ancestor.SelectSingleNode(xpath);
+
+                if (ourElement == null)
+                {
+                    if(ancestorElement == null)
                     {
-                        ours.AppendChild(theirForm);
+                        ours.AppendChild(theirElement);
                     }
-                    else if(Utilities.AreXmlElementsEqual(ancestorForm,theirForm))
+                    else if(Utilities.AreXmlElementsEqual(ancestorElement,theirElement))
                     {
-                        return ours; // we deleted it, they didn't touch it
+                        continue; // we deleted it, they didn't touch it
                     }
-                    else //we deleted it, but at the same time, they did change change it
+                    else //we deleted it, but at the same time, they changed it
                     {
                         //todo: should we add what they modified?
                         //needs a test first
 
                         //until then, this is a conflict  <-- todo
 
-                        return ours;
+                        continue;
                     }
                 }
-                else if (theirForm == null && ancestorForm !=null)
+                else if(Utilities.AreXmlElementsEqual(ourElement,ancestorElement) )
                 {
-                   if(Utilities.AreXmlElementsEqual(ourForm,ancestorForm))
+                    if(Utilities.AreXmlElementsEqual(ourElement, theirElement))
                     {
-                        ours.RemoveChild(ourForm);  //they deleted it, we didn't touch it
+                        //nothing to do
+                        continue;
                     }
-                   else
-                   {
-                       //they deleted it, but we modified it
-
-                       //todo Log conflict
-
-                       return ours;
-                   }
-                }
-                else if (
-                        ourForm.SelectSingleNode("text") == null
-                    || ourForm.SelectSingleNode("text").InnerText.Trim() == string.Empty)
-                {
-                    ours.RemoveChild(ourForm);
-                    ours.AppendChild(theirForm);//swap in theirs
+                    else //theirs is new
+                    {
+                        ourElement.ParentNode.ReplaceChild(theirElement, ourElement);
+                    }
                 }
                 else
                 {
@@ -96,17 +102,21 @@ namespace LiftIO.Merging
             }
 
             // deal with their deletions
-            foreach (XmlNode ourForm in ours.SelectNodes("./form"))
+            foreach (XmlNode ourElement in ours.ChildNodes)
             {
-                string lang = Utilities.GetStringAttribute(ourForm, "lang");
-                XmlNode theirForm = theirs.SelectSingleNode("./form[@lang='" + lang + "']");
-                XmlNode ancestorForm = ancestor.SelectSingleNode("./form[@lang='" + lang + "']");
-
-                if (theirForm == null && ancestorForm != null)
+                if (ourElement.NodeType != XmlNodeType.Element)
                 {
-                    if (Utilities.AreXmlElementsEqual(ourForm, ancestorForm))
+                    continue;
+                }
+                string key = Utilities.GetStringAttribute(ourElement, keyAttribute);
+                XmlNode theirElement = theirs.SelectSingleNode("./form[@" + keyAttribute + "='" + key + "']");
+                XmlNode ancestorElement = ancestor.SelectSingleNode("./form[@" + keyAttribute + "='" + key + "']");
+
+                if (theirElement == null && ancestorElement != null)
+                {
+                    if (Utilities.AreXmlElementsEqual(ourElement, ancestorElement))
                     {
-                        ours.RemoveChild(ourForm);                        
+                        ours.RemoveChild(ourElement);                        
                     }
                     else
                     {
