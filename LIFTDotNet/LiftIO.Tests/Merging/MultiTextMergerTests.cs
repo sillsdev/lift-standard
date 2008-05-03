@@ -14,7 +14,7 @@ namespace LiftIO.Tests.Merging
         [Test]
         public void MergeMultiTextNodes_OneAddedNewMultiTextElement()
         {
-            string red = @"";
+            string red = @"<lexical-unit/>";
             string ancestor = red;
 
             string blue = @"<lexical-unit>
