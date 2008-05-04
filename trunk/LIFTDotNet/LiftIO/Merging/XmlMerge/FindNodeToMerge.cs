@@ -1,7 +1,7 @@
 using System.Xml;
 using LiftIO.Merging.XmlDiff;
 
-namespace LiftIO.Tests.Merging
+namespace LiftIO.Merging.XmlMerge
 {
     public interface IFindNodeToMerge
     {
@@ -40,7 +40,7 @@ namespace LiftIO.Tests.Merging
 
             foreach (XmlNode node in parentToSearchIn.ChildNodes)
             {
-                XmlDiff d = new XmlDiff(elementToMatch.OuterXml, node.OuterXml);
+                XmlDiff.XmlDiff d = new XmlDiff.XmlDiff(elementToMatch.OuterXml, node.OuterXml);
                 DiffResult result = d.Compare();
                 if (result == null || result.Equal)
                 {
@@ -50,5 +50,4 @@ namespace LiftIO.Tests.Merging
             return null;
         }
     }
-
 }
