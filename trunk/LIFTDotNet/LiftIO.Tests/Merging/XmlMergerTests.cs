@@ -35,10 +35,10 @@ namespace LiftIO.Tests.Merging
 
         private void CheckOneWay(string ours, string theirs, string ancestor, params string[] xpaths)
         {
-            XmlMerger m = new XmlMerger();
-            m._elementStrategies.Add("a", ElementStrategy.CreateForKeyedElement("key"));
-            m._elementStrategies.Add("b", ElementStrategy.CreateForKeyedElement("key"));
-            m._elementStrategies.Add("c", ElementStrategy.CreateForKeyedElement("key"));
+            XmlMerger m = new XmlMerger(new ConsolMergeLogger());
+            m._mergeStrategies._elementStrategies.Add("a", ElementStrategy.CreateForKeyedElement("key"));
+            m._mergeStrategies._elementStrategies.Add("b", ElementStrategy.CreateForKeyedElement("key"));
+            m._mergeStrategies._elementStrategies.Add("c", ElementStrategy.CreateForKeyedElement("key"));
             string result = m.Merge(ours, theirs, ancestor);
             foreach (string xpath in xpaths)
             {

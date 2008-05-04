@@ -6,8 +6,14 @@ namespace LiftIO.Tests.Merging
 {
     public class XmlMerger
     {
-//        public Dictionary<string, IFindNodeToMerge> _finders = new Dictionary<string, IFindNodeToMerge>();
-        public Dictionary<string, ElementStrategy> _elementStrategies = new Dictionary<string, ElementStrategy>();
+        public IMergeLogger _logger;
+        public MergeStrategies _mergeStrategies;
+
+        public XmlMerger(IMergeLogger logger)
+        {
+            _logger = logger;
+            _mergeStrategies = new MergeStrategies();
+        }
 
         private static List<XmlAttribute> GetAttrs(XmlNode node)
         {
@@ -43,7 +49,7 @@ namespace LiftIO.Tests.Merging
                         //needs a test first
 
                         //until then, this is a conflict  <-- todo
-
+                        _logger.RegisterConflict(new RemovedVsEditedAttributeConflict(theirAttr.Name, null, theirAttr.Value, ancestorAttr.Value));
                         continue;
                     }
                 }
@@ -56,7 +62,7 @@ namespace LiftIO.Tests.Merging
                     }
                     else 
                     {
-                        //log conflict
+                        _logger.RegisterConflict(new BothEdittedAttributeConflict(theirAttr.Name, ourAttr.Value, theirAttr.Value, null));
                     }
                 }
                 else if (ancestorAttr.Value == ourAttr.Value)
@@ -73,7 +79,7 @@ namespace LiftIO.Tests.Merging
                 }
                 else
                 {
-                    //log conflict we both changed it to different things
+                    _logger.RegisterConflict(new BothEdittedAttributeConflict(theirAttr.Name, ourAttr.Value, theirAttr.Value, ancestorAttr.Value));
                 }
             }
 
@@ -86,13 +92,13 @@ namespace LiftIO.Tests.Merging
 
                 if (theirAttr == null && ancestorAttr != null)
                 {
-                    if (ourAttr.Value == ancestorAttr.Value)
+                    if (ourAttr.Value == ancestorAttr.Value) //we didn't change it, they deleted it
                     {
                         ours.Attributes.Remove(ourAttr);
                     }
                     else
                     {
-                        //todo log conflict
+                        _logger.RegisterConflict(new RemovedVsEditedAttributeConflict(ourAttr.Name, ourAttr.Value, null, ancestorAttr.Value));
                     }
                 }
             }
@@ -108,50 +114,43 @@ namespace LiftIO.Tests.Merging
                     continue;
                 }
 
-                IFindNodeToMerge finder = GetMergePartnerFinder(theirChildElement);
-                XmlNode ourElement = finder.GetNodeToMerge(theirChildElement, ours);
-                XmlNode ancestorElement = finder.GetNodeToMerge(theirChildElement, ancestor);
+                IFindNodeToMerge finder = _mergeStrategies.GetMergePartnerFinder(theirChildElement);
+                XmlNode ourChildElement = finder.GetNodeToMerge(theirChildElement, ours);
+                XmlNode ancestorChildElement = finder.GetNodeToMerge(theirChildElement, ancestor);
 
-                if (ourElement == null)
+                if (ourChildElement == null)
                 {
-                    if (ancestorElement == null)
+                    if (ancestorChildElement == null)
                     {
                         ours.AppendChild(theirChildElement);
                     }
-                    else if (Utilities.AreXmlElementsEqual(ancestorElement, theirChildElement))
+                    else if (Utilities.AreXmlElementsEqual(ancestorChildElement, theirChildElement))
                     {
                         continue; // we deleted it, they didn't touch it
                     }
                     else //we deleted it, but at the same time, they changed it
                     {
-                        //todo: should we add what they modified?
-                        //needs a test first
-
-                        //until then, this is a conflict  <-- todo
-
+                        _logger.RegisterConflict(new RemovedVsEditedElementConflict(theirChildElement.Name, null, theirChildElement, ancestorChildElement));
                         continue;
                     }
                 }
-                else if (Utilities.AreXmlElementsEqual(ourElement, ancestorElement))
+                else if (Utilities.AreXmlElementsEqual(ourChildElement, ancestorChildElement))
                 {
-                    if (Utilities.AreXmlElementsEqual(ourElement, theirChildElement))
+                    if (Utilities.AreXmlElementsEqual(ourChildElement, theirChildElement))
                     {
                         //nothing to do
                         continue;
                     }
                     else //theirs is new
                     {
-                        Merge(ourElement, theirChildElement, ancestorElement);
-                        //todo: need to recurse now?
-                        //ourElement.ParentNode.ReplaceChild(theirElement, ourElement);
+                        Merge(ourChildElement, theirChildElement, ancestorChildElement);
                     }
                 }
                 else
                 { 
                     //TODO: are they mergeable? TODO: where are text nodes handled?
 
-                    Merge(ourElement, theirChildElement, ancestorElement);
-                    //log conflict
+                    Merge(ourChildElement, theirChildElement, ancestorChildElement);
                 }
             }
 
@@ -162,7 +161,7 @@ namespace LiftIO.Tests.Merging
                 {
                     continue;
                 }
-                IFindNodeToMerge finder = GetMergePartnerFinder(ourChildElement);
+                IFindNodeToMerge finder = _mergeStrategies.GetMergePartnerFinder(ourChildElement);
                 XmlNode theirChildElement = finder.GetNodeToMerge(ourChildElement, theirs);
                 XmlNode ancestorChildElement = finder.GetNodeToMerge(ourChildElement, ancestor);
 
@@ -174,7 +173,7 @@ namespace LiftIO.Tests.Merging
                     }
                     else
                     {
-                        //todo log conflict
+                        _logger.RegisterConflict(new RemovedVsEditedElementConflict(ourChildElement.Name, ourChildElement, null, ancestorChildElement));
                     }
                 }
             }
@@ -182,25 +181,6 @@ namespace LiftIO.Tests.Merging
             return ours;
         }
 
-        private IFindNodeToMerge GetMergePartnerFinder(XmlNode element)
-        {
-            ElementStrategy strategy;
-            if (!this._elementStrategies.TryGetValue(element.Name, out strategy))
-            {
-                return new FindByEqualityOfTree();
-            }
-            return strategy._mergePartnerFinder;
-        }
-
-        private IDifferenceReportMaker GetDifferenceReportMaker(XmlNode element)
-        {
-            ElementStrategy strategy;
-            if (!this._elementStrategies.TryGetValue(element.Name, out strategy))
-            {
-                return new DefaultDifferenceReportMaker();
-            }
-            return strategy._differenceReportMaker;
-        }
 
         public XmlNode Merge(XmlNode ours, XmlNode theirs, XmlNode ancestor)
         {
