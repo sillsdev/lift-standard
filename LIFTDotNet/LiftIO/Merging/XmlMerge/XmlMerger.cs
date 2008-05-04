@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using System.Xml;
+using LiftIO.Merging.XmlMerge;
 
 namespace LiftIO.Tests.Merging
 {
     public class XmlMerger
     {
-        public Dictionary<string, IFindNodeToMerge> _finders = new Dictionary<string, IFindNodeToMerge>();
+//        public Dictionary<string, IFindNodeToMerge> _finders = new Dictionary<string, IFindNodeToMerge>();
+        public Dictionary<string, ElementStrategy> _elementStrategies = new Dictionary<string, ElementStrategy>();
 
         private static List<XmlAttribute> GetAttrs(XmlNode node)
         {
@@ -106,7 +108,7 @@ namespace LiftIO.Tests.Merging
                     continue;
                 }
 
-                IFindNodeToMerge finder = GetFinder(theirChildElement);
+                IFindNodeToMerge finder = GetMergePartnerFinder(theirChildElement);
                 XmlNode ourElement = finder.GetNodeToMerge(theirChildElement, ours);
                 XmlNode ancestorElement = finder.GetNodeToMerge(theirChildElement, ancestor);
 
@@ -160,7 +162,7 @@ namespace LiftIO.Tests.Merging
                 {
                     continue;
                 }
-                IFindNodeToMerge finder = GetFinder(ourChildElement);
+                IFindNodeToMerge finder = GetMergePartnerFinder(ourChildElement);
                 XmlNode theirChildElement = finder.GetNodeToMerge(ourChildElement, theirs);
                 XmlNode ancestorChildElement = finder.GetNodeToMerge(ourChildElement, ancestor);
 
@@ -180,14 +182,24 @@ namespace LiftIO.Tests.Merging
             return ours;
         }
 
-        private IFindNodeToMerge GetFinder(XmlNode element)
+        private IFindNodeToMerge GetMergePartnerFinder(XmlNode element)
         {
-            IFindNodeToMerge f;
-            if(!this._finders.TryGetValue(element.Name, out f))
+            ElementStrategy strategy;
+            if (!this._elementStrategies.TryGetValue(element.Name, out strategy))
             {
-                f = new FindByEqualityOfTree();
+                return new FindByEqualityOfTree();
             }
-            return f;
+            return strategy._mergePartnerFinder;
+        }
+
+        private IDifferenceReportMaker GetDifferenceReportMaker(XmlNode element)
+        {
+            ElementStrategy strategy;
+            if (!this._elementStrategies.TryGetValue(element.Name, out strategy))
+            {
+                return new DefaultDifferenceReportMaker();
+            }
+            return strategy._differenceReportMaker;
         }
 
         public XmlNode Merge(XmlNode ours, XmlNode theirs, XmlNode ancestor)

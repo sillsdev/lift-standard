@@ -38,7 +38,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Merging\FindNodeToMerge.cs" />
+    <Compile Include="Merging\XmlMerge\DifferenceLog.cs" />
+    <Compile Include="Merging\XmlMerge\ElementStrategy.cs" />
+    <Compile Include="Merging\XmlMerge\FindNodeToMerge.cs" />
     <Compile Include="Merging\LiftSavvyMergeStrategy.cs" />
     <Compile Include="Merging\DropTheirsMergeStrategy.cs" />
     <Compile Include="Merging\IMergeStrategy.cs" />
@@ -51,7 +53,7 @@
     <Compile Include="Merging\xmldiff\DiffResult.cs" />
     <Compile Include="Merging\xmldiff\XmlDiff.cs" />
     <Compile Include="Merging\xmldiff\XmlInput.cs" />
-    <Compile Include="Merging\XmlMerger.cs" />
+    <Compile Include="Merging\XmlMerge\XmlMerger.cs" />
     <Compile Include="Parsing\Annotation.cs" />
     <Compile Include="Exceptions.cs" />
     <Compile Include="Parsing\Extensible.cs" />

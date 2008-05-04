@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
+using LiftIO.Merging.XmlMerge;
 using LiftIO.Tests.Merging;
 
 namespace LiftIO.Merging
@@ -10,12 +11,20 @@ namespace LiftIO.Merging
     {
         internal static XmlNode MergeMultiTextPieces(string ours, string theirs, string ancestor)
         {
-            XmlMerger m = new XmlMerger();
-            m._finders.Add("form", new FindByKeyAttribute("lang"));
+            XmlMerger m = GetMerger();
             XmlDocument doc = new XmlDocument();
             return Utilities.GetDocumentNodeFromRawXml(m.Merge(ours, theirs, ancestor), doc);
 
             //return MergeMultiTextPieces(ours, theirs, ancestor, null);
+        }
+
+        private static XmlMerger GetMerger()
+        {
+            XmlMerger m = new XmlMerger();
+            ElementStrategy formStrategy = new ElementStrategy();
+            formStrategy._mergePartnerFinder = new FindByKeyAttribute("lang");
+            m._elementStrategies.Add("form", formStrategy);
+            return m;
         }
 
 
@@ -47,8 +56,7 @@ namespace LiftIO.Merging
 
         internal static XmlNode MergeMultiTextPieces(XmlNode ours, XmlNode theirs, XmlNode ancestor)
         {
-            XmlMerger m = new XmlMerger();
-            m._finders.Add("form", new FindByKeyAttribute("lang"));
+            XmlMerger m = GetMerger();
             return m.Merge(ours, theirs, ancestor);
         }
 

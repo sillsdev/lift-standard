@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 using LiftIO.Merging;
+using LiftIO.Merging.XmlMerge;
 using NUnit.Framework;
 using XmlUnit;
 
@@ -35,9 +36,9 @@ namespace LiftIO.Tests.Merging
         private void CheckOneWay(string ours, string theirs, string ancestor, params string[] xpaths)
         {
             XmlMerger m = new XmlMerger();
-            m._finders.Add("a", new FindByKeyAttribute("key"));
-            m._finders.Add("b", new FindByKeyAttribute("key"));
-            m._finders.Add("c", new FindByKeyAttribute("key"));
+            m._elementStrategies.Add("a", ElementStrategy.CreateForKeyedElement("key"));
+            m._elementStrategies.Add("b", ElementStrategy.CreateForKeyedElement("key"));
+            m._elementStrategies.Add("c", ElementStrategy.CreateForKeyedElement("key"));
             string result = m.Merge(ours, theirs, ancestor);
             foreach (string xpath in xpaths)
             {
