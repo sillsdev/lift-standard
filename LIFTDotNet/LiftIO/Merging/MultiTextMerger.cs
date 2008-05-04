@@ -20,10 +20,10 @@ namespace LiftIO.Merging
 
         private static XmlMerger GetMerger()
         {
-            XmlMerger m = new XmlMerger();
+            XmlMerger m = new XmlMerger(new ConsolMergeLogger());
             ElementStrategy formStrategy = new ElementStrategy();
             formStrategy._mergePartnerFinder = new FindByKeyAttribute("lang");
-            m._elementStrategies.Add("form", formStrategy);
+            m._mergeStrategies._elementStrategies.Add("form", formStrategy);
             return m;
         }
 

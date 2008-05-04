@@ -1,9 +1,19 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Xml;
 
 namespace LiftIO.Merging.XmlMerge
 {
+   
+    public interface IMergeLogger
+    {
+        void RegisterConflict(IConflict conflict);
+    }
+    public class ConsolMergeLogger : IMergeLogger
+    {
+        public void RegisterConflict(IConflict conflict)
+        {
+        }
+    }
+
     public class DifferenceReport
     {
         public string _result;

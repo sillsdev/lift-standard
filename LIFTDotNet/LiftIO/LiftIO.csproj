@@ -38,6 +38,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Merging\XmlMerge\Conflict.cs" />
     <Compile Include="Merging\XmlMerge\DifferenceLog.cs" />
     <Compile Include="Merging\XmlMerge\ElementStrategy.cs" />
     <Compile Include="Merging\XmlMerge\FindNodeToMerge.cs" />
