@@ -1,19 +1,72 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Xml;
 using LiftIO.Merging.XmlMerge;
 
 namespace LiftIO.Tests.Merging
 {
+    public class MergeResult
+    {
+        private XmlNode _mergedNode;
+        private IList<IConflict> _conflicts;
+
+        public MergeResult()
+        {
+            _conflicts = new List<IConflict>();
+        }
+
+        public XmlNode MergedNode
+        {
+            get
+            {
+                return _mergedNode;
+            }
+            internal set { _mergedNode = value; }
+        }
+
+        public IList<IConflict> Conflicts
+        {
+            get { return _conflicts; }
+            set { _conflicts = value; }
+        }
+    }
+
     public class XmlMerger
     {
         public IMergeLogger _logger;
         public MergeStrategies _mergeStrategies;
 
-        public XmlMerger(IMergeLogger logger)
+        public XmlMerger()
         {
-            _logger = logger;
             _mergeStrategies = new MergeStrategies();
+            
         }
+
+        public MergeResult Merge(XmlNode ours, XmlNode theirs, XmlNode ancestor)
+        {
+            MergeResult result = new MergeResult();
+            _logger = new MergeLogger(result.Conflicts);
+            MergeInner(ref ours, theirs, ancestor);
+            result.MergedNode = ours;
+            return result;
+        }
+
+        public void MergeInner(ref XmlNode ours, XmlNode theirs, XmlNode ancestor)
+        {
+            MergeAttributes(ref ours, theirs, ancestor);
+            MergeChildren(ref ours,theirs,ancestor);
+        }
+
+        public MergeResult Merge(string ours, string theirs, string ancestor)
+        {
+            XmlDocument doc = new XmlDocument();
+            XmlNode ourNode = Utilities.GetDocumentNodeFromRawXml(ours, doc);
+            XmlNode theirNode = Utilities.GetDocumentNodeFromRawXml(theirs, doc);
+            XmlNode ancestorNode = Utilities.GetDocumentNodeFromRawXml(ancestor, doc);
+
+            return Merge(ourNode, theirNode, ancestorNode);
+        }
+
 
         private static List<XmlAttribute> GetAttrs(XmlNode node)
         {
@@ -26,7 +79,7 @@ namespace LiftIO.Tests.Merging
             return attrs;
         }
 
-        public void MergeAttributes(ref XmlNode ours, XmlNode theirs, XmlNode ancestor)
+        private void MergeAttributes(ref XmlNode ours, XmlNode theirs, XmlNode ancestor)
         {
             foreach (XmlAttribute theirAttr in GetAttrs(theirs))
             {
@@ -49,7 +102,7 @@ namespace LiftIO.Tests.Merging
                         //needs a test first
 
                         //until then, this is a conflict  <-- todo
-                        _logger.RegisterConflict(new RemovedVsEditedAttributeConflict(theirAttr.Name, null, theirAttr.Value, ancestorAttr.Value));
+                        _logger.RegisterConflict(new RemovedVsEditedAttributeConflict(theirAttr.Name, null, theirAttr.Value, ancestorAttr.Value, _mergeStrategies));
                         continue;
                     }
                 }
@@ -60,9 +113,9 @@ namespace LiftIO.Tests.Merging
                         //nothing to do
                         continue;
                     }
-                    else 
+                    else
                     {
-                        _logger.RegisterConflict(new BothEdittedAttributeConflict(theirAttr.Name, ourAttr.Value, theirAttr.Value, null));
+                        _logger.RegisterConflict(new BothEdittedAttributeConflict(theirAttr.Name, ourAttr.Value, theirAttr.Value, null,  _mergeStrategies));
                     }
                 }
                 else if (ancestorAttr.Value == ourAttr.Value)
@@ -77,9 +130,19 @@ namespace LiftIO.Tests.Merging
                         ourAttr.Value = theirAttr.Value;
                     }
                 }
+                else if (ourAttr.Value == theirAttr.Value)
+                {
+                    //both changed to same value
+                    continue;
+                }
+                else if (ancestorAttr.Value == theirAttr.Value)
+                {
+                    //only we changed the value
+                    continue;
+                }
                 else
                 {
-                    _logger.RegisterConflict(new BothEdittedAttributeConflict(theirAttr.Name, ourAttr.Value, theirAttr.Value, ancestorAttr.Value));
+                    _logger.RegisterConflict(new BothEdittedAttributeConflict(theirAttr.Name, ourAttr.Value, theirAttr.Value, ancestorAttr.Value, _mergeStrategies));
                 }
             }
 
@@ -98,108 +161,159 @@ namespace LiftIO.Tests.Merging
                     }
                     else
                     {
-                        _logger.RegisterConflict(new RemovedVsEditedAttributeConflict(ourAttr.Name, ourAttr.Value, null, ancestorAttr.Value));
+                        _logger.RegisterConflict(new RemovedVsEditedAttributeConflict(ourAttr.Name, ourAttr.Value, null, ancestorAttr.Value, _mergeStrategies));
                     }
                 }
             }
         }
 
-        public  XmlNode MergeElements(XmlNode ours, XmlNode theirs, XmlNode ancestor)
+        private void MergeTextNodes(ref XmlNode ours, XmlNode theirs, XmlNode ancestor)
         {
-            foreach (XmlNode theirChildElement in theirs.ChildNodes)
+            if (ours.InnerText.Trim() == theirs.InnerText.Trim())
+            {
+                return; // we agree
+            }
+            if (string.IsNullOrEmpty(ours.InnerText.Trim()))
+            {
+                if (ancestor == null || ancestor.InnerText ==null || ancestor.InnerText.Trim()==string.Empty)
+                {
+                    ours.InnerText = theirs.InnerText; //we had it empty
+                    return;
+                }
+                else  //we deleted it.
+                {
+                    if (ancestor.InnerText.Trim() == theirs.InnerText.Trim())
+                    {
+                        //and they didn't touch it. So leave it deleted    
+                        return;
+                    }
+                    else
+                    {
+                        //they edited it. Keep our removal.
+                        _logger.RegisterConflict(new RemovedVsEdittedTextConflict(ours, theirs, ancestor, _mergeStrategies));
+                        return;
+                    }
+                }
+            }
+            else if ((ancestor == null) || (ours.InnerText != ancestor.InnerText)) 
+            {
+                //we're not empty, we edited it, and we don't equal theirs
+
+                if (theirs.InnerText == null || string.IsNullOrEmpty(theirs.InnerText.Trim()))
+                {
+                    //we edited, they deleted it. Keep ours.
+                    _logger.RegisterConflict(new RemovedVsEdittedTextConflict(ours, theirs, ancestor, _mergeStrategies));
+                    return;
+                }
+                else
+                {   //both edited it. Keep ours.
+                    _logger.RegisterConflict(new BothEdittedTextConflict(ours, theirs, ancestor, _mergeStrategies));
+                    return;
+                }
+            }
+            else // we didn't edit it, they did
+            {
+                ours.InnerText = theirs.InnerText;
+            }
+        }
+
+        private void MergeChildren(ref XmlNode ours, XmlNode theirs, XmlNode ancestor)
+        {
+            foreach (XmlNode theirChild in theirs.ChildNodes)
             {
 
-                if (theirChildElement.NodeType != XmlNodeType.Element)
+                if(theirChild.NodeType != XmlNodeType.Element && (theirChild.NodeType != XmlNodeType.Text))
                 {
+                    if (theirChild.NodeType == XmlNodeType.Whitespace)
+                    {
+                        continue;
+                    }
+                    Debug.Fail("We don't know how to merge this type of child: "+theirChild.NodeType.ToString());
+                    continue; //we don't know about merging other kinds of things
+                }
+
+
+                IFindNodeToMerge finder = _mergeStrategies.GetMergePartnerFinder(theirChild);
+                XmlNode ourChild = finder.GetNodeToMerge(theirChild, ours);
+                XmlNode ancestorChild = finder.GetNodeToMerge(theirChild, ancestor);
+
+
+                if (theirChild.NodeType == XmlNodeType.Text)
+                {
+                    MergeTextNodes(ref ourChild, theirChild, ancestorChild);
                     continue;
                 }
 
-                IFindNodeToMerge finder = _mergeStrategies.GetMergePartnerFinder(theirChildElement);
-                XmlNode ourChildElement = finder.GetNodeToMerge(theirChildElement, ours);
-                XmlNode ancestorChildElement = finder.GetNodeToMerge(theirChildElement, ancestor);
-
-                if (ourChildElement == null)
+                if (ourChild == null)
                 {
-                    if (ancestorChildElement == null)
+                    if (ancestorChild == null)
                     {
-                        ours.AppendChild(theirChildElement);
+                        ours.AppendChild(theirChild);
                     }
-                    else if (Utilities.AreXmlElementsEqual(ancestorChildElement, theirChildElement))
+                    else if (Utilities.AreXmlElementsEqual(ancestorChild, theirChild))
                     {
                         continue; // we deleted it, they didn't touch it
                     }
                     else //we deleted it, but at the same time, they changed it
                     {
-                        _logger.RegisterConflict(new RemovedVsEditedElementConflict(theirChildElement.Name, null, theirChildElement, ancestorChildElement));
+                        _logger.RegisterConflict(new RemovedVsEditedElementConflict(theirChild.Name, null, theirChild, ancestorChild, _mergeStrategies));
                         continue;
                     }
                 }
-                else if (Utilities.AreXmlElementsEqual(ourChildElement, ancestorChildElement))
+                else if ((ancestorChild!=null) && Utilities.AreXmlElementsEqual(ourChild, ancestorChild))
                 {
-                    if (Utilities.AreXmlElementsEqual(ourChildElement, theirChildElement))
+                    if (Utilities.AreXmlElementsEqual(ourChild, theirChild))
                     {
                         //nothing to do
                         continue;
                     }
                     else //theirs is new
                     {
-                        Merge(ourChildElement, theirChildElement, ancestorChildElement);
+                        MergeInner(ref ourChild, theirChild, ancestorChild);
                     }
                 }
                 else
-                { 
-                    //TODO: are they mergeable? TODO: where are text nodes handled?
-
-                    Merge(ourChildElement, theirChildElement, ancestorChildElement);
+                {
+                    MergeInner(ref ourChild, theirChild, ancestorChild);
                 }
             }
 
-            // deal with their deletions
-            foreach (XmlNode ourChildElement in ours.ChildNodes)
+            // deal with their deletions (elements and text)
+            foreach (XmlNode ourChild in ours.ChildNodes)
             {
-                if (ourChildElement.NodeType != XmlNodeType.Element)
+                if (ourChild.NodeType != XmlNodeType.Element && ourChild.NodeType != XmlNodeType.Text)
                 {
                     continue;
                 }
-                IFindNodeToMerge finder = _mergeStrategies.GetMergePartnerFinder(ourChildElement);
-                XmlNode theirChildElement = finder.GetNodeToMerge(ourChildElement, theirs);
-                XmlNode ancestorChildElement = finder.GetNodeToMerge(ourChildElement, ancestor);
+                IFindNodeToMerge finder = _mergeStrategies.GetMergePartnerFinder(ourChild);
+                XmlNode ancestorChild = finder.GetNodeToMerge(ourChild, ancestor);
+                XmlNode theirChild = finder.GetNodeToMerge(ourChild, theirs);
 
-                if (theirChildElement == null && ancestorChildElement != null)
+                if (theirChild == null && ancestorChild != null)
                 {
-                    if (Utilities.AreXmlElementsEqual(ourChildElement, ancestorChildElement))
+                    if (Utilities.AreXmlElementsEqual(ourChild, ancestorChild))
                     {
-                        ours.RemoveChild(ourChildElement);
+                        ours.RemoveChild(ourChild);
                     }
                     else
                     {
-                        _logger.RegisterConflict(new RemovedVsEditedElementConflict(ourChildElement.Name, ourChildElement, null, ancestorChildElement));
+                        if (ourChild.NodeType == XmlNodeType.Element)
+                        {
+                            _logger.RegisterConflict(
+                                new RemovedVsEditedElementConflict(ourChild.Name, ourChild, null, ancestorChild, _mergeStrategies));
+                        }
+                        else
+                        {
+                            _logger.RegisterConflict(
+                                new RemovedVsEdittedTextConflict(ourChild, null, ancestorChild, _mergeStrategies));
+                        }
                     }
                 }
             }
-
-            return ours;
         }
 
 
-        public XmlNode Merge(XmlNode ours, XmlNode theirs, XmlNode ancestor)
-        {
-            MergeAttributes(ref ours, theirs, ancestor);
-            return MergeElements(ours,
-                                 theirs,
-                                 ancestor);
-        }
 
-        public string Merge(string ours, string theirs, string ancestor)
-        {
-            XmlDocument doc = new XmlDocument();
-            XmlNode ourNode = Utilities.GetDocumentNodeFromRawXml(ours, doc);
-            XmlNode theirNode = Utilities.GetDocumentNodeFromRawXml(theirs, doc);
-            XmlNode ancestorNode = Utilities.GetDocumentNodeFromRawXml(ancestor, doc);
-
-            return Merge(ourNode,theirNode,ancestorNode).OuterXml;
-        }
     }
-
 
 }

@@ -9,13 +9,39 @@ namespace LiftIO.Merging.XmlMerge
     {
         public Dictionary<string, ElementStrategy> _elementStrategies = new Dictionary<string, ElementStrategy>();
 
+        public MergeStrategies()
+        {
+            ElementStrategy s = new ElementStrategy();
+            s._mergePartnerFinder = new FindTextDumb();
+            this.SetStrategy("_"+XmlNodeType.Text, s);
+
+            ElementStrategy def = new ElementStrategy();
+            def._mergePartnerFinder = new FindByEqualityOfTree();
+            this.SetStrategy("_defaultElement", def);
+        }
+
+        private void SetStrategy(string key, ElementStrategy strategy)
+        {
+            _elementStrategies[key] = strategy;
+        }
+
         public ElementStrategy GetElementStrategy(XmlNode element)
         {
-            ElementStrategy strategy;
-            if (!_elementStrategies.TryGetValue(element.Name, out strategy))
+            string name;
+            switch (element.NodeType)
             {
-                strategy = new ElementStrategy();
-                strategy._mergePartnerFinder = new FindByEqualityOfTree();
+                case XmlNodeType.Element:
+                    name = element.Name;
+                    break;
+                default:
+                    name = "_"+element.NodeType;
+                    break;
+            }
+
+            ElementStrategy strategy;
+            if (!_elementStrategies.TryGetValue(name, out strategy))
+            {
+                return _elementStrategies["_defaultElement"];
             }
             return strategy;
         }

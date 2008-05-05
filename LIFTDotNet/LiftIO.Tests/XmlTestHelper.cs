@@ -13,6 +13,17 @@ namespace LiftIO.Tests
         {
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(xml);
+            AssertXPathMatchesExactlyOneInner(doc, xpath);
+        }
+        public static void AssertXPathMatchesExactlyOne(XmlNode node, string xpath)
+        {
+             XmlDocument doc = new XmlDocument();
+            doc.LoadXml(node.OuterXml);
+            AssertXPathMatchesExactlyOneInner(doc, xpath);
+       }
+
+        private static void AssertXPathMatchesExactlyOneInner(XmlDocument doc, string xpath)
+        {
             XmlNodeList nodes = doc.SelectNodes(xpath);
             if (nodes == null || nodes.Count != 1)
             {
@@ -24,7 +35,7 @@ namespace LiftIO.Tests
                 writer.Flush();
                 if (nodes != null && nodes.Count > 1)
                 {
-                    Assert.Fail("Too Many: XPath failed: {0}", xpath);
+                    Assert.Fail("Too Many matches for XPath: {0}", xpath);
                 }
                 else
                 {

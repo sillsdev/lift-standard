@@ -213,9 +213,24 @@ namespace LiftIO
             return AreXmlElementsEqual(on, tn);
         }
 
-        public static bool AreXmlElementsEqual(XmlNode on, XmlNode tn)
+        public static bool AreXmlElementsEqual(XmlNode ours, XmlNode theirs)
         {
-            XmlDiff diff = new XmlDiff(new XmlInput(on.OuterXml), new XmlInput(tn.OuterXml));
+            if (ours.NodeType == XmlNodeType.Text)
+            {
+                if (ours.NodeType != XmlNodeType.Text)
+                {
+                    return false;
+                }
+                bool oursIsEmpty = (ours.InnerText == null || ours.InnerText.Trim() == string.Empty);
+                bool theirsIsEmpty = (theirs.InnerText == null || theirs.InnerText.Trim() == string.Empty);
+                if(oursIsEmpty != theirsIsEmpty)
+                {
+                    return false;
+                }
+                return ours.InnerText.Trim() == theirs.InnerText.Trim();
+            }
+           // DiffConfiguration config = new DiffConfiguration(WhitespaceHandling.None);
+            XmlDiff diff = new XmlDiff(new XmlInput(ours.OuterXml), new XmlInput(theirs.OuterXml));//, config);
             DiffResult d = diff.Compare();
             return (d == null || d.Difference == null || !d.Difference.MajorDifference);
         }
