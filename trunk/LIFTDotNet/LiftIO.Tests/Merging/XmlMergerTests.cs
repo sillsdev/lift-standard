@@ -1,11 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml;
-using LiftIO.Merging;
 using LiftIO.Merging.XmlMerge;
 using NUnit.Framework;
-using XmlUnit;
 
 namespace LiftIO.Tests.Merging
 {
@@ -24,27 +19,106 @@ namespace LiftIO.Tests.Merging
                                 </b>
                             </a>";
 
-            CheckBothWays(red, blue, ancestor, "a/b[@key='one']/c[text()='first']");
+            CheckBothWaysNoConflicts(red, blue, ancestor, "a/b[@key='one']/c[text()='first']");
         }
 
-        private void CheckBothWays(string red, string blue, string ancestor, params string[] xpaths)
+        private void CheckBothWaysNoConflicts(string red, string blue, string ancestor, params string[] xpaths)
         {
-            CheckOneWay(red, blue, ancestor, xpaths);
-            CheckOneWay(blue, red, ancestor, xpaths);
+            MergeResult r = CheckOneWay(red, blue, ancestor, xpaths);
+            AssertNoConflicts(r);
+
+            r = CheckOneWay(blue, red, ancestor, xpaths);
+            AssertNoConflicts(r);
         }
 
-        private void CheckOneWay(string ours, string theirs, string ancestor, params string[] xpaths)
+        private static void AssertNoConflicts(MergeResult r)
         {
-            XmlMerger m = new XmlMerger(new ConsolMergeLogger());
+            if (r.Conflicts.Count > 0)
+            {
+                foreach (IConflict conflict in r.Conflicts)
+                {
+                    Console.WriteLine("*Unexpected: "+ conflict.GetFullHumanReadableDescription());
+                }
+            }
+            Assert.AreEqual(0, r.Conflicts.Count, "There were unexpected conflicts.");
+        }
+
+        private MergeResult CheckOneWay(string ours, string theirs, string ancestor, params string[] xpaths)
+        {
+            XmlMerger m = new XmlMerger();
             m._mergeStrategies._elementStrategies.Add("a", ElementStrategy.CreateForKeyedElement("key"));
             m._mergeStrategies._elementStrategies.Add("b", ElementStrategy.CreateForKeyedElement("key"));
             m._mergeStrategies._elementStrategies.Add("c", ElementStrategy.CreateForKeyedElement("key"));
-            string result = m.Merge(ours, theirs, ancestor);
+            MergeResult result = m.Merge(ours, theirs, ancestor);
             foreach (string xpath in xpaths)
             {
-                XmlTestHelper.AssertXPathMatchesExactlyOne(result, xpath);
+                XmlTestHelper.AssertXPathMatchesExactlyOne(result.MergedNode, xpath);
             }
+            return result;
         }
+
+        [Test]
+        public void TextElement_OneAdded()
+        {
+            CheckBothWaysNoConflicts("<r><t>hello</t></r>", "<r/>", "<r/>",
+                "r/t[text()='hello']");
+
+            CheckBothWaysNoConflicts("<r><t>hello</t></r>", "<r><t/></r>", "<r/>",
+                "r/t[text()='hello']");
+
+            CheckBothWaysNoConflicts("<r><t>hello</t></r>", "<r><t/></r>", "<r><t/></r>",
+                "r/t[text()='hello']");
+        }
+
+        [Test]
+        public void TextElement_BothDeleted()
+        {
+            CheckBothWaysNoConflicts("<r><t/></r>", "<r><t></t></r>", "<r><t>hello</t></r>",
+                "r/t[not(text())]",
+                "r[count(t)=1]");
+        }
+
+        [Test]
+        public void TextElement_OneEditted()
+        {
+            CheckBothWaysNoConflicts("<r><t>after</t></r>", "<r><t>before</t></r>", "<r><t>before</t></r>",
+                         "r/t[contains(text(),'after')]");
+        }
+
+        [Test, Ignore("Not yet. The matcher using xmldiff sees the parent objects as different")]
+        public void TextElement_BothEditted_OuterWhiteSpaceIgnored()
+        {
+            CheckBothWaysNoConflicts("<r><t>   flub</t></r>", "<r><t> flub      </t></r>", "<r><t/></r>",
+                "r/t[contains(text(),'flub')]");
+        }
+
+        [Test]
+        public void TextElement_EachEditted_OursKept_ConflictRegistered()
+        {
+            string ancestor = @"<t>original</t>";
+            string ours = @"<t>mine</t>";
+            string theirs = @"<t>theirs</t>";
+
+            XmlMerger m = new XmlMerger();
+            MergeResult result = m.Merge(ours, theirs, ancestor);
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result.MergedNode, "t[text()='mine']");
+            Assert.AreEqual(typeof (BothEdittedTextConflict), result.Conflicts[0].GetType());
+        }
+
+        [Test]
+        public void TextElement_WeEdittedTheyDeleted_OursKept_ConflictRegistered()
+        {
+            string ancestor = @"<t>original</t>";
+            string ours = @"<t>mine</t>";
+            string theirs = @"<t></t>";
+
+            XmlMerger m = new XmlMerger();
+            MergeResult result = m.Merge(ours, theirs, ancestor);
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result.MergedNode, "t[text()='mine']");
+
+            Assert.AreEqual(typeof(RemovedVsEdittedTextConflict), result.Conflicts[0].GetType());
+        }
+
 
         [Test]
         public void EachAddedDifferentSyblings_GetBoth()
@@ -63,7 +137,7 @@ namespace LiftIO.Tests.Merging
                                 </b>
                             </a>";
 
-            CheckBothWays(red, blue, ancestor,
+            CheckBothWaysNoConflicts(red, blue, ancestor,
                 "a/b[@key='one']/c[text()='first']",
                 "a/b[@key='two']/c[text()='second']");
         }
@@ -88,7 +162,7 @@ namespace LiftIO.Tests.Merging
                                 </b>
                             </a>";
 
-            CheckBothWays(red, blue, ancestor,
+            CheckBothWaysNoConflicts(red, blue, ancestor,
                 "a/b[@key='one']/c[text()='first']",
                 "a/b[@key='two']/c[text()='second']");
         }
@@ -110,7 +184,7 @@ namespace LiftIO.Tests.Merging
 
             Assert.IsFalse(Utilities.AreXmlElementsEqual(red, blue));
 
-            CheckBothWays(red, blue, ancestor,
+            CheckBothWaysNoConflicts(red, blue, ancestor,
                 "a/b[@key='one']/c[text()='first']");
         }
 
@@ -130,7 +204,7 @@ namespace LiftIO.Tests.Merging
                                 </b>
                             </a>";
 
-            CheckBothWays(red, blue, ancestor,
+            CheckBothWaysNoConflicts(red, blue, ancestor,
                 "a/b[@key='one']/c[text()='first']");
         }
 
@@ -171,7 +245,7 @@ namespace LiftIO.Tests.Merging
             string ancestor = red;
             string blue = @"<a one='1'/>";
 
-            CheckBothWays(blue, red, ancestor, "a[@one='1']");
+            CheckBothWaysNoConflicts(blue, red, ancestor, "a[@one='1']");
         }
 
         [Test]
@@ -181,8 +255,9 @@ namespace LiftIO.Tests.Merging
             string red = @"<a one='1'/>";
             string blue = @"<a one='1'/>";
 
-            CheckBothWays(blue, red, ancestor, "a[@one='1']");
+            CheckBothWaysNoConflicts(blue, red, ancestor, "a[@one='1']");
         }
+
         [Test]
         public void BothAddedSameAttributeDifferentValue()
         {
@@ -190,9 +265,13 @@ namespace LiftIO.Tests.Merging
             string red = @"<a one='r'/>";
             string blue = @"<a one='b'/>";
 
-            CheckOneWay(blue, red, ancestor, "a[@one='b']");  //todo conflict
-            CheckOneWay(red, blue, ancestor, "a[@one='r']"); //todo conflict
+            MergeResult r = CheckOneWay(blue, red, ancestor, "a[@one='b']");
+            Assert.AreEqual(typeof(BothEdittedAttributeConflict), r.Conflicts[0].GetType());
+
+            r =CheckOneWay(red, blue, ancestor, "a[@one='r']"); 
+            Assert.AreEqual(typeof(BothEdittedAttributeConflict), r.Conflicts[0].GetType());
         }
+
         [Test]
         public void OneRemovedAttribute()
         {
@@ -200,7 +279,7 @@ namespace LiftIO.Tests.Merging
             string ancestor = red;
             string blue = @"<a/>";
 
-            CheckBothWays(blue, red, ancestor, "a[not(@one)]");
+            CheckBothWaysNoConflicts(blue, red, ancestor, "a[not(@one)]");
         }
         [Test]
         public void OneMovedAndChangedAttribute()
@@ -209,7 +288,7 @@ namespace LiftIO.Tests.Merging
             string ancestor = red;
             string blue = @"<a two='22' one='1'/>";
 
-            CheckBothWays(blue, red, ancestor, "a[@one='1' and @two='22']");
+            CheckBothWaysNoConflicts(blue, red, ancestor, "a[@one='1' and @two='22']");
         }
 
         [Test]
@@ -277,7 +356,7 @@ namespace LiftIO.Tests.Merging
                                 </b>
                             </a>";
 
-            CheckBothWays(red, blue, ancestor,
+            CheckBothWaysNoConflicts(red, blue, ancestor,
                 "a[count(b)='1']",
                 "a/b[count(c)='3']",
                 "a/b[@key='one']/c[text()='first']",

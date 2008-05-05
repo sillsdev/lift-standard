@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Xml;
 
 namespace LiftIO.Merging.XmlMerge
@@ -7,10 +8,18 @@ namespace LiftIO.Merging.XmlMerge
     {
         void RegisterConflict(IConflict conflict);
     }
-    public class ConsolMergeLogger : IMergeLogger
+    public class MergeLogger : IMergeLogger
     {
+        private readonly IList<IConflict> _conflicts;
+
+        public MergeLogger(IList<IConflict> conflicts)
+        {
+            _conflicts = conflicts;
+        }
+
         public void RegisterConflict(IConflict conflict)
         {
+            _conflicts.Add(conflict);
         }
     }
 

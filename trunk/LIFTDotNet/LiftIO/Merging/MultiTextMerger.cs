@@ -13,14 +13,12 @@ namespace LiftIO.Merging
         {
             XmlMerger m = GetMerger();
             XmlDocument doc = new XmlDocument();
-            return Utilities.GetDocumentNodeFromRawXml(m.Merge(ours, theirs, ancestor), doc);
-
-            //return MergeMultiTextPieces(ours, theirs, ancestor, null);
+            return m.Merge(ours, theirs, ancestor).MergedNode;
         }
 
         private static XmlMerger GetMerger()
         {
-            XmlMerger m = new XmlMerger(new ConsolMergeLogger());
+            XmlMerger m = new XmlMerger();
             ElementStrategy formStrategy = new ElementStrategy();
             formStrategy._mergePartnerFinder = new FindByKeyAttribute("lang");
             m._mergeStrategies._elementStrategies.Add("form", formStrategy);
@@ -57,7 +55,7 @@ namespace LiftIO.Merging
         internal static XmlNode MergeMultiTextPieces(XmlNode ours, XmlNode theirs, XmlNode ancestor)
         {
             XmlMerger m = GetMerger();
-            return m.Merge(ours, theirs, ancestor);
+            return m.Merge(ours, theirs, ancestor).MergedNode;
         }
 
     }

@@ -7,7 +7,7 @@ namespace LiftIO.Merging.XmlMerge
 {
     public interface IConflict
     {
-        string GetFullHumanReadableDescription(MergeStrategies mergeStrategies);
+        string GetFullHumanReadableDescription();
         string ConflictTypeHumanName
         {
             get;
@@ -21,13 +21,15 @@ namespace LiftIO.Merging.XmlMerge
         protected readonly string _ourValue;
         protected readonly string _theirValue;
         protected readonly string _ancestorValue;
+        protected readonly MergeStrategies _mergeStrategies;
 
-        public AttributeConflict(string attributeName, string ourValue, string theirValue, string ancestorValue)
+        public AttributeConflict(string attributeName, string ourValue, string theirValue, string ancestorValue, MergeStrategies mergeStrategies)
         {
             _attributeName = attributeName;
             _ourValue = ourValue;
             _theirValue = theirValue;
             _ancestorValue = ancestorValue;
+            _mergeStrategies = mergeStrategies;
         }
 
         public string AttributeDescription
@@ -49,9 +51,13 @@ namespace LiftIO.Merging.XmlMerge
                     ancestor, ours, theirs);
             }
         }
-        public virtual string GetFullHumanReadableDescription(MergeStrategies mergeStrategies)
+        public virtual string GetFullHumanReadableDescription()
         {
             return string.Format("{0} ({1}): {2}", ConflictTypeHumanName, AttributeDescription, WhatHappened);
+        }
+        public virtual string GetXmlOfConflict()
+        {
+            return string.Format("<conflict type='{0}'/>", this.GetType().Name);
         }
         public abstract string ConflictTypeHumanName
         {
@@ -61,8 +67,8 @@ namespace LiftIO.Merging.XmlMerge
 
     public class RemovedVsEditedAttributeConflict : AttributeConflict
     {
-        public RemovedVsEditedAttributeConflict(string attributeName, string ourValue, string theirValue, string ancestorValue)
-            : base(attributeName, ourValue, theirValue, ancestorValue)
+        public RemovedVsEditedAttributeConflict(string attributeName, string ourValue, string theirValue, string ancestorValue, MergeStrategies mergeStrategies)
+            : base(attributeName, ourValue, theirValue, ancestorValue, mergeStrategies)
         {
         }
         public override string ConflictTypeHumanName
@@ -73,8 +79,8 @@ namespace LiftIO.Merging.XmlMerge
 
     internal class BothEdittedAttributeConflict : AttributeConflict
     {
-        public BothEdittedAttributeConflict(string attributeName, string ourValue, string theirValue, string ancestorValue)
-            : base(attributeName, ourValue, theirValue, ancestorValue)
+        public BothEdittedAttributeConflict(string attributeName, string ourValue, string theirValue, string ancestorValue, MergeStrategies mergeStrategies)
+            : base(attributeName, ourValue, theirValue, ancestorValue, mergeStrategies)
         {
         }
 
@@ -84,25 +90,58 @@ namespace LiftIO.Merging.XmlMerge
         }
     }
 
-   
+    internal class BothEdittedTextConflict : AttributeConflict
+    {
+        public BothEdittedTextConflict(XmlNode ours, XmlNode theirs, XmlNode ancestor, MergeStrategies mergeStrategies)
+            : base("text", ours.InnerText, theirs.InnerText,
+                        ancestor == null ? string.Empty : ancestor.InnerText,
+            mergeStrategies)
+        {
+        }
+
+        public override string ConflictTypeHumanName
+        {
+            get { return string.Format("Both Edited Text Field Conflict"); }
+        }
+    }
+
+    public class RemovedVsEdittedTextConflict : AttributeConflict
+    {
+        public RemovedVsEdittedTextConflict(XmlNode ours, XmlNode theirs, XmlNode ancestor, MergeStrategies mergeStrategies)
+            : base("text", ours == null ? string.Empty : ours.InnerText,
+                        theirs == null ? string.Empty : theirs.InnerText,
+                        ancestor.InnerText,
+                        mergeStrategies)
+        {
+        }
+
+        public override string ConflictTypeHumanName
+        {
+            get { return string.Format("Both Edited Text Field Conflict"); }
+        }
+    }
+
     public abstract class ElementConflict : IConflict
     {
         protected readonly string _elementName;
         protected readonly XmlNode _ourElement;
         protected readonly XmlNode _theirElement;
         protected readonly XmlNode _ancestorElement;
+        protected readonly MergeStrategies _mergeStrategies;
 
-        public ElementConflict(string elementName, XmlNode ourElement, XmlNode theirElement, XmlNode ancestorElement)
+        public ElementConflict(string elementName, XmlNode ourElement, XmlNode theirElement, XmlNode ancestorElement,
+            MergeStrategies mergeStrategies)
         {
             _elementName = elementName;
             _ourElement = ourElement;
             _theirElement = theirElement;
             _ancestorElement = ancestorElement;
+            _mergeStrategies = mergeStrategies;
         }
 
 
 
-        public virtual string GetFullHumanReadableDescription(MergeStrategies mergeStrategies)
+        public virtual string GetFullHumanReadableDescription()
         {
             //enhance: this is a bit of a hack to pick some element that isn't null
             XmlNode element = _ourElement == null ? _ancestorElement : _ourElement;
@@ -111,7 +150,7 @@ namespace LiftIO.Merging.XmlMerge
                 element = _theirElement;
             }
 
-            return string.Format("{0} ({1}): {2}", ConflictTypeHumanName, mergeStrategies.GetElementStrategy(element).GetHumanDescription(element), WhatHappened);
+            return string.Format("{0} ({1}): {2}", ConflictTypeHumanName, _mergeStrategies.GetElementStrategy(element).GetHumanDescription(element), WhatHappened);
         }
 
 
@@ -129,8 +168,8 @@ namespace LiftIO.Merging.XmlMerge
 
     internal class RemovedVsEditedElementConflict : ElementConflict
     {
-        public RemovedVsEditedElementConflict(string elementName, XmlNode ourElement, XmlNode theirElement, XmlNode ancestorElement)
-            : base(elementName, ourElement, theirElement, ancestorElement)
+        public RemovedVsEditedElementConflict(string elementName, XmlNode ourElement, XmlNode theirElement, XmlNode ancestorElement, MergeStrategies mergeStrategies)
+            : base(elementName, ourElement, theirElement, ancestorElement, mergeStrategies)
         {
         }
 
