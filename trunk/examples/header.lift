@@ -1,0 +1,206 @@
+<lift producer="SIL.FLEx 2.2.0.39514" version="0.12">
+  <header>
+    <ranges>
+      <range id="dialect">
+        <range-element id="en">
+          <label>
+            <form lang="en">
+              <text>English</text>
+            </form>
+          </label>
+          <abbrev>
+            <form lang="en">
+              <text>Eng</text>
+            </form>
+          </abbrev>
+          <description>
+            <form lang="en">
+              <text>
+                The standard alphabetic representation of English (United States
+                style).
+              </text>
+            </form>
+          </description>
+        </range-element>
+        <range-element id="fr">
+          <label>
+            <form lang="en">
+              <text>French</text>
+            </form>
+          </label>
+          <abbrev>
+            <form lang="en">
+              <text>Frn</text>
+            </form>
+          </abbrev>
+          <description>
+            <form lang="en">
+              <text>The standard alphabetic representation of French.</text>
+            </form>
+          </description>
+        </range-element>
+        <range-element id="es">
+          <label>
+            <form lang="en">
+              <text>Spanish</text>
+            </form>
+          </label>
+          <abbrev>
+            <form lang="en">
+              <text>Spn</text>
+            </form>
+          </abbrev>
+        </range-element>
+        <range-element id="pt">
+          <label>
+            <form lang="en">
+              <text>Portuguese</text>
+            </form>
+          </label>
+          <abbrev>
+            <form lang="en">
+              <text>Por</text>
+            </form>
+          </abbrev>
+          <description>
+            <form lang="en">
+              <text>The standard alphabetic representation of Portuguese.</text>
+            </form>
+          </description>
+        </range-element>
+        <range-element id="kmk">
+          <label>
+            <form lang="en">
+              <text>Kalinga, Limos</text>
+            </form>
+          </label>
+          <abbrev>
+            <form lang="en">
+              <text>kmk</text>
+            </form>
+          </abbrev>
+        </range-element>
+      </range>
+      <range id="etymology">
+        <range-element id="borrowed">
+          <label>
+            <form lang="en">
+              <text>borrowed</text>
+            </form>
+          </label>
+          <description>
+            <form lang="en">
+              <text>The word is borrowed from another language</text>
+            </form>
+          </description>
+        </range-element>
+        <range-element id="proto">
+          <label>
+            <form lang="en">
+              <text>proto</text>
+            </form>
+          </label>
+          <description>
+            <form lang="en">
+              <text>The proto form of the word in another language</text>
+            </form>
+          </description>
+        </range-element>
+      </range>
+      <range
+          href="file://C:/Documents and Settings/Admin/My Documents/Limos Kalinga.lift-ranges"
+          id="grammatical-info"/>
+      <range
+          href="file://C:/Documents and Settings/Admin/My Documents/Limos Kalinga.lift-ranges"
+          id="lexical-relations"/>
+      <range
+          href="file://C:/Documents and Settings/Admin/My Documents/Limos Kalinga.lift-ranges"
+          id="note-type"/>
+      <range
+          href="file://C:/Documents and Settings/Admin/My Documents/Limos Kalinga.lift-ranges"
+          id="paradigm"/>
+      <range
+          href="file://C:/Documents and Settings/Admin/My Documents/Limos Kalinga.lift-ranges"
+          id="reversal-type"/>
+      <range
+          href="file://C:/Documents and Settings/Admin/My Documents/Limos Kalinga.lift-ranges"
+          id="semantic_domain"/>
+      <range
+          href="file://C:/Documents and Settings/Admin/My Documents/Limos Kalinga.lift-ranges"
+          id="status"/>
+      <range
+          href="file://C:/Documents and Settings/Admin/My Documents/Limos Kalinga.lift-ranges"
+          id="users"/>
+      <!--The following ranges are produced by FieldWorks Language Explorer, and are not part of the LIFT standard.-->
+      <range
+          href="file://C:/Documents and Settings/Admin/My Documents/Limos Kalinga.lift-ranges"
+          id="anthro_codes"/>
+      <range
+          href="file://C:/Documents and Settings/Admin/My Documents/Limos Kalinga.lift-ranges"
+          id="translation-types"/>
+      <!--The parts of speech are duplicated in another range because derivational affixes require a "From" PartOfSpeech as well as a "To" PartOfSpeech.-->
+      <range
+          href="file://C:/Documents and Settings/Admin/My Documents/Limos Kalinga.lift-ranges"
+          id="FromPartOfSpeech"/>
+      <range
+          href="file://C:/Documents and Settings/Admin/My Documents/Limos Kalinga.lift-ranges"
+          id="MorphType"/>
+    </ranges>
+    <fields>
+      <field tag="cvPattern">
+        <form lang="en">
+          <text>This records the syllable pattern for a pronunciation in FLEX.</text>
+        </form>
+      </field>
+      <field tag="tone">
+        <form lang="en">
+          <text>This records the tone information for a pronunciation in FLEX.</text>
+        </form>
+      </field>
+      <field tag="comment">
+        <form lang="en">
+          <text>This records a comment (note) in an etymology in FLEX.</text>
+        </form>
+      </field>
+      <field tag="ImportResidue">
+        <form lang="en">
+          <text>
+            This records residue left over from importing a standard format file into
+            FieldWorks (or LinguaLinks).
+          </text>
+        </form>
+      </field>
+      <field tag="literal_meaning">
+        <form lang="en">
+          <text>
+            This field is used to store a literal meaning of the entry. Typically,
+            this field is necessary only for a compound or an idiom where the meaning of
+            the whole is different from the sum of its parts.
+          </text>
+        </form>
+      </field>
+      <field tag="summary_definition">
+        <form lang="en">
+          <text>
+            A summary definition (located at the entry level in the Entry pane) is a
+            general definition summarizing all the senses of a primary entry. It has no
+            theoretical value; its use is solely pragmatic.
+          </text>
+        </form>
+      </field>
+      <field tag="scientific_name">
+        <form lang="en">
+          <text>
+            This field stores the scientific name pertinent to the current
+            sense.
+          </text>
+        </form>
+      </field>
+      <field tag="custom-sense-Common Affixes">
+        <form lang="en">
+          <text>Type=kcptString; WsSelector=kwsVern</text>
+        </form>
+      </field>
+    </fields>
+  </header>
+</lift>
