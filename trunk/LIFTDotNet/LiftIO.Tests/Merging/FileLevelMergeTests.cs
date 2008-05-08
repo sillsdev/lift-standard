@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace LiftIO.Tests.Merging
 {
     [TestFixture]
-    public class LiftVersionControlMergerTests
+    public class FileLevelMergeTests
     {
         private string _ours;
         private string _theirs;

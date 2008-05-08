@@ -8,8 +8,8 @@ using XmlUnit;
 
 namespace LiftIO.Tests.Merging
 {
-    [TestFixture]
-    public class MultiTextMergerTests
+/*    [TestFixture]
+    public class MultiTextMergingTests
     {
         [Test]
         public void MergeMultiTextNodes_OneAddedNewMultiTextElement()
@@ -168,5 +168,5 @@ namespace LiftIO.Tests.Merging
             CheckOneWay(blue, red, ancestor, "lexical-unit[ not(form)]");
         }
 
-    }
+    }*/
 }

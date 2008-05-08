@@ -46,8 +46,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Merging\XmlMergerTests.cs" />
-    <Compile Include="Merging\LiftSavvyMergingStrategyTests.cs" />
-    <Compile Include="Merging\MultiTextMergerTests.cs" />
+    <Compile Include="Merging\SenseMergingTests.cs" />
+    <Compile Include="Merging\MultiTextMergingTests.cs" />
     <Compile Include="Merging\PoorMansMergingStrategyTests.cs" />
     <Compile Include="Merging\xmldiff\XmlDiffTests.cs" />
     <Compile Include="Migration\V11To12MigratorTests.cs" />
@@ -55,7 +55,7 @@
     <Compile Include="Migration\V10To11MigratorTests.cs" />
     <Compile Include="Migration\GeneralMigratorTests.cs" />
     <Compile Include="Parsing\ExtensibleTests.cs" />
-    <Compile Include="Merging\LiftVersionControlMergerTests.cs" />
+    <Compile Include="Merging\FileLevelMergeTests.cs" />
     <Compile Include="Parsing\LiftMultiTextAnnotationMatcher.cs" />
     <Compile Include="Parsing\ParserTests.cs" />
     <Compile Include="Parsing\TraitMatcher.cs" />

@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace LiftIO.Tests.Merging
 {
     [TestFixture]
-    public class LiftSavvyMergingStrategyTests
+    public class SenseMergingTests
     {
    
      
@@ -41,7 +41,7 @@ namespace LiftIO.Tests.Merging
                     <lift version='0.10' producer='WeSay 1.0.0.0'>
                         <entry id='test'/>
                     </lift>";
-            LiftVersionControlMerger merger = new LiftVersionControlMerger(ours, theirs, ancestor, new LiftSavvyMergeStrategy());
+            LiftVersionControlMerger merger = new LiftVersionControlMerger(ours, theirs, ancestor, new EntryMerger());
             string result = merger.GetMergedLift();
             XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test']");
             XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test' and sense[@id='123']/gloss/text='ourSense']");

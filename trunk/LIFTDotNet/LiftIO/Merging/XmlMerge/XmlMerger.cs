@@ -248,7 +248,7 @@ namespace LiftIO.Tests.Merging
                 {
                     if (ancestorChild == null)
                     {
-                        ours.AppendChild(theirChild);
+                        ours.AppendChild(Utilities.GetDocumentNodeFromRawXml(theirChild.OuterXml, ours.OwnerDocument));
                     }
                     else if (Utilities.AreXmlElementsEqual(ancestorChild, theirChild))
                     {
