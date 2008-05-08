@@ -32,6 +32,17 @@ namespace LiftIO.Merging.XmlMerge
 
     }
 
+    /// <summary>
+    /// e.g. <grammatical-info>  there can only be one
+    /// </summary>
+    public class FindFirstElementWithSameName : IFindNodeToMerge
+    {
+        public XmlNode GetNodeToMerge(XmlNode nodeToMatch, XmlNode parentToSearchIn)
+        {
+            return parentToSearchIn.SelectSingleNode(nodeToMatch.Name);
+        }
+    }
+
     public class FindByEqualityOfTree : IFindNodeToMerge
     {
         public XmlNode GetNodeToMerge(XmlNode nodeToMatch, XmlNode parentToSearchIn)

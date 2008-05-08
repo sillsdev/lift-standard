@@ -20,7 +20,7 @@ namespace LiftIO.Merging.XmlMerge
             this.SetStrategy("_defaultElement", def);
         }
 
-        private void SetStrategy(string key, ElementStrategy strategy)
+        public void SetStrategy(string key, ElementStrategy strategy)
         {
             _elementStrategies[key] = strategy;
         }

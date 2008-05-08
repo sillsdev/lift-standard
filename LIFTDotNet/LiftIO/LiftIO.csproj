@@ -38,14 +38,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Merging\EntryMerger.cs" />
     <Compile Include="Merging\XmlMerge\Conflict.cs" />
     <Compile Include="Merging\XmlMerge\DifferenceLog.cs" />
     <Compile Include="Merging\XmlMerge\ElementStrategy.cs" />
     <Compile Include="Merging\XmlMerge\FindNodeToMerge.cs" />
-    <Compile Include="Merging\LiftSavvyMergeStrategy.cs" />
     <Compile Include="Merging\DropTheirsMergeStrategy.cs" />
     <Compile Include="Merging\IMergeStrategy.cs" />
-    <Compile Include="Merging\MultiTextMerger.cs" />
     <Compile Include="Merging\PoorMansMergeStrategy.cs" />
     <Compile Include="Merging\xmldiff\DiffConfiguration.cs" />
     <Compile Include="Merging\xmldiff\Difference.cs" />
