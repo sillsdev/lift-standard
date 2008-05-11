@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 using LiftIO.Merging.XmlMerge;
-using LiftIO.Tests.Merging;
 
 namespace LiftIO.Merging
 {
@@ -52,14 +51,13 @@ namespace LiftIO.Merging
             return strategy;
         }
 
-        public string MakeMergedEntry(XmlNode ourEntry, XmlNode theirEntry, XmlNode commonEntry)
+        public MergeResult MakeMergedEntry(XmlNode ourEntry, XmlNode theirEntry, XmlNode commonEntry)
         {
-            MergeResult r = _entryMerger.Merge(ourEntry, theirEntry, commonEntry);
-            return r.MergedNode.OuterXml;
+            return _entryMerger.Merge(ourEntry, theirEntry, commonEntry);
         }
     }
 
-    public class FindMatchingExampleTranslation : IFindNodeToMerge
+ /*   public class FindMatchingExampleTranslation : IFindNodeToMerge
     {
         public XmlNode GetNodeToMerge(XmlNode nodeToMatch, XmlNode parentToSearchIn)
         {
@@ -90,5 +88,5 @@ namespace LiftIO.Merging
             }
         }
 
-    }
+    }*/
 }

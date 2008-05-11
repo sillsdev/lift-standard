@@ -1,5 +1,6 @@
 using System.Text;
 using System.Xml;
+using LiftIO.Merging.XmlMerge;
 
 namespace LiftIO.Merging
 {
@@ -9,7 +10,7 @@ namespace LiftIO.Merging
     /// </summary>
     public class PoorMansMergeStrategy : IMergeStrategy
     {
-        public string MakeMergedEntry(XmlNode ourEntry, XmlNode theirEntry, XmlNode unusedCommonEntry)
+        public MergeResult MakeMergedEntry(XmlNode ourEntry, XmlNode theirEntry, XmlNode unusedCommonEntry)
         {
             XmlNode mergeNoteFieldNode = ourEntry.OwnerDocument.CreateElement("field");
             LiftVersionControlMerger.AddAttribute(mergeNoteFieldNode, "type", "mergeConflict");
@@ -20,7 +21,9 @@ namespace LiftIO.Merging
             b.Append("</trait>");
             mergeNoteFieldNode.InnerXml = b.ToString();
             ourEntry.AppendChild(mergeNoteFieldNode);
-            return ourEntry.OuterXml;
+            MergeResult r = new MergeResult();
+            r.MergedNode = ourEntry;
+            return r;
         }
     }
 }

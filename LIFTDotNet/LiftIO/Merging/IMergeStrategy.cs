@@ -1,9 +1,10 @@
 using System.Xml;
+using LiftIO.Merging.XmlMerge;
 
 namespace LiftIO.Merging
 {
     public interface IMergeStrategy
     {
-        string MakeMergedEntry(XmlNode ourEntry, XmlNode theirEntry, XmlNode commonEntry);
+        MergeResult MakeMergedEntry(XmlNode ourEntry, XmlNode theirEntry, XmlNode commonEntry);
     }
 }
