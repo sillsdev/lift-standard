@@ -1,5 +1,6 @@
 using System.Text;
 using System.Xml;
+using LiftIO.Merging.XmlMerge;
 
 namespace LiftIO.Merging
 {
@@ -8,9 +9,11 @@ namespace LiftIO.Merging
     /// </summary>
     public class DropTheirsMergeStrategy : IMergeStrategy
     {
-        public string MakeMergedEntry(XmlNode ourEntry, XmlNode theirEntry, XmlNode unusedCommonEntry)
+        public MergeResult MakeMergedEntry(XmlNode ourEntry, XmlNode theirEntry, XmlNode unusedCommonEntry)
         {
-            return ourEntry.OuterXml;
+            MergeResult r = new MergeResult();
+            r.MergedNode = ourEntry;
+            return r;
         }
 
 

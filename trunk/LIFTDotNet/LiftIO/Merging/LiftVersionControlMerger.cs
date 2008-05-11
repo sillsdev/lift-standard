@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Xml;
+using LiftIO.Merging.XmlMerge;
 using LiftIO.Parsing;
 
 namespace LiftIO.Merging
@@ -9,7 +11,7 @@ namespace LiftIO.Merging
     /// <summary>
     /// This is to be used be version control systems to do an intelligent 3-way merge of lift files
     /// </summary>
-    public class LiftVersionControlMerger
+    public class LiftVersionControlMerger : IDisposable
     {
         private readonly string _ourLift;
         private readonly string _theirLift;
@@ -19,17 +21,24 @@ namespace LiftIO.Merging
         private readonly XmlDocument _theirDom;
         private readonly XmlDocument _ancestorDom;
         private IMergeStrategy _mergingStrategy;
+        private StreamWriter _humanLog;
 
-        public LiftVersionControlMerger(string ourLiftPath, string theirLiftPath, string ancestorLiftPath, IMergeStrategy mergeStrategy)
+        public LiftVersionControlMerger(string ourLiftXml, string theirLiftXml, string ancestorLiftXml, IMergeStrategy mergeStrategy) 
         {
-            _ourLift = ourLiftPath;
-            _theirLift = theirLiftPath;
-            _ancestorLift = ancestorLiftPath;
+            _ourLift = ourLiftXml;
+            _theirLift = theirLiftXml;
+            _ancestorLift = ancestorLiftXml;
             _ourDom = new XmlDocument();
             _theirDom = new XmlDocument();
             _ancestorDom = new XmlDocument();
 
             _mergingStrategy = mergeStrategy;
+
+         //   string humanLogPath = Path.Combine(Path.GetDirectoryName(ourLiftPath), Path.GetFileNameWithoutExtension(ourLiftPath)+ "_MergeLog.txt");
+            
+            //TODO:
+            string humanLogPath = Path.GetTempFileName();
+            _humanLog = System.IO.File.CreateText(humanLogPath);
         }
 
         public string GetMergedLift()
@@ -69,6 +78,11 @@ namespace LiftIO.Merging
 
         private void ProcessEntry(XmlWriter writer, XmlNode ourEntry)
         {
+
+            //REVIEW: this doesn't seem to take advantage of the most common situation,
+            // which is an entry that *either* they changed, or we changed.  I expected to
+            // see an early comparison against the ancestor to determine that.
+
             string id = GetId(ourEntry);
             XmlNode theirEntry = FindEntry(_theirDom, id);
             if (theirEntry == null)
@@ -82,9 +96,19 @@ namespace LiftIO.Merging
             else
             {
                 XmlNode commonEntry = FindEntry(_ancestorDom, id);
-                writer.WriteRaw(_mergingStrategy.MakeMergedEntry(ourEntry, theirEntry, commonEntry));
+                MergeResult result = _mergingStrategy.MakeMergedEntry(ourEntry, theirEntry, commonEntry);
+                writer.WriteRaw(result.MergedNode.OuterXml);
+                UpdateLogs(result);
             }
             _processedIds.Add(id);
+        }
+
+        private void UpdateLogs(MergeResult result)
+        {
+            foreach (IConflict conflict in result.Conflicts)
+            {
+                _humanLog.WriteLine(conflict.GetFullHumanReadableDescription());
+            }
         }
 
         private void ProcessEntryWeKnowDoesntNeedMerging(XmlNode entry, string id, XmlWriter writer)
@@ -146,5 +170,18 @@ namespace LiftIO.Merging
         {
             return e.Attributes["id"].Value;
         }
+
+        #region IDisposable Members
+
+        // TODO: implement full pattern, with checking
+
+        public void Dispose()
+        {
+            _humanLog.Close();
+            _humanLog.Dispose();
+            _humanLog = null;
+        }
+
+        #endregion
     }
 }

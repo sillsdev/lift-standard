@@ -48,190 +48,119 @@ namespace LiftIO.Tests.Merging
         }
 
         [Test]
-        public void EachEditsSameText_KeepOursAndGetConflict()
+        public void EachEditsSameFormOfCitationForm_GetOursAndConflict()
         {
             string ours = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10' producer='WeSay 1.0.0.0'>
+                    <lift version='0.12' >
                         <entry id='test'>
-                            <sense id='123'>
-                                 <gloss lang='a'>
-                                    <text>ours</text>
-                                 </gloss>
-                             </sense>
+                            <citation>
+                                <form lang='one'><text>ours</text></form>
+                            </citation>
                         </entry>
                     </lift>";
 
             string theirs = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10' producer='WeSay 1.0.0.0'>
+                    <lift version='0.12' >
                         <entry id='test'>
-                            <sense id='123'>
-                                 <gloss lang='a'>
-                                    <text>theirs</text>
-                                 </gloss>
-                             </sense>
+                            <citation>
+                                <form lang='one'><text>theirs</text></form>
+                            </citation>
                         </entry>
                     </lift>";
             string ancestor = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10' producer='WeSay 1.0.0.0'>
-                       <entry id='test'>
-                            <sense id='123'>
-                                 <gloss lang='a'>
-                                    <text>original</text>
-                                 </gloss>
-                             </sense>
-                        </entry>                    </lift>";
-            LiftVersionControlMerger merger = new LiftVersionControlMerger(ours, theirs, ancestor, new EntryMerger());
-            string result = merger.GetMergedLift();
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test' and sense[@id='123']/gloss/text='ours']");
-
-            //TODO: we don't yet have access to the conflicts
-        }
-        [Test]
-        public void EachEditsSamePartOfSpeech_KeepOursAndGetConflict()
-        {
-            string ours = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10'>
+                    <lift version='0.12'>
                         <entry id='test'>
-                            <sense id='123'>
-                                 <grammatical-info  value='noun'/>
-                             </sense>
+                            <citation>
+                                <form lang='one'><text>original</text></form>
+                            </citation>
                         </entry>
                     </lift>";
-
-            string theirs = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10'>
-                        <entry id='test'>
-                            <sense id='123'>
-                                 <grammatical-info  value='noun'/>
-                             </sense>
-                        </entry>
-                    </lift>";
-            string ancestor = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10'>
-                       <entry id='test'>
-                            <sense id='123'>
-                                 <grammatical-info  value='adj'/>
-                             </sense>
-                        </entry>                    </lift>";
             LiftVersionControlMerger merger = new LiftVersionControlMerger(ours, theirs, ancestor, new EntryMerger());
             string result = merger.GetMergedLift();
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test']/sense/grammatical-info[@value='noun']");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[count(citation) = 1]");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry/citation/form/text[text()='ours']");
 
-            //TODO: we don't yet have access to the conflicts
+            //todo assert conflict
         }
 
         [Test]
-        public void EachAddsExampleSentence_GetBoth()
+        public void EachEditsSameFormOfField_GetOursAndConflict()
         {
             string ours = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10'>
+                    <lift version='0.12' >
                         <entry id='test'>
-                            <sense id='123'>
-                                 <grammatical-info  value='noun'/>
-                                <example>
-                                        <form lang='x'><text>one</text></form>
-                                </example>
-                             </sense>
+                            <field type='1'>
+                                <form lang='one'><text>ours</text></form>
+                            </field>
                         </entry>
                     </lift>";
 
             string theirs = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10'>
+                    <lift version='0.12' >
                         <entry id='test'>
-                            <sense id='123'>
-                                <example>
-                                        <form lang='x'><text>two</text></form>
-                                </example>
-                                 <grammatical-info  value='noun'/>
-                             </sense>
-                        </entry>
+                            <field type='1'>
+                                <form lang='one'><text>theirs</text></form>
+                            </field>                        </entry>
                     </lift>";
             string ancestor = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10'>
-                       <entry id='test'>
-                            <sense id='123'>
-                                 <grammatical-info  value='adj'/>
-                             </sense>
-                        </entry>                    </lift>";
+                    <lift version='0.12'>
+                        <entry id='test'>
+                            <field type='1'>
+                                <form lang='one'><text>common</text></form>
+                            </field>
+                        </entry>
+                    </lift>";
             LiftVersionControlMerger merger = new LiftVersionControlMerger(ours, theirs, ancestor, new EntryMerger());
             string result = merger.GetMergedLift();
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test']/sense/grammatical-info[@value='noun']");
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test']/sense[count(example) = '2']");
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test']/sense/example/form/text[text()='one']");
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test']/sense/example/form/text[text()='two']");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[count(field) = 1]");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry/field[@type='1']/form/text[text()='ours']");
 
-            //TODO: we don't yet have access to the conflicts
+            //todo assert conflict
         }
 
         [Test]
-        public void TheyEditExampleSentence_WeGetTheEdit()
+        public void EachEditsSameFormOfFieldAndAddsForm_GetCorrectMerge()
         {
             string ours = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10'>
+                    <lift version='0.12' >
                         <entry id='test'>
-                            <sense id='123'>
-                                <example>
-                                        <form lang='x'><text>error</text></form>
-                                </example>
-                             </sense>
+                            <field type='0'>
+                                <form lang='one'><text>our0</text></form>
+                            </field>
+                            <field type='1'>
+                                <form lang='one'><text>ours</text></form>
+                            </field>
                         </entry>
                     </lift>";
 
             string theirs = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10'>
+                    <lift version='0.12' >
                         <entry id='test'>
-                            <sense id='123'>
-                                <example>
-                                        <form lang='x'><text>correction</text></form>
-                                </example>
-                             </sense>
-                        </entry>
-                    </lift>";
-            string ancestor = ours;
-            LiftVersionControlMerger merger = new LiftVersionControlMerger(ours, theirs, ancestor, new EntryMerger());
-            string result = merger.GetMergedLift();
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test']/sense[count(example) = '1']");
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test']/sense/example/form/text[text()='correction']");
-        }
+                            <field type='1'>
+                                <form lang='one'><text>theirs</text></form>
+                            </field>                        
+                            <field type='2'>
+                                <form lang='one'><text>their2</text></form>
+                            </field>
 
-        [Test, Ignore("Will make two until examples have ids")]
-        public void BothEditExampleSentence_StillOnlyOne()
-        {
-            string ours = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10'>
-                        <entry id='test'>
-                            <sense id='123'>
-                                <example>
-                                        <form lang='x'><text>our fix</text></form>
-                                </example>
-                             </sense>
-                        </entry>
-                    </lift>";
-
-            string theirs = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10'>
-                        <entry id='test'>
-                            <sense id='123'>
-                                <example>
-                                        <form lang='x'><text>their fix</text></form>
-                                </example>
-                             </sense>
                         </entry>
                     </lift>";
             string ancestor = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10'>
+                    <lift version='0.12'>
                         <entry id='test'>
-                            <sense id='123'>
-                                <example>
-                                        <form lang='x'><text>error</text></form>
-                                </example>
-                             </sense>
+                            <field type='1'>
+                                <form lang='one'><text>common</text></form>
+                            </field>
                         </entry>
                     </lift>";
             LiftVersionControlMerger merger = new LiftVersionControlMerger(ours, theirs, ancestor, new EntryMerger());
             string result = merger.GetMergedLift();
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test']/sense[count(example) = '1']");
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test']/sense/example/form/text[text()='our fix']");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[count(field) = 3]");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry/field[@type='0']/form/text[text()='our0']");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry/field[@type='1']/form/text[text()='ours']");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry/field[@type='2']/form/text[text()='their2']");
+
+            //todo assert conflict
         }
     }
 }

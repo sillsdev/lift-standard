@@ -150,6 +150,39 @@ namespace LiftIO.Tests.Merging
         }
 
         [Test]
+        public void EachEditsSameDefinition_KeepOursAndGetConflict()
+        {
+            string ours = @"<?xml version='1.0' encoding='utf-8'?>
+                    <lift version='0.10'>
+                        <entry id='test'>
+                            <sense id='123'>
+                                 <grammatical-info  value='noun'/>
+                             </sense>
+                        </entry>
+                    </lift>";
+
+            string theirs = @"<?xml version='1.0' encoding='utf-8'?>
+                    <lift version='0.10'>
+                        <entry id='test'>
+                            <sense id='123'>
+                                 <grammatical-info  value='noun'/>
+                             </sense>
+                        </entry>
+                    </lift>";
+            string ancestor = @"<?xml version='1.0' encoding='utf-8'?>
+                    <lift version='0.10'>
+                       <entry id='test'>
+                            <sense id='123'>
+                                 <grammatical-info  value='adj'/>
+                             </sense>
+                        </entry>                    </lift>";
+            LiftVersionControlMerger merger = new LiftVersionControlMerger(ours, theirs, ancestor, new EntryMerger());
+            string result = merger.GetMergedLift();
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test']/sense/grammatical-info[@value='noun']");
+
+            //TODO: we don't yet have access to the conflicts
+        }
+        [Test]
         public void EachAddsExampleSentence_GetBoth()
         {
             string ours = @"<?xml version='1.0' encoding='utf-8'?>

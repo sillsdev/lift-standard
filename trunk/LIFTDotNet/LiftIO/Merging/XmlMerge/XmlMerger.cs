@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Xml;
 using LiftIO.Merging.XmlMerge;
 
-namespace LiftIO.Tests.Merging
+namespace LiftIO.Merging.XmlMerge
 {
     public class MergeResult
     {
@@ -315,5 +315,4 @@ namespace LiftIO.Tests.Merging
 
 
     }
-
 }
