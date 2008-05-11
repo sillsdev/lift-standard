@@ -9,71 +9,42 @@ using NUnit.Framework;
 namespace LiftIO.Tests.Merging
 {
     [TestFixture]
-    public class SenseMergingTests
+    public class EntryMergingTests
     {
-   
-     
         [Test]
-        public void EachHasNewSense_BothSensesCoveyed()
-        {
-            string ours = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10' producer='WeSay 1.0.0.0'>
-                        <entry id='test'>
-                            <sense id='123'>
-                                 <gloss lang='a'>
-                                    <text>ourSense</text>
-                                 </gloss>
-                             </sense>
-                        </entry>
-                    </lift>";
-
-            string theirs = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10' producer='WeSay 1.0.0.0'>
-                        <entry id='test'>
-                            <sense id='456'>
-                                 <gloss lang='a'>
-                                    <text>theirSense</text>
-                                 </gloss>
-                             </sense>
-                        </entry>
-                    </lift>";
-            string ancestor = @"<?xml version='1.0' encoding='utf-8'?>
-                    <lift version='0.10' producer='WeSay 1.0.0.0'>
-                        <entry id='test'/>
-                    </lift>";
-            LiftVersionControlMerger merger = new LiftVersionControlMerger(ours, theirs, ancestor, new EntryMerger());
-            string result = merger.GetMergedLift();
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test']");
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test' and sense[@id='123']/gloss/text='ourSense']");
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test' and sense[@id='456']/gloss/text='theirSense']");
-        }
-
-        [Test]
-        public void EachRemovesOneSense_NoSensesLeft()
+        public void EachEditsSameFormOfLexicalUnit_GetOursAndConflict()
         {
             string ours = @"<?xml version='1.0' encoding='utf-8'?>
                     <lift version='0.12' >
                         <entry id='test'>
-                            <sense id='one'/>
+                            <lexical-unit>
+                                <form lang='one'><text>ours</text></form>
+                            </lexical-unit>
                         </entry>
                     </lift>";
 
             string theirs = @"<?xml version='1.0' encoding='utf-8'?>
                     <lift version='0.12' >
                         <entry id='test'>
-                            <sense id='two'/>
+                            <lexical-unit>
+                                <form lang='one'><text>theirs</text></form>
+                            </lexical-unit>
                         </entry>
                     </lift>";
             string ancestor = @"<?xml version='1.0' encoding='utf-8'?>
                     <lift version='0.12'>
                         <entry id='test'>
-                            <sense id='one'/>
-                            <sense id='two'/>
+                            <lexical-unit>
+                                <form lang='one'><text>original</text></form>
+                            </lexical-unit>
                         </entry>
                     </lift>";
             LiftVersionControlMerger merger = new LiftVersionControlMerger(ours, theirs, ancestor, new EntryMerger());
             string result = merger.GetMergedLift();
-            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[@id='test' and not(sense)]");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry[count(lexical-unit) = 1]");
+            XmlTestHelper.AssertXPathMatchesExactlyOne(result, "lift/entry/lexical-unit/form/text[text()='ours']");
+
+            //todo assert conflict
         }
 
         [Test]
