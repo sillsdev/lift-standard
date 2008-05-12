@@ -49,7 +49,7 @@ namespace LiftIO.Tests.Merging
             m._mergeStrategies._elementStrategies.Add("a", ElementStrategy.CreateForKeyedElement("key"));
             m._mergeStrategies._elementStrategies.Add("b", ElementStrategy.CreateForKeyedElement("key"));
             m._mergeStrategies._elementStrategies.Add("c", ElementStrategy.CreateForKeyedElement("key"));
-            MergeResult result = m.Merge(ours, theirs, ancestor);
+            MergeResult result = m.Merge(ours, theirs, ancestor, false);
             foreach (string xpath in xpaths)
             {
                 XmlTestHelper.AssertXPathMatchesExactlyOne(result.MergedNode, xpath);
@@ -100,7 +100,7 @@ namespace LiftIO.Tests.Merging
             string theirs = @"<t>theirs</t>";
 
             XmlMerger m = new XmlMerger();
-            MergeResult result = m.Merge(ours, theirs, ancestor);
+            MergeResult result = m.Merge(ours, theirs, ancestor, false);
             XmlTestHelper.AssertXPathMatchesExactlyOne(result.MergedNode, "t[text()='mine']");
             Assert.AreEqual(typeof (BothEdittedTextConflict), result.Conflicts[0].GetType());
         }
@@ -113,7 +113,7 @@ namespace LiftIO.Tests.Merging
             string theirs = @"<t></t>";
 
             XmlMerger m = new XmlMerger();
-            MergeResult result = m.Merge(ours, theirs, ancestor);
+            MergeResult result = m.Merge(ours, theirs, ancestor, false);
             XmlTestHelper.AssertXPathMatchesExactlyOne(result.MergedNode, "t[text()='mine']");
 
             Assert.AreEqual(typeof(RemovedVsEdittedTextConflict), result.Conflicts[0].GetType());
