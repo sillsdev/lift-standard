@@ -35,6 +35,7 @@ namespace LiftIO.Merging.XmlMerge
     {
         public IMergeLogger _logger;
         public MergeStrategies _mergeStrategies;
+        private bool _doLeastCommonDenominator;
 
         public XmlMerger()
         {
@@ -42,8 +43,9 @@ namespace LiftIO.Merging.XmlMerge
             
         }
 
-        public MergeResult Merge(XmlNode ours, XmlNode theirs, XmlNode ancestor)
+        public MergeResult Merge(XmlNode ours, XmlNode theirs, XmlNode ancestor, bool doLeastCommonDenominator)
         {
+            _doLeastCommonDenominator = doLeastCommonDenominator;
             MergeResult result = new MergeResult();
             _logger = new MergeLogger(result.Conflicts);
             MergeInner(ref ours, theirs, ancestor);
@@ -57,14 +59,14 @@ namespace LiftIO.Merging.XmlMerge
             MergeChildren(ref ours,theirs,ancestor);
         }
 
-        public MergeResult Merge(string ours, string theirs, string ancestor)
+        public MergeResult Merge(string ours, string theirs, string ancestor, bool doLeastCommonDenominator)
         {
             XmlDocument doc = new XmlDocument();
             XmlNode ourNode = Utilities.GetDocumentNodeFromRawXml(ours, doc);
             XmlNode theirNode = Utilities.GetDocumentNodeFromRawXml(theirs, doc);
             XmlNode ancestorNode = Utilities.GetDocumentNodeFromRawXml(ancestor, doc);
 
-            return Merge(ourNode, theirNode, ancestorNode);
+            return Merge(ourNode, theirNode, ancestorNode, false);
         }
 
 
@@ -101,9 +103,17 @@ namespace LiftIO.Merging.XmlMerge
                         //todo: should we add what they modified?
                         //needs a test first
 
-                        //until then, this is a conflict  <-- todo
-                        _logger.RegisterConflict(new RemovedVsEditedAttributeConflict(theirAttr.Name, null, theirAttr.Value, ancestorAttr.Value, _mergeStrategies));
-                        continue;
+                        if (_doLeastCommonDenominator)
+                        {
+                        }
+                        else
+                        {
+                            //until then, this is a conflict
+                            _logger.RegisterConflict(
+                                new RemovedVsEditedAttributeConflict(theirAttr.Name, null, theirAttr.Value,
+                                                                     ancestorAttr.Value, _mergeStrategies));
+                            continue;
+                        }
                     }
                 }
                 else if (ancestorAttr == null) // we both introduced this attribute
@@ -115,7 +125,15 @@ namespace LiftIO.Merging.XmlMerge
                     }
                     else
                     {
-                        _logger.RegisterConflict(new BothEdittedAttributeConflict(theirAttr.Name, ourAttr.Value, theirAttr.Value, null,  _mergeStrategies));
+                        if (_doLeastCommonDenominator)
+                        {
+                        }
+                        else
+                        {
+                            _logger.RegisterConflict(
+                                new BothEdittedAttributeConflict(theirAttr.Name, ourAttr.Value, theirAttr.Value, null,
+                                                                 _mergeStrategies));
+                        }
                     }
                 }
                 else if (ancestorAttr.Value == ourAttr.Value)
@@ -142,7 +160,15 @@ namespace LiftIO.Merging.XmlMerge
                 }
                 else
                 {
-                    _logger.RegisterConflict(new BothEdittedAttributeConflict(theirAttr.Name, ourAttr.Value, theirAttr.Value, ancestorAttr.Value, _mergeStrategies));
+                    if (_doLeastCommonDenominator)
+                    {
+                    }
+                    else
+                    {
+                        _logger.RegisterConflict(
+                            new BothEdittedAttributeConflict(theirAttr.Name, ourAttr.Value, theirAttr.Value,
+                                                             ancestorAttr.Value, _mergeStrategies));
+                    }
                 }
             }
 
@@ -161,11 +187,20 @@ namespace LiftIO.Merging.XmlMerge
                     }
                     else
                     {
-                        _logger.RegisterConflict(new RemovedVsEditedAttributeConflict(ourAttr.Name, ourAttr.Value, null, ancestorAttr.Value, _mergeStrategies));
+                        if (_doLeastCommonDenominator)
+                        {
+                        }
+                        else
+                        {
+                            _logger.RegisterConflict(
+                                new RemovedVsEditedAttributeConflict(ourAttr.Name, ourAttr.Value, null,
+                                                                     ancestorAttr.Value, _mergeStrategies));
+                        }
                     }
                 }
             }
         }
+
 
         private void MergeTextNodes(ref XmlNode ours, XmlNode theirs, XmlNode ancestor)
         {
@@ -189,26 +224,40 @@ namespace LiftIO.Merging.XmlMerge
                     }
                     else
                     {
-                        //they edited it. Keep our removal.
-                        _logger.RegisterConflict(new RemovedVsEdittedTextConflict(ours, theirs, ancestor, _mergeStrategies));
-                        return;
+                        if (_doLeastCommonDenominator)
+                        {
+                        }
+                        else
+                        {
+//they edited it. Keep our removal.
+                            _logger.RegisterConflict(
+                                new RemovedVsEdittedTextConflict(ours, theirs, ancestor, _mergeStrategies));
+                            return;
+                        }
                     }
                 }
             }
             else if ((ancestor == null) || (ours.InnerText != ancestor.InnerText)) 
             {
                 //we're not empty, we edited it, and we don't equal theirs
-
-                if (theirs.InnerText == null || string.IsNullOrEmpty(theirs.InnerText.Trim()))
+                if (_doLeastCommonDenominator)
                 {
-                    //we edited, they deleted it. Keep ours.
-                    _logger.RegisterConflict(new RemovedVsEdittedTextConflict(ours, theirs, ancestor, _mergeStrategies));
-                    return;
                 }
                 else
-                {   //both edited it. Keep ours.
-                    _logger.RegisterConflict(new BothEdittedTextConflict(ours, theirs, ancestor, _mergeStrategies));
-                    return;
+                {
+                    if (theirs.InnerText == null || string.IsNullOrEmpty(theirs.InnerText.Trim()))
+                    {
+                        //we edited, they deleted it. Keep ours.
+                        _logger.RegisterConflict(
+                            new RemovedVsEdittedTextConflict(ours, theirs, ancestor, _mergeStrategies));
+                        return;
+                    }
+                    else
+                    {
+                        //both edited it. Keep ours.
+                        _logger.RegisterConflict(new BothEdittedTextConflict(ours, theirs, ancestor, _mergeStrategies));
+                        return;
+                    }
                 }
             }
             else // we didn't edit it, they did
@@ -256,8 +305,16 @@ namespace LiftIO.Merging.XmlMerge
                     }
                     else //we deleted it, but at the same time, they changed it
                     {
-                        _logger.RegisterConflict(new RemovedVsEditedElementConflict(theirChild.Name, null, theirChild, ancestorChild, _mergeStrategies));
-                        continue;
+                        if (_doLeastCommonDenominator)
+                        {
+                        }
+                        else
+                        {
+                            _logger.RegisterConflict(
+                                new RemovedVsEditedElementConflict(theirChild.Name, null, theirChild, ancestorChild,
+                                                                   _mergeStrategies));
+                            continue;
+                        }
                     }
                 }
                 else if ((ancestorChild!=null) && Utilities.AreXmlElementsEqual(ourChild, ancestorChild))
@@ -297,15 +354,22 @@ namespace LiftIO.Merging.XmlMerge
                     }
                     else
                     {
-                        if (ourChild.NodeType == XmlNodeType.Element)
+                        if (_doLeastCommonDenominator)
                         {
-                            _logger.RegisterConflict(
-                                new RemovedVsEditedElementConflict(ourChild.Name, ourChild, null, ancestorChild, _mergeStrategies));
                         }
                         else
                         {
-                            _logger.RegisterConflict(
-                                new RemovedVsEdittedTextConflict(ourChild, null, ancestorChild, _mergeStrategies));
+                            if (ourChild.NodeType == XmlNodeType.Element)
+                            {
+                                _logger.RegisterConflict(
+                                    new RemovedVsEditedElementConflict(ourChild.Name, ourChild, null, ancestorChild,
+                                                                       _mergeStrategies));
+                            }
+                            else
+                            {
+                                _logger.RegisterConflict(
+                                    new RemovedVsEdittedTextConflict(ourChild, null, ancestorChild, _mergeStrategies));
+                            }
                         }
                     }
                 }

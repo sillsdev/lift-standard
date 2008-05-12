@@ -53,7 +53,7 @@ namespace LiftIO.Merging
 
         public MergeResult MakeMergedEntry(XmlNode ourEntry, XmlNode theirEntry, XmlNode commonEntry)
         {
-            return _entryMerger.Merge(ourEntry, theirEntry, commonEntry);
+            return _entryMerger.Merge(ourEntry, theirEntry, commonEntry, false);
         }
     }
 
