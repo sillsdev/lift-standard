@@ -149,6 +149,8 @@ namespace LiftIO.Tests
             SimpleCheckGetOrMakeEntry_InsertVersion("<lift V />", 0);
         }
 
+
+
         [Test]
         public void EntryMissingIdNotFatal()
         {
@@ -173,7 +175,7 @@ namespace LiftIO.Tests
         }
         private void SimpleCheckGetOrMakeEntry_InsertVersion(string content, int times)
         {
-            content = content.Replace("<lift V", string.Format("<lift version='{0}' ", Validator.LiftVersion));
+            content = InsertVersion(content);
 
             _doc.LoadXml(content);
             using (_mocks.Ordered)
@@ -189,7 +191,12 @@ namespace LiftIO.Tests
             }
             _mocks.VerifyAllExpectationsHaveBeenMet();
         }
-        
+
+        private static string InsertVersion(string content) {
+            content = content.Replace("<lift V", string.Format("<lift version='{0}' ", Validator.LiftVersion));
+            return content;
+        }
+
         [Test]
         public void EntryWithGuid()
         {
@@ -1012,52 +1019,124 @@ namespace LiftIO.Tests
             ParseEntryAndCheck(string.Format("<entry><sense><example><note><form lang='x'><text>hello</text></form></note></example></sense></entry>"));
         }
 
+        [Test]
+        public void EmptyHeaderOk()
+        {
+            SimpleCheckWithHeader(InsertVersion("<lift V><header/><entry/></lift>"), 0, 0, 1);
+        }
 
-        /* These appear to succeed even if the range-reading code is removed
-		[Test]
-		public void EmptyLiftHeaderOk()
-		{
-			SimpleCheckWithHeader("<lift><header/></lift>", 0, 0, 0);
-		}
+        [Test]
+        public void EmptyHeaderNoEntriesOk()
+        {
+            SimpleCheckWithHeader(InsertVersion("<lift V><header/></lift>"), 0,0,0);
+        }
+
+        [Test]
+        public void EmptyFieldsOk()
+        {
+            SimpleCheckWithHeader(InsertVersion("<lift V><header><fields/></header><entry/></lift>"), 0,0,1);
+        }
+
+        [Test]
+        public void EmptyFieldsNoEntriesOk()
+        {
+            SimpleCheckWithHeader(InsertVersion("<lift V><header><fields/></header></lift>"), 0, 0, 0);
+        }
+        [Test]
+        public void EmptyFieldOk()
+        {
+            SimpleCheckWithHeader(InsertVersion("<lift V><header><fields><field tag='custom'/></fields></header><entry/></lift>"), 0,1,1);
+        }
+        [Test]
+        public void TwoFields()
+        {
+            SimpleCheckWithHeader(InsertVersion("<lift V><header><fields><field tag='special'/><field tag='custom'></field></fields></header><entry/></lift>"), 0, 2, 1);
+        }
+
+        [Test]
+        public void EmptyFieldNoEntriesOk()
+        {
+            SimpleCheckWithHeader(InsertVersion("<lift V><header><fields><field tag='custom'/></fields></header></lift>"), 0, 1, 0);
+        }
+
+
+        [Test]
+        public void EmptyRangesOk()
+        {
+            SimpleCheckWithHeader(InsertVersion("<lift V><header><ranges/></header><entry/></lift>"), 0,0,1);
+        }
+        [Test]
+        public void EmptyRangesNoEntriesOk()
+        {
+            SimpleCheckWithHeader(InsertVersion("<lift V><header><ranges/></header></lift>"), 0, 0, 0);
+        }
+
+
+
+        [Test]
+        public void EmptyRangeOk()
+        {
+            SimpleCheckWithHeader(InsertVersion("<lift V><header><ranges><range/></ranges></header><entry/></lift>"), 0,0,1);
+        }
+
+        [Test]
+        public void EmptyRangeNoEntriesOk()
+        {
+            SimpleCheckWithHeader(InsertVersion("<lift V><header><ranges><range/></ranges></header></lift>"), 0, 0, 0);
+        }
+
+        [Test]
+        public void EmptyLiftHeaderSectionsFieldsBeforeRangesOk()
+        {
+            SimpleCheckWithHeader(InsertVersion("<lift V><header><fields/><ranges/></header><entry/></lift>"), 0, 0, 1);
+        }
 
          [Test]
-                public void EmptyLiftHeaderSectionsOk()
-                {
-                    SimpleCheckWithHeader("<lift><header><ranges/><fields/></header></lift>", 0, 0, 0);
-                }
+        public void EmptyLiftHeaderSectionsOk()
+        {
+            SimpleCheckWithHeader(InsertVersion("<lift V><header><ranges/><fields/></header><entry/></lift>"), 0, 0, 1);
+        }
+        [Test]
+        public void EmptyLiftHeaderSectionsNoEntriesOk()
+        {
+            SimpleCheckWithHeader(InsertVersion("<lift V><header><ranges/><fields/></header></lift>"), 0, 0, 0);
+        }
 
-                [Test]
-                public void SimpleRangeElement()
-                {
-                    string content = "<range-element id='en'><label><form lang='en'><text>English</text></form></label><abbrev><form lang='en'><text>Eng</text></form></abbrev><description><form lang='en'><text>Standard English</text></form></description></range-element>";
-                    Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
-                        .With(Is.EqualTo("dialect"), Is.EqualTo("en"), Is.Null, Is.Null,
-                            Is.EqualTo(new LiftMultiText("en", "Standard English")),
-                            Is.EqualTo(new LiftMultiText("en", "English")),
-                            Is.EqualTo(new LiftMultiText("en", "Eng")));
-                    _doc.LoadXml(content);
-                    _parser.ReadRangeElement("dialect", _doc.FirstChild);
-                    _mocks.VerifyAllExpectationsHaveBeenMet();
-                }
-          
-          
-                private void SimpleCheckWithHeader(string content, int rangeCount, int fieldCount, int entryCount)
-                {
-                    using (_mocks.Ordered)
-                    {
-                        Expect.Exactly(rangeCount).On(_merger).Method("ProcessRangeElement")
-                            .WithAnyArguments();
-                        Expect.Exactly(fieldCount).On(_merger).Method("ProcessFieldDefinition")
-                            .WithAnyArguments();
-                        ExpectGetOrMakeEntry();
-                        ExpectFinishEntry();
-                    }
-                    _doc.LoadXml(content);
-                    _parser.ReadLiftDom(_doc, default(DateTime));
-                    _mocks.VerifyAllExpectationsHaveBeenMet();
-                }
-
-           */
+        [Test]
+        public void SimpleRangeElement()
+        {
+            string content = InsertVersion("<lift V><header><ranges><range id='dialect'><range-element id='en'><label><form lang='en'><text>English</text></form></label><abbrev><form lang='en'><text>Eng</text></form></abbrev><description><form lang='en'><text>Standard English</text></form></description></range-element></range></ranges></header><entry/></lift>");
+            Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
+                .With(Is.EqualTo("dialect"), Is.EqualTo("en"), Is.Null, Is.Null,
+                    Is.EqualTo(new LiftMultiText("en", "Standard English")),
+                    Is.EqualTo(new LiftMultiText("en", "English")),
+                    Is.EqualTo(new LiftMultiText("en", "Eng")));
+            ExpectGetOrMakeEntry();
+            ExpectFinishEntry();
+            using (TempFile f = new TempFile(string.Format(content)))
+            {
+                _parser.ReadLiftFile(f.Path);
+            }
+            _mocks.VerifyAllExpectationsHaveBeenMet();
+        }
+  
+  
+        private void SimpleCheckWithHeader(string content, int rangeElementCount, int fieldCount, int entryCount)
+        {
+            using (_mocks.Unordered)
+            {
+                Expect.Exactly(rangeElementCount).On(_merger).Method("ProcessRangeElement")
+                    .WithAnyArguments();
+                Expect.Exactly(fieldCount).On(_merger).Method("ProcessFieldDefinition")
+                    .WithAnyArguments();
+                Expect.Exactly(entryCount).On(_merger).Method("GetOrMakeEntry").WithAnyArguments().Will(Return.Value(null));
+            }
+            using (TempFile f = new TempFile(string.Format(content)))
+            {
+                _parser.ReadLiftFile(f.Path);
+            }
+            _mocks.VerifyAllExpectationsHaveBeenMet();
+        }
 
         [Test]
         public void GetNumberOfEntriesInFile_0Entries_Returns0()

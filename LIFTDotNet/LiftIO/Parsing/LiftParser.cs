@@ -714,22 +714,34 @@ namespace LiftIO.Parsing
             if (reader.IsStartElement("header"))
             {
                 ProgressMessage = "Reading LIFT file header";
+                bool headerIsEmpty = reader.IsEmptyElement;
                 reader.ReadStartElement("header");
-                ReadRanges(reader);
-                if (reader.IsStartElement("fields"))
+                if (!headerIsEmpty)
                 {
-                    reader.ReadStartElement("fields");
-                    while (reader.IsStartElement("field"))
+                    ReadRanges(reader); // can exist here or after fields
+                    if (reader.IsStartElement("fields"))
                     {
-                        string fieldXml = reader.ReadOuterXml();
-                        if (!String.IsNullOrEmpty(fieldXml))
+                        bool fieldsIsEmpty = reader.IsEmptyElement;
+                        reader.ReadStartElement("fields");
+                        if (!fieldsIsEmpty)
                         {
-                            this.ReadFieldDefinition(GetNodeFromString(fieldXml));
+                            while (reader.IsStartElement("field"))
+                            {
+                                string fieldXml = reader.ReadOuterXml();
+                                if (!String.IsNullOrEmpty(fieldXml))
+                                {
+                                    ReadFieldDefinition(GetNodeFromString(fieldXml));
+                                }
+                            }
+                            Debug.Assert(reader.LocalName == "fields");
+                            reader.ReadEndElement(); // </fields>
                         }
                     }
-                    reader.ReadEndElement();	// </fields>
+                    ReadRanges(reader); // can exist here or before fields
+
+                    Debug.Assert(reader.LocalName == "header");
+                    reader.ReadEndElement(); // </header>
                 }
-                reader.ReadEndElement();	// </header>
             }
         }
 
@@ -737,32 +749,43 @@ namespace LiftIO.Parsing
         {
             if (reader.IsStartElement("ranges"))
             {
+                bool rangesIsEmpty = reader.IsEmptyElement;
                 reader.ReadStartElement("ranges");
-                while (reader.IsStartElement("range"))
+                if (!rangesIsEmpty)
                 {
-                    string id = reader.GetAttribute("id");
-                    string href = reader.GetAttribute("href");
-                    string guid = reader.GetAttribute("guid");
-                    ProgressMessage = String.Format("Reading LIFT range {0}", id);
-                    reader.ReadStartElement();
-                    if (String.IsNullOrEmpty(href))
+                    while (reader.IsStartElement("range"))
                     {
-                        while (reader.IsStartElement("range-element"))
+                        bool rangeIsEmpty = reader.IsEmptyElement;
+                        
+                        string id = reader.GetAttribute("id");
+                        string href = reader.GetAttribute("href");
+                        string guid = reader.GetAttribute("guid");
+                        ProgressMessage = string.Format("Reading LIFT range {0}", id);
+                        reader.ReadStartElement();
+                        if (string.IsNullOrEmpty(href))
                         {
-                            string rangeXml = reader.ReadOuterXml();
-                            if (!String.IsNullOrEmpty(rangeXml))
+                            while (reader.IsStartElement("range-element"))
                             {
-                                this.ReadRangeElement(id, GetNodeFromString(rangeXml));
+                                string rangeXml = reader.ReadOuterXml();
+                                if (!String.IsNullOrEmpty(rangeXml))
+                                {
+                                    this.ReadRangeElement(id, GetNodeFromString(rangeXml));
+                                }
                             }
                         }
+                        else
+                        {
+                            this.ReadExternalRange(href, id, guid);
+                        }
+                        if (!rangeIsEmpty)
+                        {
+                            reader.MoveToContent();
+                            reader.ReadEndElement(); // </range>
+                        }
                     }
-                    else
-                    {
-                        this.ReadExternalRange(href, id, guid);
-                    }
-                    reader.ReadEndElement();	// </range>
+                    Debug.Assert(reader.LocalName == "ranges");
+                    reader.ReadEndElement();	// </ranges>
                 }
-                reader.ReadEndElement();	// </ranges>
             }
         }
 
@@ -805,7 +828,8 @@ namespace LiftIO.Parsing
                             this.ReadRangeElement(id, GetNodeFromString(rangeElementXml));
                         }
                     }
-                    reader.ReadEndElement();
+                    Debug.Assert(reader.LocalName == "range");
+                    reader.ReadEndElement(); // </range>
                     if (foundDesiredRange)
                         return;		// we've seen the range we wanted from this file.
                 }
