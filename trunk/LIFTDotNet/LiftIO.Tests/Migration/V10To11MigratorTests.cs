@@ -119,6 +119,26 @@ namespace LiftIO.Tests.Migration
 
 
         [Test]
+        public void FieldInHeaderHasTag_NotChangedToType()
+        {
+            using (TempFile f = new TempFile(@"
+                <lift version='0.10'>
+                      <header>
+                        <fields>
+                            <field tag='test'>
+                              <form lang='en'><text>item 1</text></form>
+                            </field>
+                        </fields>
+                      </header>
+                </lift>"))
+            {
+                string path = Migrator.MigrateToLatestVersion(f.Path);
+                AssertXPathAtLeastOne("//header//field[@tag='test']", path);
+                AssertXPathNotFound("//header//field[@type='test']", path);
+            }
+        }
+
+        [Test]
         public void PreservesProducer()
         {
             using (TempFile f = new TempFile("<lift version='0.10' producer='p'/>"))

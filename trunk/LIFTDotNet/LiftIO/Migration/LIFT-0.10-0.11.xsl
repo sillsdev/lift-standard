@@ -38,7 +38,7 @@
 
 
   <!-- change field/@tag to field/@type -->
-  <xsl:template match="field">
+  <xsl:template match="entry//field">
     <xsl:copy>
       <xsl:attribute name="type">
         <xsl:value-of select="@tag"/>
