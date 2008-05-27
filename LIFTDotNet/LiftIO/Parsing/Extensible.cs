@@ -22,6 +22,13 @@ namespace LiftIO.Parsing
         static public string LiftDateOnlyFormat = "yyyy-MM-dd";
         private Guid _guid;
 
+        public Extensible()
+        {
+            _creationTime = DateTime.UtcNow;
+            _modificationTime = _creationTime;
+            _guid = Guid.NewGuid();
+        }
+
         public DateTime CreationTime
         {
             get { return _creationTime; }

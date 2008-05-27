@@ -8,6 +8,40 @@ namespace LiftIO.Tests
     public class ExtensibleTests
     {
         [Test]
+        public void Construct_CreationTimeRecent()
+        {
+            Extensible e = new Extensible();
+            // created less than one second ago
+            Assert.Less(DateTime.UtcNow - e.CreationTime, new TimeSpan(0, 0, 1));
+        }
+
+        [Test]
+        public void Construct_CreationTimeSameAsModifiedTime()
+        {
+            Extensible e = new Extensible();
+            Assert.IsTrue(e.CreationTime == e.ModificationTime);
+        }
+        [Test]
+        public void Construct_CreationTimeIsUtc()
+        {
+            Extensible e = new Extensible();
+            Assert.AreEqual(DateTimeKind.Utc, e.CreationTime.Kind);
+        }
+        [Test]
+        public void Construct_ModificationTimeIsUtc()
+        {
+            Extensible e = new Extensible();
+            Assert.AreEqual(DateTimeKind.Utc, e.ModificationTime.Kind);
+        }
+        [Test]
+        public void Construct_GuidIsNotEmpty()
+        {
+            Extensible e = new Extensible();
+            Assert.IsTrue(e.Guid != Guid.Empty);
+        }
+
+
+        [Test]
         public void ParseDateOnly()
         {
             DateTime parsedDateTime = Extensible.ParseDateTimeCorrectly("2007-02-03");
