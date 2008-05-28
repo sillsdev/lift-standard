@@ -4,8 +4,10 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using LiftIO.Parsing;
+using LiftIO.Tests.Parsing;
 using LiftIO.Validation;
 using NMock2;
+using NMock2.Matchers;
 using NUnit.Framework;
 
 namespace LiftIO.Tests
@@ -202,20 +204,20 @@ namespace LiftIO.Tests
         {
             Guid g = Guid.NewGuid();
 //            ExpectMergeInLexemeForm(Is.Anything);
-            ParseEntryAndCheck(string.Format("<entry guid=\"{0}\" />", g),
-                 string.Format("/{0};;;", g));
+            ParseEntryAndCheck(string.Format("<entry guid=\"{0}\" />", g), 
+                new ExtensibleMatcher(g));
         }
         [Test]
         public void EntryWithId()
         {
   //          ExpectMergeInLexemeForm(Is.Anything);
             ParseEntryAndCheck(string.Format("<entry id=\"{0}\" />", "-foo-"),
-                 string.Format("{0};;;", "-foo-"));
+                               new ExtensibleMatcher("-foo-"));
         }
 
-        private void ParseEntryAndCheck(string content, string expectedIdString)
+        private void ParseEntryAndCheck(string content, Matcher extensibleMatcher)
         {
-            ExpectGetOrMakeEntry(expectedIdString);
+            ExpectGetOrMakeEntry(extensibleMatcher);
             ExpectFinishEntry();
             
             _doc.LoadXml(content);
@@ -233,12 +235,12 @@ namespace LiftIO.Tests
             _mocks.VerifyAllExpectationsHaveBeenMet();
         }
 
-        private void ExpectGetOrMakeEntry(string expectedIdString)
+        private void ExpectGetOrMakeEntry(Matcher extensibleMatcher)
         {
-            Expect.Exactly(1).On(_merger)
+           Expect.Exactly(1).On(_merger)
                 .Method("GetOrMakeEntry")
                 //.With(Is.Anything)
-				.With(Has.ToString(Is.EqualTo(expectedIdString)), Is.EqualTo(0))
+				.With(extensibleMatcher, Is.EqualTo(0))
 				.Will(Return.Value(new Dummy()));
         }
 
@@ -380,7 +382,7 @@ namespace LiftIO.Tests
         public void EntryWithoutId()
         {
 //            ExpectMergeInLexemeForm(Is.Anything);
-            ParseEntryAndCheck("<entry/>", ";;;");
+            ParseEntryAndCheck("<entry/>", new ExtensibleMatcher());
         }
 
         [Test]
@@ -396,7 +398,7 @@ namespace LiftIO.Tests
 
            // string s = String.Format("<entry xmlns:flex='http://fieldworks.sil.org' id='-foo' flex:guid='{0}'/>", g);
              string s = String.Format("<entry id='-foo' guid='{0}'/>", g);
-          ParseEntryAndCheck(s, string.Format("-foo/{0};;;",g));
+          ParseEntryAndCheck(s, new ExtensibleMatcher("-foo", g));
         }
 
         [Test]
@@ -586,9 +588,9 @@ namespace LiftIO.Tests
         {
             string createdIn = "2003-08-07T08:42:42+07:00";
             string modIn = "2005-01-01T01:11:11+07:00";
-            string createdOut = "2003-08-07T01:42:42Z"; // has to be UTC (in - 7 hours)
-            string modOut = "2004-12-31T18:11:11Z"; // has to be UTC (in - 7 hours)
-            ExpectGetOrMakeEntry(String.Format("foo;{0};{1};", createdOut, modOut));
+            DateTime createdOut = new DateTime(2003, 08, 07, 01, 42, 42, DateTimeKind.Utc);//"2003-08-07T01:42:42Z"  has to be UTC (in - 7 hours)
+            DateTime modOut = new DateTime(2004, 12, 31, 18, 11, 11, DateTimeKind.Utc); //"2004-12-31T18:11:11Z" has to be UTC (in - 7 hours)
+            ExpectGetOrMakeEntry(new ExtensibleMatcher("foo", createdOut, modOut));
 
 //            ExpectEmptyMultiTextMergeIn("LexemeForm");
             ParseEntryAndCheck(
@@ -1292,7 +1294,10 @@ namespace LiftIO.Tests
 				Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
 					.With(Is.EqualTo("literal_meaning"),
 						Is.EqualTo(new LiftMultiText("en", "literal meaning of an entry")));
-				ExpectGetOrMakeEntry("bird_6db30a98-530e-4614-86d4-237f6984db71/6db30a98-530e-4614-86d4-237f6984db71;2008-03-31T08:04:09Z;2008-03-31T08:04:09Z;");
+				ExpectGetOrMakeEntry(new ExtensibleMatcher("bird_6db30a98-530e-4614-86d4-237f6984db71",
+                                                            new Guid("6db30a98-530e-4614-86d4-237f6984db71"), 
+                                                            new DateTime(2008, 3, 31, 8, 4, 9, DateTimeKind.Utc), 
+                                                            new DateTime(2008, 3, 31, 8, 4, 9, DateTimeKind.Utc)));
 				Expect.Exactly(1).On(_merger).Method("MergeInLexemeForm")
 					.With(Is.Anything, Is.EqualTo(new LiftMultiText("x-rtl", "bird")));
 				ExpectGetOrMakeSense();

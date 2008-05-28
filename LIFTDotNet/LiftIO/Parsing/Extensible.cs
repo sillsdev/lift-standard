@@ -62,6 +62,10 @@ namespace LiftIO.Parsing
         {
             get
             {
+                if (_id == null)
+                {
+                    return string.Empty;
+                }
                 return _id;
             }
             set
