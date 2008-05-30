@@ -2,7 +2,7 @@ using System.IO;
 using LiftIO.Parsing;
 using NMock2;
 
-namespace LiftIO.Tests
+namespace LiftIO.Tests.Parsing
 {
     class TraitMatcher : Matcher
     {

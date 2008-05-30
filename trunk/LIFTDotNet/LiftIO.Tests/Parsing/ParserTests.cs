@@ -10,7 +10,7 @@ using NMock2;
 using NMock2.Matchers;
 using NUnit.Framework;
 
-namespace LiftIO.Tests
+namespace LiftIO.Tests.Parsing
 {
     [TestFixture]
     public class ParserTests
@@ -83,65 +83,65 @@ namespace LiftIO.Tests
             _doc.LoadXml("<foobar><form lang='x'><text>one <span class='emphasis'>inner text</span> node</text></form></foobar>");
             LiftMultiText t = _parser.ReadMultiText(_doc.FirstChild);
             Assert.AreEqual("one inner text node", t["x"].Text);
-			Assert.AreEqual(1, t["x"].Spans.Count);
-			Assert.AreEqual("emphasis", t["x"].Spans[0].Class);
-			Assert.AreEqual(null, t["x"].Spans[0].Lang);
-			Assert.AreEqual(null, t["x"].Spans[0].LinkURL);
-			Assert.AreEqual(4, t["x"].Spans[0].Index);
-			Assert.AreEqual(10, t["x"].Spans[0].Length);
+            Assert.AreEqual(1, t["x"].Spans.Count);
+            Assert.AreEqual("emphasis", t["x"].Spans[0].Class);
+            Assert.AreEqual(null, t["x"].Spans[0].Lang);
+            Assert.AreEqual(null, t["x"].Spans[0].LinkURL);
+            Assert.AreEqual(4, t["x"].Spans[0].Index);
+            Assert.AreEqual(10, t["x"].Spans[0].Length);
         }
 
-		[Test]
-		public void MultiTextWithTwoInternalSpans()
-		{
-			// Note that isolated whitespace tends to be swallowed up and ignored when reading XML files.
-			// Thus, a single space between two span elements must be represented by a character entity.
-			_doc.LoadXml("<foobar><form lang='x'><text>one <span class='emphasis'>inner text</span>&#32;<span class='vernacular' lang='y' href='this is a test'>node</span></text></form></foobar>");
-			LiftMultiText t = _parser.ReadMultiText(_doc.FirstChild);
-			Assert.AreEqual("one inner text node", t["x"].Text);
-			Assert.AreEqual(2, t["x"].Spans.Count);
-			Assert.AreEqual("emphasis", t["x"].Spans[0].Class);
-			Assert.AreEqual(null, t["x"].Spans[0].Lang);
-			Assert.AreEqual(null, t["x"].Spans[0].LinkURL);
-			Assert.AreEqual(4, t["x"].Spans[0].Index);
-			Assert.AreEqual(10, t["x"].Spans[0].Length);
-			Assert.AreEqual("vernacular", t["x"].Spans[1].Class);
-			Assert.AreEqual("y", t["x"].Spans[1].Lang);
-			Assert.AreEqual("this is a test", t["x"].Spans[1].LinkURL);
-			Assert.AreEqual(15, t["x"].Spans[1].Index);
-			Assert.AreEqual(4, t["x"].Spans[1].Length);
-		}
+        [Test]
+        public void MultiTextWithTwoInternalSpans()
+        {
+            // Note that isolated whitespace tends to be swallowed up and ignored when reading XML files.
+            // Thus, a single space between two span elements must be represented by a character entity.
+            _doc.LoadXml("<foobar><form lang='x'><text>one <span class='emphasis'>inner text</span>&#32;<span class='vernacular' lang='y' href='this is a test'>node</span></text></form></foobar>");
+            LiftMultiText t = _parser.ReadMultiText(_doc.FirstChild);
+            Assert.AreEqual("one inner text node", t["x"].Text);
+            Assert.AreEqual(2, t["x"].Spans.Count);
+            Assert.AreEqual("emphasis", t["x"].Spans[0].Class);
+            Assert.AreEqual(null, t["x"].Spans[0].Lang);
+            Assert.AreEqual(null, t["x"].Spans[0].LinkURL);
+            Assert.AreEqual(4, t["x"].Spans[0].Index);
+            Assert.AreEqual(10, t["x"].Spans[0].Length);
+            Assert.AreEqual("vernacular", t["x"].Spans[1].Class);
+            Assert.AreEqual("y", t["x"].Spans[1].Lang);
+            Assert.AreEqual("this is a test", t["x"].Spans[1].LinkURL);
+            Assert.AreEqual(15, t["x"].Spans[1].Index);
+            Assert.AreEqual(4, t["x"].Spans[1].Length);
+        }
 
-		[Test, Ignore("Nested spans are not yet implemented.")]
-		public void MultiTextWithNestedSpan()
-		{
-			_doc.LoadXml("<foobar><form lang='x'><text>one <span class='emphasis'>inner <span class='vernacular' lang='y'>text</span></span> node</text></form></foobar>");
-			LiftMultiText t = _parser.ReadMultiText(_doc.FirstChild);
-			Assert.AreEqual("one inner text node", t["x"].Text);
-			Assert.AreEqual(2, t["x"].Spans.Count);
-			Assert.AreEqual("emphasis", t["x"].Spans[0].Class);
-			Assert.AreEqual(null, t["x"].Spans[0].Lang);
-			Assert.AreEqual(null, t["x"].Spans[0].LinkURL);
-			Assert.AreEqual(4, t["x"].Spans[0].Index);
-			Assert.AreEqual(10, t["x"].Spans[0].Length);
-			Assert.AreEqual("vernacular", t["x"].Spans[1].Class);
-			Assert.AreEqual("y", t["x"].Spans[1].Lang);
-			Assert.AreEqual(null, t["x"].Spans[1].LinkURL);
-			Assert.AreEqual(10, t["x"].Spans[1].Index);
-			Assert.AreEqual(4, t["x"].Spans[1].Length);
-		}
+        [Test, Ignore("Nested spans are not yet implemented.")]
+        public void MultiTextWithNestedSpan()
+        {
+            _doc.LoadXml("<foobar><form lang='x'><text>one <span class='emphasis'>inner <span class='vernacular' lang='y'>text</span></span> node</text></form></foobar>");
+            LiftMultiText t = _parser.ReadMultiText(_doc.FirstChild);
+            Assert.AreEqual("one inner text node", t["x"].Text);
+            Assert.AreEqual(2, t["x"].Spans.Count);
+            Assert.AreEqual("emphasis", t["x"].Spans[0].Class);
+            Assert.AreEqual(null, t["x"].Spans[0].Lang);
+            Assert.AreEqual(null, t["x"].Spans[0].LinkURL);
+            Assert.AreEqual(4, t["x"].Spans[0].Index);
+            Assert.AreEqual(10, t["x"].Spans[0].Length);
+            Assert.AreEqual("vernacular", t["x"].Spans[1].Class);
+            Assert.AreEqual("y", t["x"].Spans[1].Lang);
+            Assert.AreEqual(null, t["x"].Spans[1].LinkURL);
+            Assert.AreEqual(10, t["x"].Spans[1].Index);
+            Assert.AreEqual(4, t["x"].Spans[1].Length);
+        }
 
         [Test]
         public void FirstValueOfSimpleMultiText()
         {
             LiftMultiText t = new LiftMultiText();
-			LiftString s1 = new LiftString();
-			s1.Text = "1";
-			t.Add("x", s1);
-			LiftString s2 = new LiftString();
-			s2.Text = "2";
-			t.Add("y", s2);
-			Assert.AreEqual("x", t.FirstValue.Key);
+            LiftString s1 = new LiftString();
+            s1.Text = "1";
+            t.Add("x", s1);
+            LiftString s2 = new LiftString();
+            s2.Text = "2";
+            t.Add("y", s2);
+            Assert.AreEqual("x", t.FirstValue.Key);
             Assert.AreEqual("1", t.FirstValue.Value.Text);
         }
 
@@ -205,12 +205,12 @@ namespace LiftIO.Tests
             Guid g = Guid.NewGuid();
 //            ExpectMergeInLexemeForm(Is.Anything);
             ParseEntryAndCheck(string.Format("<entry guid=\"{0}\" />", g), 
-                new ExtensibleMatcher(g));
+                               new ExtensibleMatcher(g));
         }
         [Test]
         public void EntryWithId()
         {
-  //          ExpectMergeInLexemeForm(Is.Anything);
+            //          ExpectMergeInLexemeForm(Is.Anything);
             ParseEntryAndCheck(string.Format("<entry id=\"{0}\" />", "-foo-"),
                                new ExtensibleMatcher("-foo-"));
         }
@@ -237,11 +237,11 @@ namespace LiftIO.Tests
 
         private void ExpectGetOrMakeEntry(Matcher extensibleMatcher)
         {
-           Expect.Exactly(1).On(_merger)
+            Expect.Exactly(1).On(_merger)
                 .Method("GetOrMakeEntry")
                 //.With(Is.Anything)
-				.With(extensibleMatcher, Is.EqualTo(0))
-				.Will(Return.Value(new Dummy()));
+                .With(extensibleMatcher, Is.EqualTo(0))
+                .Will(Return.Value(new Dummy()));
         }
 
         private void ExpectEmptyEntry()
@@ -293,7 +293,7 @@ namespace LiftIO.Tests
         //        .With(Is.Anything, matcher);
         //}
 
-		private void ExpectFinishEntry()
+        private void ExpectFinishEntry()
         {
             Expect.Exactly(1).On(_merger)
                 .Method("FinishEntry");
@@ -310,11 +310,11 @@ namespace LiftIO.Tests
         //}
 
 
-		private void ExpectMergeInField(Matcher tagMatcher, Matcher dateCreatedMatcher, Matcher dateModifiedMatcher, Matcher multiTextMatcher, Matcher traitsMatcher)
-		{
+        private void ExpectMergeInField(Matcher tagMatcher, Matcher dateCreatedMatcher, Matcher dateModifiedMatcher, Matcher multiTextMatcher, Matcher traitsMatcher)
+        {
             Expect.Exactly(1).On(_merger)
                 .Method("MergeInField").With(Is.Anything, tagMatcher,
-                dateCreatedMatcher, dateModifiedMatcher, multiTextMatcher, traitsMatcher);
+                                             dateCreatedMatcher, dateModifiedMatcher, multiTextMatcher, traitsMatcher);
             //  .Method("MergeInField").With(matchers);
         }
 
@@ -331,20 +331,20 @@ namespace LiftIO.Tests
             Expect.Exactly(1).On(_merger)
                 .Method("MergeInTrait")
                 .With(Is.Anything, traitMatcher);
-       }
+        }
         private void ExpectMergeInRelation(string relationType, string targetId)
         {
             Expect.Exactly(1).On(_merger)
                 .Method("MergeInRelation")
                 .With(Is.Anything, Is.EqualTo(relationType), Is.EqualTo(targetId), Is.Anything);  
-       }
+        }
  
-       private void ExpectMergeInPicture(string href)
+        private void ExpectMergeInPicture(string href)
         {
             Expect.Exactly(1).On(_merger)
                 .Method("MergeInPicture")
                 .With(Is.Anything, Is.EqualTo(href), Is.Null);  
-       }
+        }
 
         private void ExpectMergeInPictureWithCaption(string href)
         {
@@ -358,7 +358,7 @@ namespace LiftIO.Tests
             Expect.Exactly(1).On(_merger)
                 .Method("EntryWasDeleted");
             //todo expect more!
-       }
+        }
 
         private void ExpectMergeInNote(string value)
         {
@@ -396,9 +396,9 @@ namespace LiftIO.Tests
 //            _parser.ReadFile(_doc);
 //
 
-           // string s = String.Format("<entry xmlns:flex='http://fieldworks.sil.org' id='-foo' flex:guid='{0}'/>", g);
-             string s = String.Format("<entry id='-foo' guid='{0}'/>", g);
-          ParseEntryAndCheck(s, new ExtensibleMatcher("-foo", g));
+            // string s = String.Format("<entry xmlns:flex='http://fieldworks.sil.org' id='-foo' flex:guid='{0}'/>", g);
+            string s = String.Format("<entry id='-foo' guid='{0}'/>", g);
+            ParseEntryAndCheck(s, new ExtensibleMatcher("-foo", g));
         }
 
         [Test]
@@ -414,7 +414,7 @@ namespace LiftIO.Tests
         [Test]
         public void EmptyFormOk()
         {
-           using (_mocks.Ordered)
+            using (_mocks.Ordered)
             {
                 ExpectGetOrMakeEntry(/*";;;"*/);
                 ExpectMergeInLexemeForm(Is.Anything);
@@ -442,25 +442,25 @@ namespace LiftIO.Tests
             ExpectMultiTextMergeIn("LexemeForm", Has.Property("Count", Is.EqualTo(2)));
 //            ExpectMergeInCitationForm(Is.Anything);
             ParseEntryAndCheck("<entry><lexical-unit><form lang='x'><text>hello</text></form><form lang='y'><text>bye</text></form></lexical-unit></entry>");
- //           ParseEntryAndCheck("<entry><lexical-unit><form lang='x'><text>hello</text></form><form lang='y'>bye</form></lexical-unit></entry>", "GetOrMakeEntry(;;;)MergeInLexemeForm(m,x=hello|y=bye|)");
+            //           ParseEntryAndCheck("<entry><lexical-unit><form lang='x'><text>hello</text></form><form lang='y'>bye</form></lexical-unit></entry>", "GetOrMakeEntry(;;;)MergeInLexemeForm(m,x=hello|y=bye|)");
         }
 
         [Test]
         public void EntryWithCitationForm()
         {
             ExpectGetOrMakeEntry();
-  //          ExpectMergeInLexemeForm(Is.Anything);
+            //          ExpectMergeInLexemeForm(Is.Anything);
             ExpectMultiTextMergeIn("CitationForm", Has.Property("Count", Is.EqualTo(2)));
             ParseEntryAndCheck("<entry><citation><form lang='x'><text>hello</text></form><form lang='y'><text>bye</text></form></citation></entry>");
         }
 
-		[Test]
-		public void EntryWithPronunciation()
-		{
-			ExpectGetOrMakeEntry();
-			ExpectMergeInPronunciation("en__IPA=ai|");
-			ParseEntryAndCheck("<entry><pronunciation><form lang='en__IPA'><text>ai</text></form></pronunciation></entry>");
-		}
+        [Test]
+        public void EntryWithPronunciation()
+        {
+            ExpectGetOrMakeEntry();
+            ExpectMergeInPronunciation("en__IPA=ai|");
+            ParseEntryAndCheck("<entry><pronunciation><form lang='en__IPA'><text>ai</text></form></pronunciation></entry>");
+        }
 
         [Test]
         public void EntryWithPronunciationWithFields()
@@ -468,12 +468,12 @@ namespace LiftIO.Tests
             ExpectGetOrMakeEntry();
             ExpectMergeInPronunciation("");
             ExpectMergeInField(
-                    Is.EqualTo("cvPattern"),
-                    Is.EqualTo(default(DateTime)),
-                    Is.EqualTo(default(DateTime)),
-                    Has.Property("Count", Is.EqualTo(1)),//multitext
-                    Has.Property("Count", Is.EqualTo(0))//traits
-                    );
+                Is.EqualTo("cvPattern"),
+                Is.EqualTo(default(DateTime)),
+                Is.EqualTo(default(DateTime)),
+                Has.Property("Count", Is.EqualTo(1)),//multitext
+                Has.Property("Count", Is.EqualTo(0))//traits
+                );
             ParseEntryAndCheck(@"<entry><pronunciation>
                     <field type='cvPattern'>
                         <form lang='en'>
@@ -491,31 +491,31 @@ namespace LiftIO.Tests
             ParseEntryAndCheck("<entry><pronunciation><media href='blah.mp3'/></pronunciation></entry>");
         }
 
-		private void ExpectMergeInPronunciation(string value)
-		{
-			Expect.Exactly(1).On(_merger)
-				.Method("MergeInPronunciation")
+        private void ExpectMergeInPronunciation(string value)
+        {
+            Expect.Exactly(1).On(_merger)
+                .Method("MergeInPronunciation")
                 .With(Is.Anything, Has.ToString(Is.EqualTo(value)), Is.Anything)
-				.Will(Return.Value(new Dummy()));
-		}
+                .Will(Return.Value(new Dummy()));
+        }
 
-		[Test]
-		public void EntryWithVariant()
-		{
-			ExpectGetOrMakeEntry();
-			ExpectMergeInVariant("en=-d|");
-			ParseEntryAndCheck("<entry><variant><form lang='en'><text>-d</text></form></variant></entry>");
-		}
+        [Test]
+        public void EntryWithVariant()
+        {
+            ExpectGetOrMakeEntry();
+            ExpectMergeInVariant("en=-d|");
+            ParseEntryAndCheck("<entry><variant><form lang='en'><text>-d</text></form></variant></entry>");
+        }
 
-		private void ExpectMergeInVariant(string value)
-		{
-			Expect.Exactly(1).On(_merger)
-				.Method("MergeInVariant")
+        private void ExpectMergeInVariant(string value)
+        {
+            Expect.Exactly(1).On(_merger)
+                .Method("MergeInVariant")
                 .With(Is.Anything, Has.ToString(Is.EqualTo(value)), Is.Anything)
-				.Will(Return.Value(new Dummy()));
-		}
+                .Will(Return.Value(new Dummy()));
+        }
 
-		// private void ExpectEmptyMultiTextMergeIn(string MultiTextPropertyName)
+        // private void ExpectEmptyMultiTextMergeIn(string MultiTextPropertyName)
         //{
         //    Expect.Exactly(1).On(_merger)
         //                    .Method("MergeIn" + MultiTextPropertyName)
@@ -525,24 +525,24 @@ namespace LiftIO.Tests
         
         private void ExpectValueOfMergeIn(string MultiTextPropertyName, string value)
         {
-             Expect.Exactly(1).On(_merger)
-                            .Method("MergeIn" + MultiTextPropertyName)
-							.With(Is.Anything, Has.ToString(Is.EqualTo(value)));
-       }
+            Expect.Exactly(1).On(_merger)
+                .Method("MergeIn" + MultiTextPropertyName)
+                .With(Is.Anything, Has.ToString(Is.EqualTo(value)));
+        }
 
-	   private void ExpectValueOfMergeInTranslationForm(string type, string value)
-	   {
-		   if (type == null)
-			   Expect.Exactly(1).On(_merger)
-							.Method("MergeInTranslationForm")
-							.With(Is.Anything, Is.Null, Has.ToString(Is.EqualTo(value)), Is.Anything);
-		   else
-			   Expect.Exactly(1).On(_merger)
-							.Method("MergeInTranslationForm")
-                            .With(Is.Anything, Has.ToString(Is.EqualTo(type)), Has.ToString(Is.EqualTo(value)), Is.Anything);
-	   }
+        private void ExpectValueOfMergeInTranslationForm(string type, string value)
+        {
+            if (type == null)
+                Expect.Exactly(1).On(_merger)
+                    .Method("MergeInTranslationForm")
+                    .With(Is.Anything, Is.Null, Has.ToString(Is.EqualTo(value)), Is.Anything);
+            else
+                Expect.Exactly(1).On(_merger)
+                    .Method("MergeInTranslationForm")
+                    .With(Is.Anything, Has.ToString(Is.EqualTo(type)), Has.ToString(Is.EqualTo(value)), Is.Anything);
+        }
 
-	   //        private void ExpectMultiTextMergeIn(string MultiTextPropertyName, Matcher matcher)
+        //        private void ExpectMultiTextMergeIn(string MultiTextPropertyName, Matcher matcher)
 //        {
 //             Expect.Exactly(1).On(_merger)
 //                            .Method("MergeIn" + MultiTextPropertyName)
@@ -552,8 +552,8 @@ namespace LiftIO.Tests
         private void ExpectMultiTextMergeIn(string MultiTextPropertyName, Matcher multiTextMatcher)
         {
             Expect.Exactly(1).On(_merger)
-                           .Method("MergeIn" + MultiTextPropertyName)
-                           .With(Is.Anything, multiTextMatcher);
+                .Method("MergeIn" + MultiTextPropertyName)
+                .With(Is.Anything, multiTextMatcher);
         }
 
 
@@ -603,7 +603,7 @@ namespace LiftIO.Tests
         public void EntryWithNote()
         {
             ExpectGetOrMakeEntry();
-    //        ExpectMergeInLexemeForm(Is.Anything);
+            //        ExpectMergeInLexemeForm(Is.Anything);
             ExpectMergeInNote("x=hello|");
 
             ParseEntryAndCheck(string.Format("<entry><note><form lang='x'><text>hello</text></form></note></entry>"));
@@ -625,11 +625,11 @@ namespace LiftIO.Tests
         public void EntryWithSense()
         {
             ExpectGetOrMakeEntry();
-        //    ExpectMergeInLexemeForm(Is.Anything);
+            //    ExpectMergeInLexemeForm(Is.Anything);
             ExpectGetOrMakeSense();
-          //  ExpectMergeGloss();
-          //  ExpectMergeDefinition();
-           ParseEntryAndCheck(string.Format("<entry><sense></sense></entry>"));
+            //  ExpectMergeGloss();
+            //  ExpectMergeDefinition();
+            ParseEntryAndCheck(string.Format("<entry><sense></sense></entry>"));
         }
 
         [Test]
@@ -759,14 +759,14 @@ namespace LiftIO.Tests
         {
             ExpectEmptyEntry();
             ExpectMergeInField(
-                    Is.EqualTo("color"),
-                    Is.EqualTo(default(DateTime)),
-                    Is.EqualTo(default(DateTime)),
-                    Has.Property("Count", Is.EqualTo(2)),
-					Has.Property("Count", Is.EqualTo(0))
-                    );
+                Is.EqualTo("color"),
+                Is.EqualTo(default(DateTime)),
+                Is.EqualTo(default(DateTime)),
+                Has.Property("Count", Is.EqualTo(2)),
+                Has.Property("Count", Is.EqualTo(0))
+                );
             ParseEntryAndCheck(
-                    "<entry><field type='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field></entry>");
+                "<entry><field type='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field></entry>");
         }
 
         [Test]
@@ -775,14 +775,14 @@ namespace LiftIO.Tests
             ExpectEmptyEntry();
             ExpectGetOrMakeSense();
             ExpectMergeInField(
-                    Is.EqualTo("color"),
-                    Is.EqualTo(default(DateTime)),
-                    Is.EqualTo(default(DateTime)),
-                    Has.Property("Count", Is.EqualTo(2)),
-					Has.Property("Count", Is.EqualTo(0))
-                    );
+                Is.EqualTo("color"),
+                Is.EqualTo(default(DateTime)),
+                Is.EqualTo(default(DateTime)),
+                Has.Property("Count", Is.EqualTo(2)),
+                Has.Property("Count", Is.EqualTo(0))
+                );
             ParseEntryAndCheck(
-                    "<entry><sense><field type='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field></sense></entry>");
+                "<entry><sense><field type='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field></sense></entry>");
         }
 
         [Test]
@@ -792,14 +792,14 @@ namespace LiftIO.Tests
             ExpectGetOrMakeSense();
             ExpectGetOrMakeExample();
             ExpectMergeInField(
-                    Is.EqualTo("color"),
-                    Is.EqualTo(default(DateTime)),
-                    Is.EqualTo(default(DateTime)),
-                    Has.Property("Count", Is.EqualTo(2)),
-					Has.Property("Count", Is.EqualTo(0))
-                    );
+                Is.EqualTo("color"),
+                Is.EqualTo(default(DateTime)),
+                Is.EqualTo(default(DateTime)),
+                Has.Property("Count", Is.EqualTo(2)),
+                Has.Property("Count", Is.EqualTo(0))
+                );
             ParseEntryAndCheck(
-                    "<entry><sense><example><field type='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field></example></sense></entry>");
+                "<entry><sense><example><field type='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field></example></sense></entry>");
         }
 
 
@@ -808,21 +808,21 @@ namespace LiftIO.Tests
         {
             ExpectEmptyEntry();
             ExpectMergeInField(
-                    Is.EqualTo("color"),
-                    Is.EqualTo(default(DateTime)),
-                    Is.EqualTo(default(DateTime)),
-                    Has.Property("Count", Is.EqualTo(2)),
-					Has.Property("Count", Is.EqualTo(0))
-                    );
+                Is.EqualTo("color"),
+                Is.EqualTo(default(DateTime)),
+                Is.EqualTo(default(DateTime)),
+                Has.Property("Count", Is.EqualTo(2)),
+                Has.Property("Count", Is.EqualTo(0))
+                );
             ExpectMergeInField(
-                    Is.EqualTo("special"),
-                    Is.EqualTo(default(DateTime)),
-                    Is.EqualTo(default(DateTime)),
-                    Has.Property("Count", Is.EqualTo(1)),
-					Has.Property("Count", Is.EqualTo(0))
-                    );
+                Is.EqualTo("special"),
+                Is.EqualTo(default(DateTime)),
+                Is.EqualTo(default(DateTime)),
+                Has.Property("Count", Is.EqualTo(1)),
+                Has.Property("Count", Is.EqualTo(0))
+                );
             ParseEntryAndCheck(
-                    "<entry><field type='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field><field type='special'><form lang='en'><text>free</text></form></field></entry>");
+                "<entry><field type='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field><field type='special'><form lang='en'><text>free</text></form></field></entry>");
         }
 
 
@@ -832,35 +832,35 @@ namespace LiftIO.Tests
         {
             ExpectEmptyEntry();
             ExpectMergeInField(
-                    Is.EqualTo("color"),
-                    Is.EqualTo(default(DateTime)),
-                    Is.EqualTo(default(DateTime)),
-					Has.Property("Count", Is.EqualTo(2)),
-					Has.Property("Count", Is.EqualTo(0))
-                    );
+                Is.EqualTo("color"),
+                Is.EqualTo(default(DateTime)),
+                Is.EqualTo(default(DateTime)),
+                Has.Property("Count", Is.EqualTo(2)),
+                Has.Property("Count", Is.EqualTo(0))
+                );
             ParseEntryAndCheck(
-                    "<entry><field type='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field><field type='color'><form lang='en'><text>free</text></form></field></entry>");
+                "<entry><field type='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field><field type='color'><form lang='en'><text>free</text></form></field></entry>");
         }
 
         [Test]
         public void DatesOnFields()
         {
 
-        ExpectEmptyEntry();
+            ExpectEmptyEntry();
             DateTime creat = new DateTime(2000,1,1).ToUniversalTime();
             string createdTime = creat.ToString(Extensible.LiftTimeFormatNoTimeZone);
             DateTime mod = new DateTime(2000, 1, 2).ToUniversalTime();
             string modifiedTime = mod.ToString(Extensible.LiftTimeFormatNoTimeZone);
             ExpectMergeInField(
                 Is.EqualTo("color"),
-               Is.EqualTo(creat),
-               Is.EqualTo(mod),
-               Is.Anything,
-				Has.Property("Count", Is.EqualTo(0))
+                Is.EqualTo(creat),
+                Is.EqualTo(mod),
+                Is.Anything,
+                Has.Property("Count", Is.EqualTo(0))
                 );
             ParseEntryAndCheck(String.Format("<entry><field type='color' dateCreated='{0}'  dateModified='{1}' ></field></entry>",
-                createdTime,
-                modifiedTime));
+                                             createdTime,
+                                             modifiedTime));
         }
 
         [Test]
@@ -868,9 +868,9 @@ namespace LiftIO.Tests
         {
             ExpectEmptyEntry();
             ExpectMergeInTrait(new NMock2.Matchers.AndMatcher(
-                    Has.Property("Name", Is.EqualTo("color")), Has.Property("Value", Is.EqualTo("red"))));
+                                   Has.Property("Name", Is.EqualTo("color")), Has.Property("Value", Is.EqualTo("red"))));
             ExpectMergeInTrait(new NMock2.Matchers.AndMatcher(
-                    Has.Property("Name", Is.EqualTo("shape")), Has.Property("Value", Is.EqualTo("square"))));
+                                   Has.Property("Name", Is.EqualTo("shape")), Has.Property("Value", Is.EqualTo("square"))));
             ParseEntryAndCheck(string.Format("<entry><trait name='color' value='red'/><trait name='shape' value='square'/></entry>"));
         }
 
@@ -880,9 +880,9 @@ namespace LiftIO.Tests
         {
             ExpectEmptyEntry();
             ExpectMergeInTrait(new NMock2.Matchers.AndMatcher(
-                    Has.Property("Name", Is.EqualTo("color")), Has.Property("Value", Is.EqualTo("red"))));
+                                   Has.Property("Name", Is.EqualTo("color")), Has.Property("Value", Is.EqualTo("red"))));
             ExpectMergeInTrait(new NMock2.Matchers.AndMatcher(
-                    Has.Property("Name", Is.EqualTo("color")), Has.Property("Value", Is.EqualTo("blue"))));
+                                   Has.Property("Name", Is.EqualTo("color")), Has.Property("Value", Is.EqualTo("blue"))));
             ParseEntryAndCheck(string.Format("<entry><trait name='color' value='red'/><trait name='color' value='blue'/></entry>"));
         }
 
@@ -893,9 +893,9 @@ namespace LiftIO.Tests
             ExpectEmptyEntry();
             ExpectGetOrMakeSense();
             ExpectMergeInTrait(new NMock2.Matchers.AndMatcher(
-                    Has.Property("Name", Is.EqualTo("color")), Has.Property("Value", Is.EqualTo("red"))));
+                                   Has.Property("Name", Is.EqualTo("color")), Has.Property("Value", Is.EqualTo("red"))));
             ExpectMergeInTrait(new NMock2.Matchers.AndMatcher(
-                    Has.Property("Name", Is.EqualTo("shape")), Has.Property("Value", Is.EqualTo("square"))));
+                                   Has.Property("Name", Is.EqualTo("shape")), Has.Property("Value", Is.EqualTo("square"))));
             ParseEntryAndCheck(string.Format("<entry><sense><trait name='color' value='red'/><trait name='shape' value='square'/></sense></entry>"));
         }
 
@@ -906,9 +906,9 @@ namespace LiftIO.Tests
             ExpectGetOrMakeSense();
             ExpectGetOrMakeExample();
             ExpectMergeInTrait(new NMock2.Matchers.AndMatcher(
-                    Has.Property("Name", Is.EqualTo("color")), Has.Property("Value", Is.EqualTo("red"))));
+                                   Has.Property("Name", Is.EqualTo("color")), Has.Property("Value", Is.EqualTo("red"))));
             ExpectMergeInTrait(new NMock2.Matchers.AndMatcher(
-                    Has.Property("Name", Is.EqualTo("shape")), Has.Property("Value", Is.EqualTo("square"))));
+                                   Has.Property("Name", Is.EqualTo("shape")), Has.Property("Value", Is.EqualTo("square"))));
             ParseEntryAndCheck(string.Format("<entry><sense><example><trait name='color' value='red'/><trait name='shape' value='square'/></example></sense></entry>"));
         }
 
@@ -983,8 +983,8 @@ namespace LiftIO.Tests
             //ExpectMergeGloss();
             //ExpectMergeDefinition();
             ExpectGetOrMakeExample();
-  //          ExpectValueOfMergeIn("ExampleForm", "");
-			ExpectValueOfMergeInTranslationForm("Free Translation", "x=hello|");
+            //          ExpectValueOfMergeIn("ExampleForm", "");
+            ExpectValueOfMergeInTranslationForm("Free Translation", "x=hello|");
 
             ParseEntryAndCheck("<entry><sense><example><translation type='Free Translation'><form lang='x'><text>hello</text></form></translation></example></sense></entry>");
             //    "GetOrMakeEntry(;;;)GetOrMakeSense(m,)GetOrMakeExample(m,)MergeInTranslationForm(m,x=hello|)");
@@ -1000,7 +1000,7 @@ namespace LiftIO.Tests
             //ExpectMergeDefinition();
             ExpectGetOrMakeExample();
 //            ExpectValueOfMergeIn("ExampleForm", "");
-			ExpectValueOfMergeInTranslationForm(null, "x=hello|");
+            ExpectValueOfMergeInTranslationForm(null, "x=hello|");
 
             ExpectValueOfMergeIn("Source", "test");
 
@@ -1093,7 +1093,7 @@ namespace LiftIO.Tests
             SimpleCheckWithHeader(InsertVersion("<lift V><header><fields/><ranges/></header><entry/></lift>"), 0, 0, 1);
         }
 
-         [Test]
+        [Test]
         public void EmptyLiftHeaderSectionsOk()
         {
             SimpleCheckWithHeader(InsertVersion("<lift V><header><ranges/><fields/></header><entry/></lift>"), 0, 0, 1);
@@ -1110,9 +1110,9 @@ namespace LiftIO.Tests
             string content = InsertVersion("<lift V><header><ranges><range id='dialect'><range-element id='en'><label><form lang='en'><text>English</text></form></label><abbrev><form lang='en'><text>Eng</text></form></abbrev><description><form lang='en'><text>Standard English</text></form></description></range-element></range></ranges></header><entry/></lift>");
             Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
                 .With(Is.EqualTo("dialect"), Is.EqualTo("en"), Is.Null, Is.Null,
-                    Is.EqualTo(new LiftMultiText("en", "Standard English")),
-                    Is.EqualTo(new LiftMultiText("en", "English")),
-                    Is.EqualTo(new LiftMultiText("en", "Eng")));
+                      Is.EqualTo(new LiftMultiText("en", "Standard English")),
+                      Is.EqualTo(new LiftMultiText("en", "English")),
+                      Is.EqualTo(new LiftMultiText("en", "Eng")));
             ExpectGetOrMakeEntry();
             ExpectFinishEntry();
             using (TempFile f = new TempFile(string.Format(content)))
@@ -1161,159 +1161,159 @@ namespace LiftIO.Tests
         }
 
         [Test]
-		public void SimpleFieldDefinition()
-		{
-			string content = "<field tag='tone'><form lang='en'><text>the tone information for a pronunciation</text></form></field>";
-			Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
-				.With(Is.EqualTo("tone"), Is.EqualTo(new LiftMultiText("en", "the tone information for a pronunciation")));
-			_doc.LoadXml(content);
-			_parser.ReadFieldDefinition(_doc.FirstChild);
-			_mocks.VerifyAllExpectationsHaveBeenMet();
-		}
+        public void SimpleFieldDefinition()
+        {
+            string content = "<field tag='tone'><form lang='en'><text>the tone information for a pronunciation</text></form></field>";
+            Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
+                .With(Is.EqualTo("tone"), Is.EqualTo(new LiftMultiText("en", "the tone information for a pronunciation")));
+            _doc.LoadXml(content);
+            _parser.ReadFieldDefinition(_doc.FirstChild);
+            _mocks.VerifyAllExpectationsHaveBeenMet();
+        }
 
-		[Test]
-		public void SimpleEtymology()
-		{
-			string content = "<entry><etymology source='Greek' type=''><form lang='bam'><text>alphabeta</text></form><gloss lang='en'><text>letters</text></gloss><field type='comment'><form lang='en'><text>this etymology is nonsense</text></form></field></etymology></entry>";
-			_doc.LoadXml(content);
-			using (_mocks.Ordered)
-			{
-				ExpectGetOrMakeEntry();
-				Expect.Exactly(1).On(_merger).Method("MergeInEtymology")
-					.With(Is.Anything, Is.EqualTo("Greek"), Is.EqualTo(new LiftMultiText("bam", "alphabeta")),
-							Is.EqualTo(new LiftMultiText("en", "letters")), Is.Anything)
-					.Will(Return.Value(new Dummy()));
-				Expect.Exactly(1).On(_merger).Method("MergeInField")
-					.With(Is.Anything, Is.EqualTo("comment"), Is.EqualTo(DateTime.MinValue), Is.EqualTo(DateTime.MinValue),
-							Is.EqualTo(new LiftMultiText("en", "this etymology is nonsense")), Is.Anything);
-				ExpectFinishEntry();
-			}
-			_parser.ReadEntry(_doc.FirstChild);
-			_mocks.VerifyAllExpectationsHaveBeenMet();
-		}
+        [Test]
+        public void SimpleEtymology()
+        {
+            string content = "<entry><etymology source='Greek' type=''><form lang='bam'><text>alphabeta</text></form><gloss lang='en'><text>letters</text></gloss><field type='comment'><form lang='en'><text>this etymology is nonsense</text></form></field></etymology></entry>";
+            _doc.LoadXml(content);
+            using (_mocks.Ordered)
+            {
+                ExpectGetOrMakeEntry();
+                Expect.Exactly(1).On(_merger).Method("MergeInEtymology")
+                    .With(Is.Anything, Is.EqualTo("Greek"), Is.EqualTo(new LiftMultiText("bam", "alphabeta")),
+                          Is.EqualTo(new LiftMultiText("en", "letters")), Is.Anything)
+                    .Will(Return.Value(new Dummy()));
+                Expect.Exactly(1).On(_merger).Method("MergeInField")
+                    .With(Is.Anything, Is.EqualTo("comment"), Is.EqualTo(DateTime.MinValue), Is.EqualTo(DateTime.MinValue),
+                          Is.EqualTo(new LiftMultiText("en", "this etymology is nonsense")), Is.Anything);
+                ExpectFinishEntry();
+            }
+            _parser.ReadEntry(_doc.FirstChild);
+            _mocks.VerifyAllExpectationsHaveBeenMet();
+        }
 
-		[Test]
-		public void SimpleReversal()
-		{
-			string content = "<entry><sense><reversal><form lang='en'><text>sorghum</text></form></reversal></sense></entry>";
-			_doc.LoadXml(content);
-			using (_mocks.Ordered)
-			{
-				ExpectGetOrMakeEntry();
-				ExpectGetOrMakeSense();
-				Expect.Exactly(1).On(_merger).Method("MergeInReversal")
+        [Test]
+        public void SimpleReversal()
+        {
+            string content = "<entry><sense><reversal><form lang='en'><text>sorghum</text></form></reversal></sense></entry>";
+            _doc.LoadXml(content);
+            using (_mocks.Ordered)
+            {
+                ExpectGetOrMakeEntry();
+                ExpectGetOrMakeSense();
+                Expect.Exactly(1).On(_merger).Method("MergeInReversal")
                     .With(Is.Anything, Is.Null, Is.EqualTo(new LiftMultiText("en", "sorghum")), Is.Null, Is.Anything);
-				ExpectFinishEntry();
-			}
-			_parser.ReadEntry(_doc.FirstChild);
-			_mocks.VerifyAllExpectationsHaveBeenMet();
-		}
+                ExpectFinishEntry();
+            }
+            _parser.ReadEntry(_doc.FirstChild);
+            _mocks.VerifyAllExpectationsHaveBeenMet();
+        }
 
-		[Test]
-		public void NestedReversal()
-		{
-			string content = "<entry><sense><reversal type='test'><form lang='en'><text>apple</text></form><main><form lang='en'><text>fruit</text></form></main></reversal></sense></entry>";
-			_doc.LoadXml(content);
-			using (_mocks.Ordered)
-			{
-				ExpectGetOrMakeEntry();
-				ExpectGetOrMakeSense();
-				Expect.Exactly(1).On(_merger).Method("GetOrMakeParentReversal")
-					.With(Is.Null, Is.EqualTo(new LiftMultiText("en", "fruit")), Is.EqualTo("test"));
-				Expect.Exactly(1).On(_merger).Method("MergeInReversal")
+        [Test]
+        public void NestedReversal()
+        {
+            string content = "<entry><sense><reversal type='test'><form lang='en'><text>apple</text></form><main><form lang='en'><text>fruit</text></form></main></reversal></sense></entry>";
+            _doc.LoadXml(content);
+            using (_mocks.Ordered)
+            {
+                ExpectGetOrMakeEntry();
+                ExpectGetOrMakeSense();
+                Expect.Exactly(1).On(_merger).Method("GetOrMakeParentReversal")
+                    .With(Is.Null, Is.EqualTo(new LiftMultiText("en", "fruit")), Is.EqualTo("test"));
+                Expect.Exactly(1).On(_merger).Method("MergeInReversal")
                     .With(Is.Anything, Is.Null, Is.EqualTo(new LiftMultiText("en", "apple")), Is.EqualTo("test"), Is.Anything);
-				ExpectFinishEntry();
-			}
-			_parser.ReadEntry(_doc.FirstChild);
-			_mocks.VerifyAllExpectationsHaveBeenMet();
-		}
+                ExpectFinishEntry();
+            }
+            _parser.ReadEntry(_doc.FirstChild);
+            _mocks.VerifyAllExpectationsHaveBeenMet();
+        }
 
-		[Test]
-		public void ReadSubSense()
-		{
-			string content = "<entry><sense><gloss lang='en'><text>destroy</text></gloss><subsense><gloss lang='en'><text>unmake</text></gloss></subsense></sense></entry>";
-			_doc.LoadXml(content);
-			using (_mocks.Ordered)
-			{
-				ExpectGetOrMakeEntry();
-				ExpectGetOrMakeSense();
-				Expect.Exactly(1).On(_merger).Method("MergeInGloss")
-					.With(Is.NotNull, Is.EqualTo(new LiftMultiText("en", "destroy")));
-				Expect.Exactly(1).On(_merger).Method("GetOrMakeSubsense")
-					.Will(Return.Value(new Dummy()));
-				Expect.Exactly(1).On(_merger).Method("MergeInGloss")
-					.With(Is.Anything, Is.EqualTo(new LiftMultiText("en", "unmake")));
-				ExpectFinishEntry();
-			}
-			_parser.ReadEntry(_doc.FirstChild);
-			_mocks.VerifyAllExpectationsHaveBeenMet();
-		}
+        [Test]
+        public void ReadSubSense()
+        {
+            string content = "<entry><sense><gloss lang='en'><text>destroy</text></gloss><subsense><gloss lang='en'><text>unmake</text></gloss></subsense></sense></entry>";
+            _doc.LoadXml(content);
+            using (_mocks.Ordered)
+            {
+                ExpectGetOrMakeEntry();
+                ExpectGetOrMakeSense();
+                Expect.Exactly(1).On(_merger).Method("MergeInGloss")
+                    .With(Is.NotNull, Is.EqualTo(new LiftMultiText("en", "destroy")));
+                Expect.Exactly(1).On(_merger).Method("GetOrMakeSubsense")
+                    .Will(Return.Value(new Dummy()));
+                Expect.Exactly(1).On(_merger).Method("MergeInGloss")
+                    .With(Is.Anything, Is.EqualTo(new LiftMultiText("en", "unmake")));
+                ExpectFinishEntry();
+            }
+            _parser.ReadEntry(_doc.FirstChild);
+            _mocks.VerifyAllExpectationsHaveBeenMet();
+        }
 
-		[Test]
-		public void ReadExternalLiftFile()
-		{
-			// For this test to work, the files test20080407.lift and test20080407.lift-ranges MUST
-			// be copied to the current working directory.
-			using (_mocks.Ordered)	// Ordered may be too strong is parse details change.
-			{
-				Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
-					.With(Is.EqualTo("etymology"), Is.EqualTo("borrowed"), Is.Null, Is.Null,
-						Is.EqualTo(new LiftMultiText("en", "The word is borrowed from another language")),
-						Is.EqualTo(new LiftMultiText("en", "borrowed")),
-						Is.EqualTo(new LiftMultiText()));
-				Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
-					.With(Is.EqualTo("etymology"), Is.EqualTo("proto"), Is.Null, Is.Null,
-						Is.EqualTo(new LiftMultiText("en", "The proto form of the word in another language")),
-						Is.EqualTo(new LiftMultiText("en", "proto")),
-						Is.EqualTo(new LiftMultiText()));
-				// The following range elements are from an external range file.
-				Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
-					.With(Is.EqualTo("grammatical-info"), Is.EqualTo("Adverb"), Is.NotNull, Is.Null,
-						Is.EqualTo(new LiftMultiText("en", "modify verbs")),
-						Is.EqualTo(new LiftMultiText("en", "Adverb")),
-						Is.EqualTo(new LiftMultiText("en", "adv")));
-				Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
-					.With(Is.EqualTo("grammatical-info"), Is.EqualTo("Noun"), Is.NotNull, Is.Null,
-						Is.EqualTo(new LiftMultiText("en", "substantives and nominals")),
-						Is.EqualTo(new LiftMultiText("en", "Noun")),
-						Is.EqualTo(new LiftMultiText("en", "n")));
-				Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
-					.With(Is.EqualTo("grammatical-info"), Is.EqualTo("Verb"), Is.NotNull, Is.Null,
-						Is.EqualTo(new LiftMultiText("en", "signal events and actions")),
-						Is.EqualTo(new LiftMultiText("en", "Verb")),
-						Is.EqualTo(new LiftMultiText("en", "v")));
-				Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
-					.With(Is.EqualTo("cvPattern"),
-						Is.EqualTo(new LiftMultiText("en", "the syllable pattern for a pronunciation")));
-				Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
-					.With(Is.EqualTo("tone"),
-						Is.EqualTo(new LiftMultiText("en", "the tone information for a pronunciation")));
-				Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
-					.With(Is.EqualTo("ImportResidue"),
-						Is.EqualTo(new LiftMultiText("en", "residue left over from importing")));
-				Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
-					.With(Is.EqualTo("literal_meaning"),
-						Is.EqualTo(new LiftMultiText("en", "literal meaning of an entry")));
-				ExpectGetOrMakeEntry(new ExtensibleMatcher("bird_6db30a98-530e-4614-86d4-237f6984db71",
-                                                            new Guid("6db30a98-530e-4614-86d4-237f6984db71"), 
-                                                            new DateTime(2008, 3, 31, 8, 4, 9, DateTimeKind.Utc), 
-                                                            new DateTime(2008, 3, 31, 8, 4, 9, DateTimeKind.Utc)));
-				Expect.Exactly(1).On(_merger).Method("MergeInLexemeForm")
-					.With(Is.Anything, Is.EqualTo(new LiftMultiText("x-rtl", "bird")));
-				ExpectGetOrMakeSense();
-				Expect.Exactly(1).On(_merger).Method("MergeInGrammaticalInfo")
-					.With(Is.Anything, Is.EqualTo("Noun"), Is.NotNull);
-				Expect.Exactly(1).On(_merger).Method("MergeInGloss")
-					.With(Is.Anything, Is.EqualTo(new LiftMultiText("en", "bird")));
-				Expect.Exactly(1).On(_merger).Method("MergeInTrait")
-					.With(Is.Anything, Is.EqualTo(new Trait("MorphType", "stem")));
-				Expect.Exactly(1).On(_merger).Method("MergeInTrait")
-					.With(Is.Anything, Is.EqualTo(new Trait("EntryType", "Main Entry")));
-				ExpectFinishEntry();
-			}
-			_parser.ReadLiftFile("test20080407.lift");
-			_mocks.VerifyAllExpectationsHaveBeenMet();
-		}
+        [Test]
+        public void ReadExternalLiftFile()
+        {
+            // For this test to work, the files test20080407.lift and test20080407.lift-ranges MUST
+            // be copied to the current working directory.
+            using (_mocks.Ordered)	// Ordered may be too strong is parse details change.
+            {
+                Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
+                    .With(Is.EqualTo("etymology"), Is.EqualTo("borrowed"), Is.Null, Is.Null,
+                          Is.EqualTo(new LiftMultiText("en", "The word is borrowed from another language")),
+                          Is.EqualTo(new LiftMultiText("en", "borrowed")),
+                          Is.EqualTo(new LiftMultiText()));
+                Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
+                    .With(Is.EqualTo("etymology"), Is.EqualTo("proto"), Is.Null, Is.Null,
+                          Is.EqualTo(new LiftMultiText("en", "The proto form of the word in another language")),
+                          Is.EqualTo(new LiftMultiText("en", "proto")),
+                          Is.EqualTo(new LiftMultiText()));
+                // The following range elements are from an external range file.
+                Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
+                    .With(Is.EqualTo("grammatical-info"), Is.EqualTo("Adverb"), Is.NotNull, Is.Null,
+                          Is.EqualTo(new LiftMultiText("en", "modify verbs")),
+                          Is.EqualTo(new LiftMultiText("en", "Adverb")),
+                          Is.EqualTo(new LiftMultiText("en", "adv")));
+                Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
+                    .With(Is.EqualTo("grammatical-info"), Is.EqualTo("Noun"), Is.NotNull, Is.Null,
+                          Is.EqualTo(new LiftMultiText("en", "substantives and nominals")),
+                          Is.EqualTo(new LiftMultiText("en", "Noun")),
+                          Is.EqualTo(new LiftMultiText("en", "n")));
+                Expect.Exactly(1).On(_merger).Method("ProcessRangeElement")
+                    .With(Is.EqualTo("grammatical-info"), Is.EqualTo("Verb"), Is.NotNull, Is.Null,
+                          Is.EqualTo(new LiftMultiText("en", "signal events and actions")),
+                          Is.EqualTo(new LiftMultiText("en", "Verb")),
+                          Is.EqualTo(new LiftMultiText("en", "v")));
+                Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
+                    .With(Is.EqualTo("cvPattern"),
+                          Is.EqualTo(new LiftMultiText("en", "the syllable pattern for a pronunciation")));
+                Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
+                    .With(Is.EqualTo("tone"),
+                          Is.EqualTo(new LiftMultiText("en", "the tone information for a pronunciation")));
+                Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
+                    .With(Is.EqualTo("ImportResidue"),
+                          Is.EqualTo(new LiftMultiText("en", "residue left over from importing")));
+                Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
+                    .With(Is.EqualTo("literal_meaning"),
+                          Is.EqualTo(new LiftMultiText("en", "literal meaning of an entry")));
+                ExpectGetOrMakeEntry(new ExtensibleMatcher("bird_6db30a98-530e-4614-86d4-237f6984db71",
+                                                           new Guid("6db30a98-530e-4614-86d4-237f6984db71"), 
+                                                           new DateTime(2008, 3, 31, 8, 4, 9, DateTimeKind.Utc), 
+                                                           new DateTime(2008, 3, 31, 8, 4, 9, DateTimeKind.Utc)));
+                Expect.Exactly(1).On(_merger).Method("MergeInLexemeForm")
+                    .With(Is.Anything, Is.EqualTo(new LiftMultiText("x-rtl", "bird")));
+                ExpectGetOrMakeSense();
+                Expect.Exactly(1).On(_merger).Method("MergeInGrammaticalInfo")
+                    .With(Is.Anything, Is.EqualTo("Noun"), Is.NotNull);
+                Expect.Exactly(1).On(_merger).Method("MergeInGloss")
+                    .With(Is.Anything, Is.EqualTo(new LiftMultiText("en", "bird")));
+                Expect.Exactly(1).On(_merger).Method("MergeInTrait")
+                    .With(Is.Anything, Is.EqualTo(new Trait("MorphType", "stem")));
+                Expect.Exactly(1).On(_merger).Method("MergeInTrait")
+                    .With(Is.Anything, Is.EqualTo(new Trait("EntryType", "Main Entry")));
+                ExpectFinishEntry();
+            }
+            _parser.ReadLiftFile("test20080407.lift");
+            _mocks.VerifyAllExpectationsHaveBeenMet();
+        }
   
         /*
          * 
@@ -1376,65 +1376,4 @@ namespace LiftIO.Tests
             return "m";
         }
     }
-/*
-    class TestLiftMerger : ILexiconMerger<Dummy, Dummy, Dummy>
-    {
-        public StringBuilder _results;
-
-        public TestLiftMerger(StringBuilder results)
-        {
-            _results = results;
-        }
-
-        public Dummy GetOrMakeEntry(IdentifyingInfo idInfo)
-        {
-            _results.AppendFormat("GetOrMakeEntry({0})",idInfo);
-            return new Dummy();
-        }
-
-        public void MergeInLexemeForm(Dummy entry, SimpleMultiText forms)
-        {
-            _results.AppendFormat("MergeInLexemeForm({0},{1})", entry, GetStingFromMultiText(forms));
-       } 
-
-        private static string GetStingFromMultiText(SimpleMultiText forms)
-        {
-            string s="";
-            foreach (string key in forms.Keys)
-            {
-                s += string.Format("{0}={1}|", key, forms[key]);
-            }
-            return s;
-        }
-
-        public Dummy GetOrMakeSense(Dummy entry, IdentifyingInfo idInfo)
-        {
-            _results.AppendFormat("GetOrMakeSense({0},{1})", entry, idInfo);
-            return new Dummy();
-        }
-
-        public Dummy GetOrMakeExample(Dummy sense, IdentifyingInfo idInfo)
-        {
-            _results.AppendFormat("GetOrMakeExample({0},{1})", sense, idInfo);
-            return new Dummy();
-        }
-
-
-        public void MergeInGloss(Dummy sense, SimpleMultiText forms)
-        {
-            _results.AppendFormat("MergeInGloss({0},{1})", sense, GetStingFromMultiText(forms));
-        }
-
-        public void MergeInExampleForm(Dummy example, SimpleMultiText forms)
-        {
-            _results.AppendFormat("MergeInExampleForm({0},{1})", example, GetStingFromMultiText(forms));
-        }
-
-        public void MergeInTranslationForm(Dummy example, SimpleMultiText forms)
-        {
-            _results.AppendFormat("MergeInTranslationForm({0},{1})", example, GetStingFromMultiText(forms));
-        }
-    }*/
-
-
 }

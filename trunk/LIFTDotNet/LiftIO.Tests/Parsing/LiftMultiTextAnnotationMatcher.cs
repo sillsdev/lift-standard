@@ -3,9 +3,8 @@ using System.IO;
 using LiftIO.Parsing;
 using NMock2;
 
-namespace LiftIO.Tests
+namespace LiftIO.Tests.Parsing
 {
-
     class LiftMultiTextAnnotationMatcher : Matcher
     {
         private readonly string _expectedLanguageOfFirstAnnotation;
