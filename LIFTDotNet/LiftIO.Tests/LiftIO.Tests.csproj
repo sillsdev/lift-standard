@@ -45,12 +45,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Merging\XmlMerger-LCD-Tests.cs" />
-    <Compile Include="Merging\EntrMergingTests.cs" />
-    <Compile Include="Merging\XmlMergerTests.cs" />
-    <Compile Include="Merging\SenseMergingTests.cs" />
-    <Compile Include="Merging\MultiTextMergingTests.cs" />
-    <Compile Include="Merging\PoorMansMergingStrategyTests.cs" />
     <Compile Include="Merging\xmldiff\XmlDiffTests.cs" />
     <Compile Include="Migration\V11To12MigratorTests.cs" />
     <Compile Include="Migration\MigratorTestBase.cs" />
@@ -58,7 +52,6 @@
     <Compile Include="Migration\GeneralMigratorTests.cs" />
     <Compile Include="Parsing\ExtensibleMatcher.cs" />
     <Compile Include="Parsing\ExtensibleTests.cs" />
-    <Compile Include="Merging\FileLevelMergeTests.cs" />
     <Compile Include="Parsing\LiftMultiTextAnnotationMatcher.cs" />
     <Compile Include="Parsing\ParserTests.cs" />
     <Compile Include="Parsing\TraitMatcher.cs" />

@@ -2,7 +2,7 @@ using System;
 using LiftIO.Parsing;
 using NUnit.Framework;
 
-namespace LiftIO.Tests
+namespace LiftIO.Tests.Parsing
 {
     [TestFixture]
     public class ExtensibleTests
