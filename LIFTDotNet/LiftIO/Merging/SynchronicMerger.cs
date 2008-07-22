@@ -24,14 +24,14 @@ namespace LiftIO.Merging
         /// <exception cref="IOException">If file is locked</exception>
         /// <exception cref="LiftFormatException">If there is an error and then file is found to be non-conformant.</exception>
         /// <param name="pathToBaseLiftFile"></param>
-        public void MergeUpdatesIntoFile(string pathToBaseLiftFile)
+        public bool MergeUpdatesIntoFile(string pathToBaseLiftFile)
         {
             // _pathToBaseLiftFile = pathToBaseLiftFile;
 
             FileInfo[] files = GetPendingUpdateFiles(pathToBaseLiftFile);
             if (files.Length < 1)
             {
-                return;
+                return false;
             }
             Array.Sort(files, new FileInfoLastWriteTimeComparer());
             int count = files.Length;
@@ -41,7 +41,7 @@ namespace LiftIO.Merging
             FileAttributes fa = File.GetAttributes(pathToBaseLiftFile);
             if ((fa & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
             {
-                return;
+                return false;
             }
 
             for (int i = 0; i < count; i++)
@@ -49,7 +49,7 @@ namespace LiftIO.Merging
                 if (files[i].IsReadOnly)
                 {
                     //todo: "Cannot merge safely because at least one file is read only: {0}
-                    return;
+                    return true;
                 }
             }
             bool mergedAtLeastOne = false;
@@ -105,7 +105,7 @@ namespace LiftIO.Merging
 
             if (!mergedAtLeastOne)
             {
-                return;
+                return false;
             }
 
             //string pathToBaseLiftFile = Path.Combine(directory, BaseLiftFileName);
@@ -127,6 +127,7 @@ namespace LiftIO.Merging
             {
                 File.Delete(s);
             }
+            return true;
         }
 
 

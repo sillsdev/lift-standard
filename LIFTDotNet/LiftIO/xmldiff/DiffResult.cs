@@ -8,8 +8,8 @@ namespace LiftIO.Merging.XmlDiff
 	using System.Text; 
 	
     public class DiffResult {
-        private bool _identical = true;
-        private bool _equal = true;
+        private bool _areIdentical = true;
+        private bool _areEqual = true;
         private Difference _difference;
     	private StringBuilder _stringBuilder;
     	
@@ -17,15 +17,15 @@ namespace LiftIO.Merging.XmlDiff
     		_stringBuilder = new StringBuilder();
     	}
         
-        public bool Identical {
+        public bool AreIdentical {
             get {
-                return _identical;
+                return _areIdentical;
             }
         }
         
-        public bool Equal {
+        public bool AreEqual {
             get {
-                return _equal;
+                return _areEqual;
             }
         }
         
@@ -38,7 +38,7 @@ namespace LiftIO.Merging.XmlDiff
         public string StringValue {
         	get {
 	        	if (_stringBuilder.Length == 0) {
-	        		if (Identical) {
+	        		if (AreIdentical) {
 	        			_stringBuilder.Append("Identical");        			
 	        		} else {
 	        			_stringBuilder.Append("Equal");
@@ -47,11 +47,11 @@ namespace LiftIO.Merging.XmlDiff
 	        	return _stringBuilder.ToString();
         	}
         }
-        
-        public void DifferenceFound(XmlDiff inDiff, Difference difference) {
-            _identical = false;
-            if (difference.MajorDifference) {
-                _equal = false;
+        //was public, but jh didn't see why
+        internal void DifferenceFound(XmlDiff inDiff, Difference difference) {
+            _areIdentical = false;
+            if (difference.HasMajorDifference) {
+                _areEqual = false;
             }       
             _difference = difference;
         	if (_stringBuilder.Length == 0) {

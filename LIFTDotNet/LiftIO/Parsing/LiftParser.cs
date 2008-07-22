@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Xml;
+using LiftIO.Merging;
 using LiftIO.Validation;
 
 namespace LiftIO.Parsing
@@ -34,6 +35,8 @@ namespace LiftIO.Parsing
 
         private bool _cancelNow = false;
         private DateTime _defaultCreationModificationUTC=default(DateTime);
+        private ILiftChangeDetector _changeDetector;
+        private ILiftChangeReport _changeReport;
 
         public LiftParser(ILexiconMerger<TBase, TEntry, TSense, TExample> merger)
         {
@@ -89,6 +92,13 @@ namespace LiftIO.Parsing
 
         internal TEntry ReadEntry(XmlNode node)
         {
+            if (_changeReport != null)
+            {
+                string id = Utilities.GetOptionalAttributeString(node, "id");
+                if (ChangeReport.GetChangeType(id) == LiftChangeReport.ChangeType.None)
+                    return default(TEntry);
+            }
+
             Extensible extensible = ReadExtensibleElementBasics(node);
             DateTime dateDeleted = GetOptionalDate(node, "dateDeleted", default(DateTime));
             if(dateDeleted != default(DateTime))
@@ -625,12 +635,28 @@ namespace LiftIO.Parsing
             {
                 throw new LiftFormatException("Programmer should migrate the lift file before calling this method.");
             }
-         
+
+            if (_changeDetector != null && _changeDetector.CanProvideChangeRecord)
+            {
+                ProgressMessage = "Detecting Changes To Lift File...";
+                _changeReport = _changeDetector.GetChangeReport(new NullProgress());
+            }
+
             using (XmlReader reader = XmlReader.Create(pathToLift, NormalReaderSettings))
             {
                 reader.ReadStartElement("lift");
                 ReadHeader(reader);
                 ReadEntries(reader);
+            }
+            if (_changeReport != null && _changeReport.IdsOfDeletedEntries.Count > 0)
+            {
+                ProgressMessage = "Removing entries that were removed from the Lift file...";
+                foreach (string id in _changeReport.IdsOfDeletedEntries)
+                {
+                    Extensible eInfo = new Extensible();
+                    eInfo.Id = id;
+                    _merger.EntryWasDeleted(eInfo, default(DateTime) /* we don't know... why is this part of the interface, anyhow? */);
+                }
             }
         }
 
@@ -915,6 +941,22 @@ namespace LiftIO.Parsing
         {
             get { return _defaultCreationModificationUTC; }
             set { _defaultCreationModificationUTC = value; }
+        }
+
+        /// <summary>
+        /// Optional object that will tell us which entries actually need parsing/adding.
+        /// NB: it is up to the client of this class to do any deleting that the detector says is needed
+        /// </summary>
+        public ILiftChangeDetector ChangeDetector
+        {
+            get { return _changeDetector; }
+            set { _changeDetector = value; }
+        }
+
+        public ILiftChangeReport ChangeReport
+        {
+            get { return _changeReport; }
+            set { _changeReport = value; }
         }
 
         private void NotifyError(Exception error)

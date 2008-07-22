@@ -12,6 +12,7 @@ namespace LiftIO.Parsing
         private string _id;//actually not part of extensible (as of 8/1/2007)
         private DateTime _creationTime;
         private DateTime _modificationTime;
+
         //private List<Trait> _traits;
         //private List<Field> _fields;
         //private List<Annotation> _annotation;
