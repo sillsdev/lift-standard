@@ -232,7 +232,7 @@ namespace LiftIO
            // DiffConfiguration config = new DiffConfiguration(WhitespaceHandling.None);
             XmlDiff diff = new XmlDiff(new XmlInput(ours.OuterXml), new XmlInput(theirs.OuterXml));//, config);
             DiffResult d = diff.Compare();
-            return (d == null || d.Difference == null || !d.Difference.MajorDifference);
+            return (d == null || d.Difference == null || !d.Difference.HasMajorDifference);
         }
 
         public static string GetStringAttribute(XmlNode form, string attr) 
@@ -253,6 +253,21 @@ namespace LiftIO
             if (attr == null)
                 return null;
             return attr.Value;
+        }
+
+        public static string MakeSafeXmlAttribute(string sInput)
+        {
+            string sOutput = sInput;
+
+            if (sOutput != null && sOutput.Length != 0)
+            {
+                sOutput = sOutput.Replace("&", "&amp;");
+                sOutput = sOutput.Replace("\"", "&quot;");
+                sOutput = sOutput.Replace("'", "&apos;");
+                sOutput = sOutput.Replace("<", "&lt;");
+                sOutput = sOutput.Replace(">", "&gt;");
+            }
+            return sOutput;
         }
 
         public static XmlNode GetDocumentNodeFromRawXml(string outerXml, XmlNode nodeMaker)

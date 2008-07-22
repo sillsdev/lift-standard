@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
+using LiftIO.Merging;
 using LiftIO.Parsing;
 using LiftIO.Tests.Parsing;
 using LiftIO.Validation;
@@ -49,10 +50,27 @@ namespace LiftIO.Tests.Parsing
 
         }
 
+        [Test]
+        public void ReadLiftFile_SuppliedChangeDetector_SkipsUnchangedEntries()
+        {
+            _parser.ChangeReport = new DummyChangeReport();
+
+            _doc.LoadXml("<entry id='old'/>");
+            _parser.ReadEntry(_doc.FirstChild);
+            _mocks.VerifyAllExpectationsHaveBeenMet();
+
+            ExpectGetOrMakeEntry(new ExtensibleMatcher("changed"));
+            ExpectFinishEntry();
+
+            _doc.LoadXml("<entry id='changed'/>");
+            _parser.ReadEntry(_doc.FirstChild);
+            _mocks.VerifyAllExpectationsHaveBeenMet();
+        }
+
         [Test, ExpectedException(typeof(LiftFormatException))]
         public void ReadLiftFile_OldVersion_Throws()
         {
-            using (TempFile f = new TempFile("<lift version='0.10'></lift>"))
+            using (TempFile f = new TempFile(string.Format("<lift version='{0}'></lift>", /*Validator.LiftVersion*/ "0.0")))
             {
                 _parser.ReadLiftFile(f.Path);
             }
@@ -210,9 +228,7 @@ namespace LiftIO.Tests.Parsing
         [Test]
         public void EntryWithId()
         {
-            //          ExpectMergeInLexemeForm(Is.Anything);
-            ParseEntryAndCheck(string.Format("<entry id=\"{0}\" />", "-foo-"),
-                               new ExtensibleMatcher("-foo-"));
+            ParseEntryAndCheck("<entry id='-foo-' />", new ExtensibleMatcher("-foo-"));
         }
 
         private void ParseEntryAndCheck(string content, Matcher extensibleMatcher)
@@ -1374,6 +1390,60 @@ namespace LiftIO.Tests.Parsing
         public override string ToString()
         {
             return "m";
+        }
+    }
+
+    public class DummyLiftChangeDetector : ILiftChangeDetector
+    {
+        private bool _haveCache = false;
+
+        public DummyLiftChangeDetector()
+        {
+            Reset();
+        }
+        public void Reset()
+        {
+            _haveCache = true;
+        }
+
+        public void ClearCache()
+        {
+            _haveCache = false;
+        }
+
+        public bool CanProvideChangeRecord
+        {
+            get { return _haveCache; }
+        }
+
+        public ILiftChangeReport GetChangeReport(IProgress progress)
+        {
+            return new DummyChangeReport();
+        }
+    }
+
+    class DummyChangeReport : ILiftChangeReport
+    {
+        public LiftChangeReport.ChangeType GetChangeType(string entryId)
+        {
+            switch (entryId)
+            {
+                case "new":
+                    return LiftChangeReport.ChangeType.New;
+
+                case "old":
+                    return LiftChangeReport.ChangeType.None;
+
+                case "changed":
+                    return LiftChangeReport.ChangeType.Editted;
+                default:
+                    return LiftChangeReport.ChangeType.None;
+            }
+        }
+
+        public IList<string> IdsOfDeletedEntries
+        {
+            get { throw new System.NotImplementedException(); }
         }
     }
 }

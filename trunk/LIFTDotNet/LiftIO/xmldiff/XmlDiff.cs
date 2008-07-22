@@ -256,7 +256,7 @@ namespace LiftIO.Merging.XmlDiff
 
         private bool ContinueComparison(Difference afterDifference)
         {
-            return !afterDifference.MajorDifference;
+            return !afterDifference.HasMajorDifference;
         }
 
         private void CheckEmptyOrAtEndElement(DiffResult result,

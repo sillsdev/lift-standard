@@ -13,7 +13,7 @@ namespace LiftIO.Tests.Merging.XmlDiff
         [Test] public void EqualResultForSameReader() { 
             TextReader reader = new StringReader("<empty/>");
             DiffResult result = PerformDiff(reader, reader);
-            Assert.AreEqual(true, result.Equal);
+            Assert.AreEqual(true, result.AreEqual);
         }
         
         [Test] public void SameResultForTwoInvocations() {
@@ -29,7 +29,7 @@ namespace LiftIO.Tests.Merging.XmlDiff
             TextReader reader2 = new StringReader(input2);
             DiffResult result = PerformDiff(reader1, reader2);
             string msg = "comparing " + input1 + " to " + input2 + ": " + result.Difference;
-            Assert.AreEqual(expected, result.Equal);
+            Assert.AreEqual(expected, result.AreEqual);
         }
         
         private void AssertExpectedResult(string[] inputs1, string[] inputs2, bool expected) {
