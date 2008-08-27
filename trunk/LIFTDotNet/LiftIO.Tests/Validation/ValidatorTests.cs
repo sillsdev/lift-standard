@@ -41,7 +41,7 @@ namespace LiftIO.Tests.Validation
         {
             string contents = "<lift version='0.8'><header></header><header></header></lift>";
             string errors = Validate(contents, false);
-            Assert.IsTrue(errors.Contains("This file claims to be version"));
+            Assert.IsTrue(errors.Contains("This file claims to be version "));
         }
 
         private static string Validate(string contents, bool shouldPass)
