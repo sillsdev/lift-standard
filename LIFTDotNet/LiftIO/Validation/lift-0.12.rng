@@ -503,22 +503,75 @@
     </zeroOrMore>
   </define>
 
-  <!-- =================================================== range-ref-content -->
-  <define name="range-ref-content">
+  <!-- =================================================== range-element-content -->
+  <define name="range-element-content">
     <attribute name="id"/>
-    <attribute name="href">
-      <data type="anyURI"/>
-    </attribute>
+    <optional>
+      <!-- refers to another range-element's id -->
+      <attribute name="parent"/>
+    </optional>
     <optional>
       <attribute name="guid"/>
     </optional>
+    <interleave>
+      <optional>
+        <element name="description">
+          <ref name="multitext-content"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="label">
+          <ref name="multitext-content"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="abbrev">
+          <ref name="multitext-content"/>
+        </element>
+      </optional>
+    </interleave>
+  </define>
+
+  <!-- =================================================== range-content -->
+  <define name="range-content">
+    <attribute name="id"/>
+    <optional>
+      <attribute name="href">
+        <data type="anyURI"/>
+      </attribute>
+    </optional>
+    <optional>
+      <attribute name="guid"/>
+    </optional>
+    <interleave>
+      <optional>
+        <element name="description">
+          <ref name="multitext-content"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="label">
+          <ref name="multitext-content"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="abbrev">
+          <ref name="multitext-content"/>
+        </element>
+      </optional>
+      <zeroOrMore>
+        <element name="range-element">
+          <ref name="range-element-content"/>
+        </element>
+      </zeroOrMore>
+    </interleave>
   </define>
 
   <!-- ====================================================== ranges-content -->
   <define name="ranges-content">
     <zeroOrMore>
       <element name="range">
-        <ref name="range-ref-content"/>
+        <ref name="range-content"/>
       </element>
     </zeroOrMore>
   </define>

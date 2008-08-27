@@ -621,7 +621,7 @@ namespace LiftIO.Parsing
         /// <summary>
         /// Read a LIFT file. Must be the current lift version.
         /// </summary>
-        public void ReadLiftFile(string pathToLift)
+        public int ReadLiftFile(string pathToLift)
         {
             if (_defaultCreationModificationUTC == default(DateTime))
             {
@@ -636,6 +636,7 @@ namespace LiftIO.Parsing
                 throw new LiftFormatException("Programmer should migrate the lift file before calling this method.");
             }
 
+            int numberOfEntriesRead = 0;
             if (_changeDetector != null && _changeDetector.CanProvideChangeRecord)
             {
                 ProgressMessage = "Detecting Changes To Lift File...";
@@ -646,7 +647,7 @@ namespace LiftIO.Parsing
             {
                 reader.ReadStartElement("lift");
                 ReadHeader(reader);
-                ReadEntries(reader);
+                numberOfEntriesRead = ReadEntries(reader);
             }
             if (_changeReport != null && _changeReport.IdsOfDeletedEntries.Count > 0)
             {
@@ -658,6 +659,7 @@ namespace LiftIO.Parsing
                     _merger.EntryWasDeleted(eInfo, default(DateTime) /* we don't know... why is this part of the interface, anyhow? */);
                 }
             }
+            return numberOfEntriesRead;
         }
 
         /// <summary>
@@ -694,7 +696,7 @@ namespace LiftIO.Parsing
         }
 
 
-        private void ReadEntries(XmlReader reader)
+        private int ReadEntries(XmlReader reader)
         {
 // Process all of the entry elements, reading them into memory one at a time.
             ProgressMessage = "Reading entries from LIFT file";
@@ -723,6 +725,7 @@ namespace LiftIO.Parsing
                     break;
                 }
             }
+            return numberOfEntriesRead;
         }
 
         /// <summary>
@@ -836,6 +839,8 @@ namespace LiftIO.Parsing
         {
             if (pathToRangeFile.StartsWith("file://"))
                 pathToRangeFile = pathToRangeFile.Substring(7);
+            if (!File.Exists(pathToRangeFile))
+                return;		// ignore missing range file without error.
 
             using (XmlReader reader = XmlReader.Create(pathToRangeFile, NormalReaderSettings))
             {

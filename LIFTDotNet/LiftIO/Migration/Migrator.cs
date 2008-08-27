@@ -24,7 +24,7 @@ namespace LiftIO.Migration
         {
             if (!IsMigrationNeeded(pathToOriginalLift))
             {
-                throw new ArgumentException("This file is already the most current version. Use Validator.IsMigrationNeeded() first to determine if migration is needed.");
+                throw new ArgumentException("This file is already the most current version. Use Migrator.IsMigrationNeeded() first to determine if migration is needed.");
             }
 
             string sourceVersion = Validator.GetLiftVersion(pathToOriginalLift);
