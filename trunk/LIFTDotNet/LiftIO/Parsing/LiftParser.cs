@@ -33,6 +33,7 @@ namespace LiftIO.Parsing
       //  private readonly ILimittedMerger<TBase, TEntry, TSense, TExample> _limitedMerger;
         private const string _wsAttributeLabel = "lang";
 
+		private string _pathToLift = null;
         private bool _cancelNow = false;
         private DateTime _defaultCreationModificationUTC=default(DateTime);
         private ILiftChangeDetector _changeDetector;
@@ -623,6 +624,7 @@ namespace LiftIO.Parsing
         /// </summary>
         public int ReadLiftFile(string pathToLift)
         {
+			_pathToLift = pathToLift;	// may need this to find its ranges file.
             if (_defaultCreationModificationUTC == default(DateTime))
             {
                 _defaultCreationModificationUTC = File.GetLastWriteTimeUtc(pathToLift);
@@ -839,9 +841,16 @@ namespace LiftIO.Parsing
         {
             if (pathToRangeFile.StartsWith("file://"))
                 pathToRangeFile = pathToRangeFile.Substring(7);
-            if (!File.Exists(pathToRangeFile))
-                return;		// ignore missing range file without error.
-
+			if (!File.Exists(pathToRangeFile))
+			{
+				// try to find range file next to the lift file (may have been copied to another
+				// directory or another machine)
+				string dir = Path.GetDirectoryName(_pathToLift);
+				string file = Path.GetFileName(pathToRangeFile);
+				pathToRangeFile = Path.Combine(dir, file);
+				if (!File.Exists(pathToRangeFile))
+					return;		// ignore missing range file without error.
+			}
             using (XmlReader reader = XmlReader.Create(pathToRangeFile, NormalReaderSettings))
             {
                 reader.ReadStartElement("lift-ranges");
