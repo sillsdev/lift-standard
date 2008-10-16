@@ -369,6 +369,13 @@ namespace LiftIO.Tests.Parsing
                 .With(Is.Anything, Is.EqualTo(href), Is.NotNull);
         }
 
+        private void ExpectMergeInMediaWithCaption(string href, string caption)
+        {
+            Expect.Exactly(1).On(_merger)
+                            .Method("MergeInMedia")
+                            .With(Is.Anything, Is.EqualTo(href), Has.ToString(Is.EqualTo(caption)));
+        }
+
         private void ExpectEntryWasDeleted()
         {
             Expect.Exactly(1).On(_merger)
@@ -499,12 +506,13 @@ namespace LiftIO.Tests.Parsing
                 </pronunciation></entry>");
         }
 
-        [Test, Ignore("Not implemented yet")]
+        [Test]
         public void EntryWithPronunciationWithMedia()
         {
             ExpectGetOrMakeEntry();
-            ExpectMergeInPronunciation("en__IPA=ai|");//TODO: this is not going to test it
-            ParseEntryAndCheck("<entry><pronunciation><media href='blah.mp3'/></pronunciation></entry>");
+            ExpectMergeInPronunciation("en__IPA=ai|");
+            ExpectMergeInMediaWithCaption("blah.mp3", "en=This is a test|");
+            ParseEntryAndCheck("<entry><pronunciation><form lang='en__IPA'><text>ai</text></form><media href='blah.mp3'><label><form lang='en'><text>This is a test</text></form></label></media></pronunciation></entry>");
         }
 
         private void ExpectMergeInPronunciation(string value)
