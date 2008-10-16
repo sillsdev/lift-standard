@@ -149,7 +149,7 @@ namespace LiftIO.Parsing
             {
                 ReadVariant(n, entry);
             }
-			
+
             foreach (XmlNode n in node.SelectNodes("pronunciation"))
             {
                 ReadPronunciation(n, entry);
@@ -195,10 +195,13 @@ namespace LiftIO.Parsing
 //            }
 
             LiftMultiText contents = ReadMultiText(node);
-            //todo: media
             TBase pronunciation = _merger.MergeInPronunciation(entry, contents, node.OuterXml);
             if (pronunciation != null)
+            {
+                foreach (XmlNode n in node.SelectNodes("media"))
+                    ReadMedia(n, pronunciation);
                 ReadExtensibleElementDetails(pronunciation, node);
+            }
         }
 
         private void ReadVariant(XmlNode node, TEntry entry)
@@ -234,6 +237,17 @@ namespace LiftIO.Parsing
                 caption = null;
             }
             _merger.MergeInPicture(parent, href, caption);
+        }
+
+        private void ReadMedia(XmlNode n, TBase parent)
+        {
+            string href = Utilities.GetStringAttribute(n, "href");
+            LiftMultiText caption = LocateAndReadMultiText(n, "label");
+            if (caption.IsEmpty)
+            {
+                caption = null;
+            }
+            _merger.MergeInMedia(parent, href, caption);
         }
 
         /// <summary>

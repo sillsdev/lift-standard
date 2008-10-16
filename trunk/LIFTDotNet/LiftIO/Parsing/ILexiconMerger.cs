@@ -68,10 +68,18 @@ namespace LiftIO.Parsing
         void MergeInNote(TBase extensible, string type, LiftMultiText contents);
 
         /// <summary>
+        /// Handle LIFT's "media" entity.  This is currently used only inside "pronunciation".
+        /// </summary>
+        /// <param name="pronunciation">the owning object, probably a pronunciation</param>
+        /// <param name="href"></param>
+        /// <param name="caption"></param>
+        void MergeInMedia(TBase pronunciation, string href, LiftMultiText caption);
+        
+        /// <summary>
         /// Handle LIFT's "grammatical-info" entity.  Note that this can occur in a "sense" (or
         /// "subsense") or in a "reversal".
         /// </summary>
-        /// <param name="extensible"></param>
+        /// <param name="senseOrReversal"></param>
         /// <param name="val"></param>
         /// <param name="traits"></param>
         void MergeInGrammaticalInfo(TBase senseOrReversal, string val, List<Trait> traits);
