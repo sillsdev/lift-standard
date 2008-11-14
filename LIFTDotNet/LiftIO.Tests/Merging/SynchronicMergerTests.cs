@@ -38,6 +38,13 @@ namespace LiftIO.Tests.Merging
             return _baseLiftFileName + DateTime.UtcNow.ToString("yyyy'-'MM'-'dd'T'HH'-'mm'-'ss'-'FFFFFFF UTC ") + SynchronicMerger.ExtensionOfIncrementalFiles;
         }
 
+        [Test, ExpectedException(typeof(ArgumentException))]
+        public void GetPendingUpdateFiles_SimpleFileNameInsteadOfPath_Throws()
+        {
+            WriteFile(_baseLiftFileName, "", _directory);
+            SynchronicMerger.GetPendingUpdateFiles(_baseLiftFileName);
+        }
+
         [Test]
         public void OneFile_NoUpdates_LeftUntouched()
         {

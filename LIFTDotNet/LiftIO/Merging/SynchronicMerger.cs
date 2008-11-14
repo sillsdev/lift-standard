@@ -26,6 +26,7 @@ namespace LiftIO.Merging
         /// <param name="pathToBaseLiftFile"></param>
         public bool MergeUpdatesIntoFile(string pathToBaseLiftFile)
         {
+
             // _pathToBaseLiftFile = pathToBaseLiftFile;
 
             FileInfo[] files = GetPendingUpdateFiles(pathToBaseLiftFile);
@@ -205,6 +206,11 @@ namespace LiftIO.Merging
 
         public static FileInfo[] GetPendingUpdateFiles(string pathToBaseLiftFile)
         {
+            //see ws-1035
+           if(!pathToBaseLiftFile.Contains(Path.DirectorySeparatorChar.ToString()))
+           {
+               throw new ArgumentException("pathToBaseLiftFile must be a full path, not just a file name. Path was "+pathToBaseLiftFile);
+           }
             DirectoryInfo di = new DirectoryInfo(Path.GetDirectoryName(pathToBaseLiftFile));
             return di.GetFiles("*"+ExtensionOfIncrementalFiles, SearchOption.TopDirectoryOnly);
         }
