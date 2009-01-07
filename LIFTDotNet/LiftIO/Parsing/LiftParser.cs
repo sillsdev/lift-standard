@@ -221,9 +221,10 @@ namespace LiftIO.Parsing
 //            }
 
             string source = Utilities.GetOptionalAttributeString(node, "source");
+            string type = Utilities.GetOptionalAttributeString(node, "type");
             LiftMultiText form = LocateAndReadMultiText(node, null);
             LiftMultiText gloss = LocateAndReadOneElementPerFormData(node, "gloss");
-            TBase etymology = _merger.MergeInEtymology(entry, source, form, gloss, node.OuterXml);
+            TBase etymology = _merger.MergeInEtymology(entry, source, type, form, gloss, node.OuterXml);
             if (etymology != null)
                 ReadExtensibleElementDetails(etymology, node);
         }

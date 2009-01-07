@@ -107,12 +107,15 @@ namespace LiftIO.Parsing
         /// <summary>
         /// Handle LIFT's "etymology" entity.
         /// </summary>
-        /// <param name="entry"></param>
-        /// <param name="source"></param>
-        /// <param name="form"></param>
+        /// <param name="entry">the owning entry</param>
+        /// <param name="source">language of the form</param>
+        /// <param name="type">either "proto" or "borrowed" (or possibly ?)</param>
+        /// <param name="form">not really multilingual, should have exactly one value</param>
         /// <param name="gloss"></param>
+        /// <param name="rawXml"></param>
         /// <returns>the etymology object</returns>
-        TBase MergeInEtymology(TEntry entry, string source, LiftMultiText form, LiftMultiText gloss, string rawXml);
+        TBase MergeInEtymology(TEntry entry, string source, string type, LiftMultiText form,
+            LiftMultiText gloss, string rawXml);
 
         /// <summary>
         /// Process a range element from the header (possibly from a separate range file).  The

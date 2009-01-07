@@ -1198,13 +1198,14 @@ namespace LiftIO.Tests.Parsing
         [Test]
         public void SimpleEtymology()
         {
-            string content = "<entry><etymology source='Greek' type=''><form lang='bam'><text>alphabeta</text></form><gloss lang='en'><text>letters</text></gloss><field type='comment'><form lang='en'><text>this etymology is nonsense</text></form></field></etymology></entry>";
+            string content = "<entry><etymology source='Greek' type='borrowed'><form lang='bam'><text>alphabeta</text></form><gloss lang='en'><text>letters</text></gloss><field type='comment'><form lang='en'><text>this etymology is nonsense</text></form></field></etymology></entry>";
             _doc.LoadXml(content);
             using (_mocks.Ordered)
             {
                 ExpectGetOrMakeEntry();
                 Expect.Exactly(1).On(_merger).Method("MergeInEtymology")
-                    .With(Is.Anything, Is.EqualTo("Greek"), Is.EqualTo(new LiftMultiText("bam", "alphabeta")),
+                    .With(Is.Anything, Is.EqualTo("Greek"), Is.EqualTo("borrowed"),
+                          Is.EqualTo(new LiftMultiText("bam", "alphabeta")),
                           Is.EqualTo(new LiftMultiText("en", "letters")), Is.Anything)
                     .Will(Return.Value(new Dummy()));
                 Expect.Exactly(1).On(_merger).Method("MergeInField")

@@ -216,7 +216,7 @@
       <ref name="extensible-content"/>
       <optional>
         <element name="form">
-          <ref name="form-no-lang-content"/>
+          <ref name="form-content"/>
         </element>
       </optional>
       <zeroOrMore>
@@ -224,7 +224,6 @@
           <ref name="form-content"/>
         </element>
       </zeroOrMore>
-
     </interleave>
   </define>
 
