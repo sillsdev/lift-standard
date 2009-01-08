@@ -174,7 +174,7 @@ namespace LiftIO.Parsing
             {
                 string noteType = Utilities.GetOptionalAttributeString(noteNode, "type");
                 LiftMultiText noteText = ReadMultiText(noteNode);
-                _merger.MergeInNote(e, noteType, noteText);
+                _merger.MergeInNote(e, noteType, noteText, node.OuterXml);
             }
         }
 

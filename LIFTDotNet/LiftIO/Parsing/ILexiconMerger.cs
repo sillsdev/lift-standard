@@ -65,7 +65,7 @@ namespace LiftIO.Parsing
         /// <summary>
         /// Handle LIFT's "note" entity. NB: This may be called multiple times (w/ different notes).
         /// </summary>
-        void MergeInNote(TBase extensible, string type, LiftMultiText contents);
+        void MergeInNote(TBase extensible, string type, LiftMultiText contents, string rawXml);
 
         /// <summary>
         /// Handle LIFT's "media" entity.  This is currently used only inside "pronunciation".
