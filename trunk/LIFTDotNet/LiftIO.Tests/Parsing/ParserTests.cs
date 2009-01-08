@@ -387,14 +387,14 @@ namespace LiftIO.Tests.Parsing
         {
             Expect.Exactly(1).On(_merger)
                 .Method("MergeInNote")
-                .With(Is.Anything, Is.Anything/*todo type*/, Has.ToString(Is.EqualTo(value)));
+                .With(Is.Anything, Is.Anything/*todo type*/, Has.ToString(Is.EqualTo(value)), Is.Anything);
         }
 
         private void ExpectTypedMergeInNote(string type)
         {
             Expect.Exactly(1).On(_merger)
                 .Method("MergeInNote")
-                .With(Is.Anything, Is.EqualTo(type), Is.Anything);
+                .With(Is.Anything, Is.EqualTo(type), Is.Anything, Is.Anything);
         }
         
         
