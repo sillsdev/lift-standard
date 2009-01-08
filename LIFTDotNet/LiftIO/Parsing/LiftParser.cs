@@ -174,7 +174,7 @@ namespace LiftIO.Parsing
             {
                 string noteType = Utilities.GetOptionalAttributeString(noteNode, "type");
                 LiftMultiText noteText = ReadMultiText(noteNode);
-                _merger.MergeInNote(e, noteType, noteText, node.OuterXml);
+                _merger.MergeInNote(e, noteType, noteText, noteNode.OuterXml);
             }
         }
 
@@ -347,11 +347,11 @@ namespace LiftIO.Parsing
                 {
                     _merger.MergeInExampleForm(example, exampleSentence);
                 }
-                foreach (XmlNode n in node.SelectNodes("translation"))
+                foreach (XmlNode translationNode in node.SelectNodes("translation"))
                 {
-                    LiftMultiText translation = ReadMultiText(n);
-                    string type = Utilities.GetOptionalAttributeString(n, "type");
-                    _merger.MergeInTranslationForm(example, type, translation, node.OuterXml);
+                    LiftMultiText translation = ReadMultiText(translationNode);
+                    string type = Utilities.GetOptionalAttributeString(translationNode, "type");
+                    _merger.MergeInTranslationForm(example, type, translation, translationNode.OuterXml);
                 }
                 string source = Utilities.GetOptionalAttributeString(node, "source");
                 if (source != null)
