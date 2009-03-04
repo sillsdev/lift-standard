@@ -1,0 +1,11 @@
+Content-Type: text/x-zim-wiki
+Wiki-Format: zim 0.26
+Creation-Date: Wed, 04 Mar 2009 15:41:17 +0700
+Modification-Date: Wed, 04 Mar 2009 15:41:46 +0700
+
+====== Classes ======
+Created Wednesday 04 March 2009
+
+<span class="">
+
+We need a way to classify classes. So should add a rangeset of span classes so that people can do that.
