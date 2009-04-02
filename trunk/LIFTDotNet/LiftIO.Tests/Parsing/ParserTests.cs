@@ -1308,16 +1308,16 @@ namespace LiftIO.Tests.Parsing
                           Is.EqualTo(new LiftMultiText("en", "Verb")),
                           Is.EqualTo(new LiftMultiText("en", "v")));
                 Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
-                    .With(Is.EqualTo("cvPattern"),
+                    .With(Is.EqualTo("cv-pattern"),
                           Is.EqualTo(new LiftMultiText("en", "the syllable pattern for a pronunciation")));
                 Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
                     .With(Is.EqualTo("tone"),
                           Is.EqualTo(new LiftMultiText("en", "the tone information for a pronunciation")));
                 Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
-                    .With(Is.EqualTo("ImportResidue"),
+                    .With(Is.EqualTo("import-residue"),
                           Is.EqualTo(new LiftMultiText("en", "residue left over from importing")));
                 Expect.Exactly(1).On(_merger).Method("ProcessFieldDefinition")
-                    .With(Is.EqualTo("literal_meaning"),
+                    .With(Is.EqualTo("literal-meaning"),
                           Is.EqualTo(new LiftMultiText("en", "literal meaning of an entry")));
                 ExpectGetOrMakeEntry(new ExtensibleMatcher("bird_6db30a98-530e-4614-86d4-237f6984db71",
                                                            new Guid("6db30a98-530e-4614-86d4-237f6984db71"), 
@@ -1331,9 +1331,9 @@ namespace LiftIO.Tests.Parsing
                 Expect.Exactly(1).On(_merger).Method("MergeInGloss")
                     .With(Is.Anything, Is.EqualTo(new LiftMultiText("en", "bird")));
                 Expect.Exactly(1).On(_merger).Method("MergeInTrait")
-                    .With(Is.Anything, Is.EqualTo(new Trait("MorphType", "stem")));
+                    .With(Is.Anything, Is.EqualTo(new Trait("morph-type", "stem")));
                 Expect.Exactly(1).On(_merger).Method("MergeInTrait")
-                    .With(Is.Anything, Is.EqualTo(new Trait("EntryType", "Main Entry")));
+                    .With(Is.Anything, Is.EqualTo(new Trait("entry-type", "Main Entry")));
                 ExpectFinishEntry();
             }
             _parser.ReadLiftFile("test20080407.lift");
