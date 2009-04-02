@@ -599,7 +599,7 @@
   <!-- ======================================================== lift-content -->
   <define name="lift-content">
     <attribute name="version">
-      <value>0.12</value>
+      <value>0.13</value>
     </attribute>
     <optional>
       <attribute name="producer"/>
