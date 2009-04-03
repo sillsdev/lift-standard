@@ -102,9 +102,6 @@
 			<xsl:when test=".='SemanticDomainDdp4'">
 				<xsl:attribute name="name">semantic-domain-ddp4</xsl:attribute>
 			</xsl:when>
-			<xsl:when test=".='flag_skip_BaseForm'">
-				<xsl:attribute name="name">flag-skip-BaseForm</xsl:attribute>
-			</xsl:when>
 			<xsl:when test=".='EntryType'">
 				<xsl:attribute name="name">entry-type</xsl:attribute>
 			</xsl:when>
@@ -147,7 +144,10 @@
 			<xsl:when test=".='Type'">
 				<xsl:attribute name="name">type</xsl:attribute>
 			</xsl:when>
-			<xsl:when test="substring(., string-length(.)-5)='-Slots'">
+			      <xsl:when test="substring(., 1, 10)='flag_skip_'">
+			        <xsl:attribute name="name">flag-skip-<xsl:value-of select="substring(., 11,string-length(.))"/></xsl:attribute>
+			      </xsl:when>
+			      <xsl:when test="substring(., string-length(.)-5)='-Slots'">
 				<xsl:attribute name="name"><xsl:value-of select="substring(., 1, string-length(.)-6)"/>-slot</xsl:attribute>
 			</xsl:when>
 			<xsl:when test="substring(., string-length(.)-15)='-InflectionClass'">
@@ -163,9 +163,6 @@
 		<xsl:choose>
 			<xsl:when test=".='SemanticDomainDdp4'">
 				<xsl:attribute name="id">semantic-domain-ddp4</xsl:attribute>
-			</xsl:when>
-			<xsl:when test=".='flag_skip_BaseForm'">
-				<xsl:attribute name="id">flag-skip-BaseForm</xsl:attribute>
 			</xsl:when>
 			<xsl:when test=".='EntryType'">
 				<xsl:attribute name="id">entry-type</xsl:attribute>
@@ -215,7 +212,7 @@
 			<xsl:when test="substring(., string-length(.)-15)='-InflectionClass'">
 				<xsl:attribute name="id"><xsl:value-of select="substring(., 1, string-length(.)-16)"/>-infl-class</xsl:attribute>
 			</xsl:when>
-			<xsl:otherwise>
+      <xsl:otherwise>
 				<xsl:copy/>
 			</xsl:otherwise>
 		</xsl:choose>
