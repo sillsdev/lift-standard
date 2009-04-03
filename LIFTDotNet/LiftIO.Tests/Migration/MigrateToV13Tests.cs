@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using LiftIO.Migration;
-using LiftIO.Tests.Migration;
+﻿using LiftIO.Migration;
 using LiftIO.Validation;
 using NUnit.Framework;
 
@@ -13,7 +8,7 @@ namespace LiftIO.Tests.Migration
 	public class MigrateToV13Tests : MigratorTestBase
 	{
 		[Test]
-		public void CheckLiftAttributes()
+		public void LiftVersion_Was0Point12_IsSetTo0Point13()
 		{
 			using (TempFile f = new TempFile("<lift version='0.12' producer='testing'/>"))
 			{
@@ -24,7 +19,7 @@ namespace LiftIO.Tests.Migration
 		}
 
 		[Test]
-		public void SenseLiteralDefinition_MovedToEntry()
+		public void SenseLiteralDefinition_WasOnSense_MovedToEntry()
 		{
 			using (TempFile f = new TempFile("<lift version='0.12' producer='tester'>" +
 				"<entry>" +
@@ -46,7 +41,7 @@ namespace LiftIO.Tests.Migration
 		}
 
 		[Test]
-		public void CheckMigrationFromV11()
+		public void FileWas0Point11_EtymologyInSense_MovedToEntry()
 		{
 			using (TempFile f = new TempFile("<lift version='0.11' producer='testing'><entry><sense><etymology/></sense></entry></lift>"))
 			{
@@ -59,5 +54,21 @@ namespace LiftIO.Tests.Migration
 				}
 			}
 		}
+
+        [Test]
+        public void TraitHasOldSkipFlag_ChangedToHyphenatedForm()
+        {
+            using (TempFile f = new TempFile(@"
+                <lift version='0.12'>
+                      <entry>
+                        <trait name='flag_skip_FooBar' value='set' />
+                      </entry>
+                </lift>"))
+            {
+                string path = Migrator.MigrateToLatestVersion(f.Path);
+                AssertXPathNotFound("//entry/trait[@name='flag_skip_FooBar']", path);
+                AssertXPathAtLeastOne("//entry/trait[@name='flag-skip-FooBar']", path);
+            }
+        }
 	}
 }
