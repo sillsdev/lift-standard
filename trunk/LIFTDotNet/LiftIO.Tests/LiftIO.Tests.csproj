@@ -80,6 +80,7 @@
     <Compile Include="Merging\LiftChangeReportTests.cs" />
     <Compile Include="Merging\LiftChangeDetectorTests.cs" />
     <Compile Include="Merging\xmldiff\XmlDiffTests.cs" />
+    <Compile Include="Migration\V13ToV12FLexMigratorTests.cs" />
     <Compile Include="Migration\V11To12MigratorTests.cs" />
     <Compile Include="Migration\MigratorTestBase.cs" />
     <Compile Include="Migration\V10To11MigratorTests.cs" />
