@@ -55,6 +55,11 @@ namespace LiftIO.Migration
             xsl.Transform(migrationSourcePath, migrationTargetPath);
         }
 
+        public static void ReverseMigrateFrom13ToFLEx12(string fromPath, string toPath)
+        {
+            DoOneMigrationStep("LiftIO.Migration.ReverseLIFT-0.13-0.12.xsl", fromPath, toPath);
+        }
+
         private static string GetNameOfXsltWhichConvertsFromVersion(string sourceVersion)
         {
             string[] resources = typeof(LiftMultiText).Assembly.GetManifestResourceNames();
