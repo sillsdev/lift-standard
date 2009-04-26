@@ -102,7 +102,10 @@
 			<xsl:when test=".='SemanticDomainDdp4'">
 				<xsl:attribute name="name">semantic-domain-ddp4</xsl:attribute>
 			</xsl:when>
-			<xsl:when test=".='EntryType'">
+      <xsl:when test=".='semantic_domain'">
+        <xsl:attribute name="name">semantic-domain-ddp4</xsl:attribute>
+      </xsl:when>
+      <xsl:when test=".='EntryType'">
 				<xsl:attribute name="name">entry-type</xsl:attribute>
 			</xsl:when>
 			<xsl:when test=".='MorphType'">
@@ -122,9 +125,6 @@
 			</xsl:when>
 			<xsl:when test=".='Environment'">
 				<xsl:attribute name="name">environment</xsl:attribute>
-			</xsl:when>
-			<xsl:when test=".='semantic_domain'">
-				<xsl:attribute name="name">semantic-domain</xsl:attribute>
 			</xsl:when>
 			<xsl:when test=".='DomainType'">
 				<xsl:attribute name="name">domain-type</xsl:attribute>
@@ -161,10 +161,13 @@
 	<!-- fix any header values that match up with traits -->
 	<xsl:template match="range/@id">
 		<xsl:choose>
-			<xsl:when test=".='SemanticDomainDdp4'">
+      <xsl:when test=".='semantic_domain'">
 				<xsl:attribute name="id">semantic-domain-ddp4</xsl:attribute>
 			</xsl:when>
-			<xsl:when test=".='EntryType'">
+      <xsl:when test=".='SemanticDomainDdp4'">
+        <xsl:attribute name="id">semantic-domain-ddp4</xsl:attribute>
+      </xsl:when>
+      <xsl:when test=".='EntryType'">
 				<xsl:attribute name="id">entry-type</xsl:attribute>
 			</xsl:when>
 			<xsl:when test=".='MorphType'">
@@ -184,9 +187,6 @@
 			</xsl:when>
 			<xsl:when test=".='Environment'">
 				<xsl:attribute name="id">environment</xsl:attribute>
-			</xsl:when>
-			<xsl:when test=".='semantic_domain'">
-				<xsl:attribute name="id">semantic-domain</xsl:attribute>
 			</xsl:when>
 			<xsl:when test=".='DomainType'">
 				<xsl:attribute name="id">domain-type</xsl:attribute>

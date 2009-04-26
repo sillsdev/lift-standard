@@ -20,16 +20,21 @@
 			<xsl:when test=".='summary-definition'">
 				<xsl:attribute name="type">summary_definition</xsl:attribute>
 			</xsl:when>
-			<xsl:when test=".='comment'">
+			<!-- actually flex 5.4 used lower case for these
+      <xsl:when test=".='comment'">
 				<xsl:attribute name="type">Comment</xsl:attribute>
 			</xsl:when>
+     
+     --> 
 			<xsl:when test=".='cv-pattern'">
-				<xsl:attribute name="type">CVPattern</xsl:attribute>
+				<xsl:attribute name="type">cvPattern</xsl:attribute>
 			</xsl:when>
+			<!-- actually flex 5.4 used lower case for these
 			<xsl:when test=".='tone'">
 				<xsl:attribute name="type">Tone</xsl:attribute>
 			</xsl:when>
-			<xsl:when test=".='import-residue'">
+		-->
+    <xsl:when test=".='import-residue'">
 				<xsl:attribute name="type">ImportResidue</xsl:attribute>
 			</xsl:when>
 			<xsl:when test=".='scientific-name'">
@@ -43,23 +48,25 @@
 	<!-- fix any header values for fields -->
 	<xsl:template match="field/@tag">
 		<xsl:choose>
-			<xsl:when test=".='literal_meaning'">
-				<xsl:attribute name="tag">literal-meaning</xsl:attribute>
+			<xsl:when test=".='literal-meaning'">
+				<xsl:attribute name="tag">literal_meaning</xsl:attribute>
 			</xsl:when>
-			<xsl:when test=".='summary_definition'">
-				<xsl:attribute name="tag">summary-definition</xsl:attribute>
+			<xsl:when test=".='summary-definition'">
+				<xsl:attribute name="tag">summary_definition</xsl:attribute>
 			</xsl:when>
-			<xsl:when test=".='Comment'">
-				<xsl:attribute name="tag">comment</xsl:attribute>
+      <!-- actually flex 5.4 used lower case
+			<xsl:when test=".='comment'">
+				<xsl:attribute name="tag">Comment</xsl:attribute>
 			</xsl:when>
-			<xsl:when test=".='cv-pattern'">
-				<xsl:attribute name="tag">CVPattern</xsl:attribute>
-			</xsl:when>
-
 			<xsl:when test=".='tone'">
 				<xsl:attribute name="tag">Tone</xsl:attribute>
 			</xsl:when>
-			<xsl:when test=".='import-residue'">
+-->
+      <xsl:when test=".='cv-pattern'">
+        <xsl:attribute name="tag">cvPattern</xsl:attribute>
+      </xsl:when>
+      
+      <xsl:when test=".='import-residue'">
 				<xsl:attribute name="tag">ImportResidue</xsl:attribute>
 			</xsl:when>
 			<xsl:when test=".='scientific-name'">
@@ -79,7 +86,10 @@
       <xsl:when test=".='semantic-domain-ddp4'">
         <xsl:attribute name="name">semantic_domain</xsl:attribute>
       </xsl:when>
-      
+      <xsl:when test=".='semantic-domain'">
+        <xsl:attribute name="name">semantic_domain</xsl:attribute>
+      </xsl:when>
+     
       <xsl:when test=".='entry-type'">
 				<xsl:attribute name="name">EntryType</xsl:attribute>
 			</xsl:when>
@@ -114,7 +124,8 @@
 			<xsl:when test=".='status'">
 				<xsl:attribute name="name">Status</xsl:attribute>
 			</xsl:when>
-			<xsl:when test=".='from-part-of-speech'">
+
+      <xsl:when test=".='from-part-of-speech'">
 				<xsl:attribute name="name">FromPartOfSpeech</xsl:attribute>
 			</xsl:when>
 			<xsl:when test=".='type'">
@@ -142,7 +153,12 @@
       <xsl:when test=".='semantic-domain-ddp4'">
         <xsl:attribute name="id">semantic_domain</xsl:attribute>
       </xsl:when>
-
+      
+      <!-- wasn't fixed in an earlier version of the 0.12 to 0.13 conveter -->
+      <xsl:when test=".='semantic-domain'">
+        <xsl:attribute name="id">semantic_domain</xsl:attribute>
+      </xsl:when>
+      
       <xsl:when test=".='entry-type'">
         <xsl:attribute name="id">EntryType</xsl:attribute>
       </xsl:when>
@@ -174,9 +190,11 @@
       <xsl:when test=".='usage-type'">
         <xsl:attribute name="id">UsageType</xsl:attribute>
       </xsl:when>
-      <xsl:when test=".='status'">
-        <xsl:attribute name="id">Status</xsl:attribute>
+    <!-- in the range, it was lower case
+    <xsl:when test=".='status'">
+        <xsl:attribute name="id">status</xsl:attribute>
       </xsl:when>
+-->
       <xsl:when test=".='from-part-of-speech'">
         <xsl:attribute name="id">FromPartOfSpeech</xsl:attribute>
       </xsl:when>
