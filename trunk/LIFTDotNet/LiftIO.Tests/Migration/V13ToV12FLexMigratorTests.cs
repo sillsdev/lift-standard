@@ -16,7 +16,7 @@ namespace LiftIO.Tests.Migration
             {
                 using (TempFolder x = new TempFolder("13-12LiftMigrator"))
                 {
-                    var toFile = x.GetPathForNewTempFile(false);
+                    TempFile toFile = x.GetPathForNewTempFile(false);
 
                     Migrator.ReverseMigrateFrom13ToFLEx12(f.Path, toFile.Path);
                     Assert.AreEqual("0.12", Validator.GetLiftVersion(toFile.Path));
@@ -40,7 +40,7 @@ namespace LiftIO.Tests.Migration
             {
                 using (TempFolder x = new TempFolder("13-12LiftMigrator"))
                 {
-                    var toFile = x.GetPathForNewTempFile(false);
+                    TempFile toFile = x.GetPathForNewTempFile(false);
 
                     Migrator.ReverseMigrateFrom13ToFLEx12(fromFile.Path, toFile.Path);
 
