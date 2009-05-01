@@ -1,5 +1,5 @@
 <?xml version = '1.0' encoding = 'UTF-8' ?>
-<XMI xmi.version = '1.2' xmlns:UML = 'org.omg.xmi.namespace.UML' timestamp = 'Thu Apr 30 17:07:44 CDT 2009'>
+<XMI xmi.version = '1.2' xmlns:UML = 'org.omg.xmi.namespace.UML' timestamp = 'Fri May 01 08:17:50 CDT 2009'>
   <XMI.header>    <XMI.documentation>
       <XMI.exporter>ArgoUML (using Netbeans XMI Writer version 1.0)</XMI.exporter>
       <XMI.exporterVersion>0.28(6) revised on $Date: 2007-05-12 08:08:08 +0200 (Sat, 12 May 2007) $ </XMI.exporterVersion>
@@ -588,40 +588,6 @@
                     <UML:DataType xmi.idref = '13452'/>
                   </UML:StructuralFeature.type>
                 </UML:Attribute>
-                <UML:Attribute xmi.id = '28320' name = 'dateModified' visibility = 'public'
-                  isSpecification = 'false'>
-                  <UML:StructuralFeature.multiplicity>
-                    <UML:Multiplicity xmi.id = '127-0-1-1-37babf93:120d86e44ef:-8000:000000000000119A'>
-                      <UML:Multiplicity.range>
-                        <UML:MultiplicityRange xmi.id = '127-0-1-1-37babf93:120d86e44ef:-8000:0000000000001199'
-                          lower = '0' upper = '1'/>
-                      </UML:Multiplicity.range>
-                    </UML:Multiplicity>
-                  </UML:StructuralFeature.multiplicity>
-                  <UML:ModelElement.stereotype>
-                    <UML:Stereotype xmi.idref = '127-0-1-1--1dcea883:120d3d7a11f:-8000:00000000000010BF'/>
-                  </UML:ModelElement.stereotype>
-                  <UML:StructuralFeature.type>
-                    <UML:DataType xmi.idref = '18256'/>
-                  </UML:StructuralFeature.type>
-                </UML:Attribute>
-                <UML:Attribute xmi.id = '31302' name = 'dateCreated' visibility = 'public'
-                  isSpecification = 'false'>
-                  <UML:StructuralFeature.multiplicity>
-                    <UML:Multiplicity xmi.id = '127-0-1-1-37babf93:120d86e44ef:-8000:0000000000001196'>
-                      <UML:Multiplicity.range>
-                        <UML:MultiplicityRange xmi.id = '127-0-1-1-37babf93:120d86e44ef:-8000:0000000000001195'
-                          lower = '0' upper = '1'/>
-                      </UML:Multiplicity.range>
-                    </UML:Multiplicity>
-                  </UML:StructuralFeature.multiplicity>
-                  <UML:ModelElement.stereotype>
-                    <UML:Stereotype xmi.idref = '127-0-1-1--1dcea883:120d3d7a11f:-8000:00000000000010BF'/>
-                  </UML:ModelElement.stereotype>
-                  <UML:StructuralFeature.type>
-                    <UML:DataType xmi.idref = '18256'/>
-                  </UML:StructuralFeature.type>
-                </UML:Attribute>
               </UML:Classifier.feature>
             </UML:Class>
             <UML:Class xmi.id = '10324' name = 'grammatical-info' visibility = 'public'
@@ -658,8 +624,7 @@
               isRoot = 'false' isLeaf = 'false' isAbstract = 'false' isActive = 'false'>
               <UML:GeneralizableElement.generalization>
                 <UML:Generalization xmi.idref = '29445'/>
-                <UML:Generalization xmi.idref = '127-0-1-1-2220d775:120f9019548:-8000:00000000000010C0'/>
-                <UML:Generalization xmi.idref = '127-0-1-1-2220d775:120f9019548:-8000:00000000000010C1'/>
+                <UML:Generalization xmi.idref = '127-0-1-1-2220d775:120f9019548:-8000:00000000000010C2'/>
               </UML:GeneralizableElement.generalization>
               <UML:Classifier.feature>
                 <UML:Attribute xmi.id = '10520' name = 'source' visibility = 'public' isSpecification = 'false'>
@@ -814,8 +779,6 @@
             <UML:Class xmi.id = '18118' name = 'etymology' visibility = 'public' isSpecification = 'false'
               isRoot = 'false' isLeaf = 'false' isAbstract = 'false' isActive = 'false'>
               <UML:GeneralizableElement.generalization>
-                <UML:Generalization xmi.idref = '18247'/>
-                <UML:Generalization xmi.idref = '27308'/>
                 <UML:Generalization xmi.idref = 'og95svG6bUI4'/>
               </UML:GeneralizableElement.generalization>
               <UML:Classifier.feature>
@@ -933,22 +896,6 @@
                 <UML:Generalization xmi.idref = '31470'/>
               </UML:GeneralizableElement.generalization>
               <UML:Classifier.feature>
-                <UML:Attribute xmi.id = '32358' name = 'name' visibility = 'public' isSpecification = 'false'>
-                  <UML:ModelElement.stereotype>
-                    <UML:Stereotype xmi.idref = '127-0-1-1--1dcea883:120d3d7a11f:-8000:00000000000010BF'/>
-                  </UML:ModelElement.stereotype>
-                  <UML:StructuralFeature.type>
-                    <UML:DataType xmi.idref = '13452'/>
-                  </UML:StructuralFeature.type>
-                </UML:Attribute>
-                <UML:Attribute xmi.id = '31398' name = 'value' visibility = 'public' isSpecification = 'false'>
-                  <UML:ModelElement.stereotype>
-                    <UML:Stereotype xmi.idref = '127-0-1-1--1dcea883:120d3d7a11f:-8000:00000000000010BF'/>
-                  </UML:ModelElement.stereotype>
-                  <UML:StructuralFeature.type>
-                    <UML:DataType xmi.idref = '13452'/>
-                  </UML:StructuralFeature.type>
-                </UML:Attribute>
                 <UML:Attribute xmi.id = '29686' name = 'who' visibility = 'public' isSpecification = 'false'>
                   <UML:StructuralFeature.multiplicity>
                     <UML:Multiplicity xmi.id = '127-0-1-1-37babf93:120d86e44ef:-8000:000000000000118E'>
@@ -979,16 +926,6 @@
                   </UML:ModelElement.stereotype>
                   <UML:StructuralFeature.type>
                     <UML:DataType xmi.idref = '18256'/>
-                  </UML:StructuralFeature.type>
-                </UML:Attribute>
-              </UML:Classifier.feature>
-            </UML:Class>
-            <UML:Class xmi.id = '29742' name = 'lift-ranges' visibility = 'public' isSpecification = 'false'
-              isRoot = 'false' isLeaf = 'false' isAbstract = 'false' isActive = 'false'>
-              <UML:Classifier.feature>
-                <UML:Attribute xmi.id = '29743' name = 'range*' visibility = 'public' isSpecification = 'false'>
-                  <UML:StructuralFeature.type>
-                    <UML:Class xmi.idref = '4865'/>
                   </UML:StructuralFeature.type>
                 </UML:Attribute>
               </UML:Classifier.feature>
@@ -1057,15 +994,6 @@
                 <UML:Class xmi.idref = '4493'/>
               </UML:Generalization.parent>
             </UML:Generalization>
-            <UML:Generalization xmi.id = '18247' name = '' visibility = 'public' isSpecification = 'false'
-              discriminator = ''>
-              <UML:Generalization.child>
-                <UML:Class xmi.idref = '18118'/>
-              </UML:Generalization.child>
-              <UML:Generalization.parent>
-                <UML:Class xmi.idref = '4493'/>
-              </UML:Generalization.parent>
-            </UML:Generalization>
             <UML:Generalization xmi.id = '18391' name = '' visibility = 'public' isSpecification = 'false'
               discriminator = ''>
               <UML:Generalization.child>
@@ -1079,15 +1007,6 @@
               discriminator = ''>
               <UML:Generalization.child>
                 <UML:Class xmi.idref = '9068'/>
-              </UML:Generalization.child>
-              <UML:Generalization.parent>
-                <UML:Class xmi.idref = '27271'/>
-              </UML:Generalization.parent>
-            </UML:Generalization>
-            <UML:Generalization xmi.id = '27308' name = '' visibility = 'public' isSpecification = 'false'
-              discriminator = ''>
-              <UML:Generalization.child>
-                <UML:Class xmi.idref = '18118'/>
               </UML:Generalization.child>
               <UML:Generalization.parent>
                 <UML:Class xmi.idref = '27271'/>
@@ -2565,16 +2484,7 @@
                 </UML:AssociationEnd>
               </UML:Association.connection>
             </UML:Association>
-            <UML:Generalization xmi.id = '127-0-1-1-2220d775:120f9019548:-8000:00000000000010C0'
-              isSpecification = 'false'>
-              <UML:Generalization.child>
-                <UML:Class xmi.idref = '10499'/>
-              </UML:Generalization.child>
-              <UML:Generalization.parent>
-                <UML:Class xmi.idref = '27271'/>
-              </UML:Generalization.parent>
-            </UML:Generalization>
-            <UML:Generalization xmi.id = '127-0-1-1-2220d775:120f9019548:-8000:00000000000010C1'
+            <UML:Generalization xmi.id = '127-0-1-1-2220d775:120f9019548:-8000:00000000000010C2'
               isSpecification = 'false'>
               <UML:Generalization.child>
                 <UML:Class xmi.idref = '10499'/>
