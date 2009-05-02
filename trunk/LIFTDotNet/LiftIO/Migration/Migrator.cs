@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Xsl;
 using LiftIO.Parsing;
@@ -58,7 +59,54 @@ namespace LiftIO.Migration
         public static void ReverseMigrateFrom13ToFLEx12(string fromPath, string toPath)
         {
             DoOneMigrationStep("LiftIO.Migration.ReverseLIFT-0.13-0.12.xsl", fromPath, toPath);
+
+            //now strip the actual text off our our semantic domains
+//            string pattern = @"(semantic_domain'\s*value\s*=\s*'(\d\.)*\d)(\w|\s|,)*(')";
+            string pattern = @"(semantic_domain'\s*value\s*=\s*'(\d\.)*\d)[change]*(')";
+            char qt = '"';
+            pattern = pattern.Replace("'", "[" + qt + ",']");
+            pattern = pattern.Replace("change", "^'\"");
+            GrepFile(toPath, pattern, "$1$3");
+
         }
+
+        private static void GrepFile(string inputPath, string pattern, string replaceWith)
+        {
+            Regex regex = new Regex(pattern, RegexOptions.Compiled);
+//            
+//                        var m = regex.Match(" <trait name='semantic_domain' value='2.5 something or other'/>");
+//                        char qt = '"';
+//                        string pattern2 = @"(semantic_domain'\s*value\s*=\s*'(\d\.)*\d)(\w|\s)*(')";
+//                        pattern2 = pattern2.Replace("'", "[" + qt + ",']");
+//                        Regex regex2 = new Regex(pattern2, RegexOptions.Multiline);
+//
+//                        var input = @" <trait name='semantic_domain' value='2.5 something'/> <trait name='semantic_domain' value='3.3 other'/>";
+//                        input = input.Replace('\'', '"');
+//                        var m2 = regex2.Match(input);
+//                        var z = regex2.Replace(input, "$1$4");
+//            
+            string tempPath = inputPath + ".tmp";
+
+            using (StreamReader reader = File.OpenText(inputPath))
+            {
+                using (StreamWriter writer = new StreamWriter(tempPath))
+                {
+                    while (!reader.EndOfStream)
+                    {
+                        writer.WriteLine(regex.Replace(reader.ReadLine(), replaceWith));
+                    }
+                    writer.Close();
+                }
+                reader.Close();
+            }
+            //string backupPath = GetUniqueFileName(inputPath);
+            string backupPath = inputPath + ".bak";
+
+            File.Replace(tempPath, inputPath, backupPath);
+
+        }
+
+
 
         private static string GetNameOfXsltWhichConvertsFromVersion(string sourceVersion)
         {
