@@ -10,6 +10,11 @@ namespace LiftIO
         {
         }
 
+        public LiftFormatException(string message, Exception innerException)
+            : base(message, innerException)
+        {
+        }
+
         public string FilePath
         {
             get { return _filePath; }
