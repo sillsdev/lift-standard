@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 
 namespace LiftIO.Parsing
 {
@@ -41,12 +42,32 @@ namespace LiftIO.Parsing
         }
         public static DateTime ParseDateTimeCorrectly(string time)
         {
-            DateTime result = DateTime.ParseExact(time,
-                                                  new string[] { LiftTimeFormatNoTimeZone, LiftTimeFormatWithTimeZone, LiftDateOnlyFormat },
-                                                  new DateTimeFormatInfo(),
-                                                  DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
-            Debug.Assert(result.Kind == DateTimeKind.Utc);
-            return result;
+            var formats = new string[]
+                                  {
+                                      LiftTimeFormatNoTimeZone, LiftTimeFormatWithTimeZone,
+                                      LiftDateOnlyFormat
+                                  };
+            try
+            {
+                DateTime result = DateTime.ParseExact(time,
+                                                      formats,
+                                                      new DateTimeFormatInfo(),
+                                                      DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal);
+                Debug.Assert(result.Kind == DateTimeKind.Utc);
+                return result;
+            }
+            catch (FormatException e)
+            {
+                var builder = new StringBuilder();
+                builder.AppendFormat("One of the date fields contained a date/time format which could not be parsed ({0})." + Environment.NewLine, time);
+                builder.Append("This program can parse the following formats: ");
+                foreach (var format in formats)
+                {
+                    builder.Append(format + Environment.NewLine);
+                }
+                builder.Append("See: http://en.wikipedia.org/wiki/ISO_8601 for an explanation of these symbols.");
+                throw new LiftFormatException(builder.ToString(), e);
+            }
         }
 
         public DateTime ModificationTime

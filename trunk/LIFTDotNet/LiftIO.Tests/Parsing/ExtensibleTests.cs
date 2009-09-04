@@ -74,7 +74,7 @@ namespace LiftIO.Tests.Parsing
         }
 
         [Test]
-        [ExpectedException(typeof(FormatException))]
+        [ExpectedException(typeof(LiftFormatException))]
         public void ParseDate_Bad_Throws()
         {
             Extensible.ParseDateTimeCorrectly("2007-02-03T03:01:39");

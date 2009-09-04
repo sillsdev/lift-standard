@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Xml;
 using LiftIO.Merging;
 using LiftIO.Validation;
@@ -377,7 +378,7 @@ namespace LiftIO.Parsing
             XmlNodeList nodelist = node.SelectNodes("main");
             if (nodelist.Count > 1)
             {
-                NotifyError(new LiftFormatException(String.Format("Only one <main> element is allowed inside a <reversal> element:\r\n{0}", node.OuterXml)));
+                NotifyFormatError(new LiftFormatException(String.Format("Only one <main> element is allowed inside a <reversal> element:\r\n{0}", node.OuterXml)));
             }
             TBase parent = null;
             if (nodelist.Count == 1)
@@ -393,7 +394,7 @@ namespace LiftIO.Parsing
             XmlNodeList nodelist = node.SelectNodes("main");
             if (nodelist.Count > 1)
             {
-                NotifyError(new LiftFormatException(String.Format("Only one <main> element is allowed inside a <main> element:\r\n{0}", node.OuterXml)));
+                NotifyFormatError(new LiftFormatException(String.Format("Only one <main> element is allowed inside a <main> element:\r\n{0}", node.OuterXml)));
             }
             TBase parent = null;
             if (nodelist.Count == 1)
@@ -429,7 +430,7 @@ namespace LiftIO.Parsing
                     }
                     catch (Exception)
                     {
-                        NotifyError(new LiftFormatException(String.Format("{0} is not a valid GUID", guidString)));
+                        NotifyFormatError(new LiftFormatException(String.Format("{0} is not a valid GUID", guidString)));
                     }
                 }
             }
@@ -497,9 +498,9 @@ namespace LiftIO.Parsing
             {
                 return Extensible.ParseDateTimeCorrectly(attr.Value);
             }
-            catch (FormatException e)
+            catch (Exception e)
             {
-                NotifyError(e); // not a fatal error
+                NotifyFormatError(e); // not a fatal error
                 return defaultDateTime;
             }
         }
@@ -590,7 +591,7 @@ namespace LiftIO.Parsing
                 catch (Exception e)
                 {
                     // not a fatal error
-                    NotifyError(e);
+                    NotifyFormatError(e);
                 }
             }
         }
@@ -988,10 +989,21 @@ namespace LiftIO.Parsing
             set { _changeReport = value; }
         }
 
-        private void NotifyError(Exception error)
+        /// <summary>
+        /// NB: this will always conver the exception to a LiftFormatException, if it isn't already
+        /// </summary>
+        /// <param name="error"></param>
+        private void NotifyFormatError(Exception error)
         {
             if (ParsingWarning != null)
             {
+
+                //it's important to pass this on as a format error, which the client should be expecting
+                //to report without crashing.
+                if (!(error is LiftFormatException))
+                {
+                    error = new LiftFormatException(error.Message, error);
+                }
                 ErrorArgs e = new ErrorArgs();
                 e.Exception = error;
                 ParsingWarning.Invoke(this, e);
