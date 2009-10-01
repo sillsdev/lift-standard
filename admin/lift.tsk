@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<?taskcoach release="0.74.1" tskversion="25"?>
+<tasks>
+<task expandedContexts="('taskviewer',)" id="62876304:1254387543.93" startdate="2009-10-01" status="1" subject="Develop 0.15">
+<task id="68577104:1254387557.6" startdate="2009-10-01" status="1" subject="Deprecate GUIDS">
+<description>
+Make IDs required and immutable
+</description>
+</task>
+<task id="62897296:1254387581.42" startdate="2009-10-01" status="1" subject="Add directory structure">
+<description>
+Add a recommended section to describe a recommended directory structure
+</description>
+</task>
+<task id="68642512:1254387611.91" startdate="2009-10-01" status="1" subject="Update ontologies">
+<description>
+Update the listed ontologies to account for updates in flex
+</description>
+</task>
+<task id="62973264:1254387637.45" startdate="2009-10-01" status="1" subject="Convert .zargo to rng">
+<description>
+Get XSL conversion code from Gary Simons
+</description>
+</task>
+</task>
+<syncmlconfig>
+<TaskCoach-000001240f52a81f53390e0e007f000000010001>
+<spds>
+<sources>
+<TaskCoach-000001240f52a81f53390e0e007f000000010001.Tasks/>
+<TaskCoach-000001240f52a81f53390e0e007f000000010001.Notes/>
+</sources>
+<syncml>
+<Auth/>
+<Conn/>
+</syncml>
+</spds>
+</TaskCoach-000001240f52a81f53390e0e007f000000010001>
+</syncmlconfig>
+<guid>
+000001240f52a81f53390e0e007f000000010001
+</guid>
+</tasks>
