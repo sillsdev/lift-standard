@@ -30,6 +30,35 @@ namespace LiftIO.Tests.Validation
         }
 
         [Test]
+        public void Validate_FileHasEscapedDangerousUnicodeCharsInText_Validates()
+        {
+            string contents = string.Format(@"
+            <lift version='{0}'>
+                 <entry id='one'>
+                    <lexical-unit>
+                          <form lang='bth'>
+                            <text>&#x1F;</text>
+                         </form>
+                    </lexical-unit>
+                </entry>
+                </lift>", Validator.LiftVersion);
+            Validate(contents, true);
+        }
+
+
+        [Test]
+        public void Validate_FileHasEscapedDangerousUnicodeCharsInId_Validates()
+        {
+            string contents = string.Format(@"
+            <lift version='{0}'>
+                 <entry id='one&#x1F;'>
+                </entry>
+                </lift>", Validator.LiftVersion);
+            Validate(contents, true);
+        }
+
+
+        [Test]
         public void Validate_BadLift_DoesNotValidate()
         {
             string contents = "<lift version='0.10'><header></header><header></header></lift>";

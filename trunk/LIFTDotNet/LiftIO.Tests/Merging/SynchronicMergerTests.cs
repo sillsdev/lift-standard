@@ -84,8 +84,18 @@ namespace LiftIO.Tests.Merging
             WriteFile(GetNextUpdateFileName(), "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hello'></entry>", _directory);
             XmlDocument doc = MergeAndGetResult(true, _directory);
             Assert.AreEqual(2, doc.SelectNodes("//entry").Count);
-            Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one']").Count);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one' and @greeting='hello']").Count);
+        }
+
+        [Test]
+        public void EdittedEntry_BothOldAndNewHaveEscapedIllegalCharacter_Updated()
+        {
+            WriteFile(_baseLiftFileName, "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1'>&#x1F;Foo</entry>", _directory);
+            WriteFile(GetNextUpdateFileName(), "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1'>&#x1F;Bar</entry>", _directory);
+            XmlDocument doc = MergeAndGetResult(true, _directory);
+            Assert.AreEqual(1, doc.SelectNodes("//entry").Count);
+            var entry= doc.SelectSingleNode("//entry[@id='one']");
+            Assert.AreEqual("&#x1F;Bar", entry.InnerXml);
         }
 
         [Test]
@@ -295,18 +305,43 @@ namespace LiftIO.Tests.Merging
         [Test]
         public void AddingToEmptyLift() 
         {
-            using (StreamWriter writer = File.CreateText(Path.Combine(_directory, _baseLiftFileName)))
-            {
-                string content = "<?xml version=\"1.0\" encoding=\"utf-8\"?><lift preserveMe='foo'/>";
-                writer.Write(content);
-                writer.Close();
-            }
+            WriteEmptyLift();
             WriteFile(GetNextUpdateFileName(), "<entry id='one' greeting='hello'></entry>", _directory);
             XmlDocument doc = MergeAndGetResult(true, _directory);
             Assert.AreEqual(1, doc.SelectNodes("//lift[@preserveMe='foo']").Count);
             Assert.AreEqual(1, doc.SelectNodes("//entry").Count);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one']").Count);
             Assert.AreEqual(1, doc.SelectNodes("//entry[@id='one' and @greeting='hello']").Count);
+        }
+
+        private void WriteEmptyLift()
+        {
+            using (StreamWriter writer = File.CreateText(Path.Combine(_directory, _baseLiftFileName)))
+            {
+                string content = "<?xml version=\"1.0\" encoding=\"utf-8\"?><lift preserveMe='foo'/>";
+                writer.Write(content);
+                writer.Close();
+            }
+        }
+
+        [Test]
+        public void AddingToEmptyLift_HasIllegalUnicode_DoesNotCrash()
+        {
+            using (StreamWriter writer = File.CreateText(Path.Combine(_directory, _baseLiftFileName)))
+            {
+                string content = "<?xml version=\"1.0\" encoding=\"utf-8\"?><lift/>";
+                writer.Write(content);
+                writer.Close();
+            }
+            WriteFile(GetNextUpdateFileName(), @"
+                <entry id='one'>
+                    <lexical-unit>
+                          <form lang='bth'>
+                            <text>&#x1F;</text>
+                         </form>
+                    </lexical-unit>
+                </entry>", _directory);
+            XmlDocument doc = MergeAndGetResult(true, _directory);
         }
 
         [Test]
