@@ -78,6 +78,107 @@ namespace LiftIO.Tests.Merging
         }
 
         [Test]
+        public void NewEntries_SingleLineXml_FormattedCorrectly()
+        {
+            WriteLongSingleLineBaseFile();
+            WriteLongSingleLineFragment();
+            Merge(_directory);
+            Assert.AreEqual(FormattedXml2entries, ReadFileContentIntoString(Path.Combine(_directory, _baseLiftFileName)));
+        }
+
+        private void WriteLongSingleLineBaseFile()
+        {
+            WriteFile(_baseLiftFileName, @"<entry id=""03d4b59a-9673-4f16-964e-4ea9f0636ef7"" dateCreated=""2009-10-07T04:07:54Z"" dateModified=""2009-10-07T04:10:34Z"" guid=""03d4b59a-9673-4f16-964e-4ea9f0636ef7""><lexical-unit><form lang=""nan""><text>test</text></form></lexical-unit><sense id=""e6f93a8d-7883-4c1c-877e-e34db9f06cdc""><definition><form lang=""en""><text>difficult; slow</text></form></definition></sense></entry>", _directory);
+        }
+
+        private void WriteLongSingleLineFragment()
+        {
+            WriteFile(GetNextUpdateFileName(), @"<entry id=""Xtest3_92f0c58a-9ad6-4715-ad9b-d56597217ac3"" dateCreated=""2010-02-04T03:58:33Z"" dateModified=""2010-02-04T03:58:40Z"" guid=""92f0c58a-9ad6-4715-ad9b-d56597217ac3""><lexical-unit><form lang=""v""><text>Xtest3</text></form></lexical-unit><sense id=""4bc90f1e-1d4a-418f-a6e0-a4191b3e04f3""><definition><form lang=""en""><text>test3</text></form></definition></sense></entry>", _directory);
+        }
+
+        private string ReadFileContentIntoString(string FileName)
+        {
+            StreamReader sr = null;
+            string FileContents = null;
+
+            try
+            {
+                FileStream fs = new FileStream(FileName, FileMode.Open,
+                                               FileAccess.Read);
+                sr = new StreamReader(fs);
+                FileContents = sr.ReadToEnd();
+            }
+            finally
+            {
+                if (sr != null)
+                    sr.Close();
+            }
+
+            return FileContents;
+        }
+
+        private string FormattedXml3entries
+        {
+            get
+            {
+                return
+                    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<lift\r\n\tversion=\"0.13\"\r\n\tproducer=\"WeSay.1Pt0Alpha\" xmlns:flex=\"http://fieldworks.sil.org\">\r\n\t<entry\r\n\t\tid=\"03d4b59a-9673-4f16-964e-4ea9f0636ef7\"\r\n\t\tdateCreated=\"2009-10-07T04:07:54Z\"\r\n\t\tdateModified=\"2009-10-07T04:10:34Z\"\r\n\t\tguid=\"03d4b59a-9673-4f16-964e-4ea9f0636ef7\">\r\n\t\t<lexical-unit>\r\n\t\t\t<form\r\n\t\t\t\tlang=\"nan\">\r\n\t\t\t\t<text>test</text>\r\n\t\t\t</form>\r\n\t\t</lexical-unit>\r\n\t\t<sense\r\n\t\t\tid=\"e6f93a8d-7883-4c1c-877e-e34db9f06cdc\">\r\n\t\t\t<definition>\r\n\t\t\t\t<form\r\n\t\t\t\t\tlang=\"en\">\r\n\t\t\t\t\t<text>difficult; slow</text>\r\n\t\t\t\t</form>\r\n\t\t\t</definition>\r\n\t\t</sense>\r\n\t</entry>\r\n\t<entry\r\n\t\tid=\"03d4b59a-9673-4f16-964e-4ea9f0636ef8\"\r\n\t\tdateCreated=\"2009-10-07T04:07:54Z\"\r\n\t\tdateModified=\"2009-10-07T04:10:34Z\"\r\n\t\tguid=\"03d4b59a-9673-4f16-964e-4ea9f0636ef8\">\r\n\t\t<lexical-unit>\r\n\t\t\t<form\r\n\t\t\t\tlang=\"nan\">\r\n\t\t\t\t<text>test</text>\r\n\t\t\t</form>\r\n\t\t</lexical-unit>\r\n\t\t<sense\r\n\t\t\tid=\"e6f93a8d-7883-4c1c-877e-e34db9f06cdd\">\r\n\t\t\t<definition>\r\n\t\t\t\t<form\r\n\t\t\t\t\tlang=\"en\">\r\n\t\t\t\t\t<text>difficult; slow</text>\r\n\t\t\t\t</form>\r\n\t\t\t</definition>\r\n\t\t</sense>\r\n\t</entry>\r\n\t<entry\r\n\t\tid=\"Xtest3_92f0c58a-9ad6-4715-ad9b-d56597217ac3\"\r\n\t\tdateCreated=\"2010-02-04T03:58:33Z\"\r\n\t\tdateModified=\"2010-02-04T03:58:40Z\"\r\n\t\tguid=\"92f0c58a-9ad6-4715-ad9b-d56597217ac3\">\r\n\t\t<lexical-unit>\r\n\t\t\t<form\r\n\t\t\t\tlang=\"v\">\r\n\t\t\t\t<text>Xtest3</text>\r\n\t\t\t</form>\r\n\t\t</lexical-unit>\r\n\t\t<sense\r\n\t\t\tid=\"4bc90f1e-1d4a-418f-a6e0-a4191b3e04f3\">\r\n\t\t\t<definition>\r\n\t\t\t\t<form\r\n\t\t\t\t\tlang=\"en\">\r\n\t\t\t\t\t<text>test3</text>\r\n\t\t\t\t</form>\r\n\t\t\t</definition>\r\n\t\t</sense>\r\n\t</entry>\r\n</lift>";
+            }
+        }
+
+        private string FormattedXml2entries
+        {
+            get
+            {
+                return
+                    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<lift\r\n\tversion=\"0.13\"\r\n\tproducer=\"WeSay.1Pt0Alpha\" xmlns:flex=\"http://fieldworks.sil.org\">\r\n\t<entry\r\n\t\tid=\"03d4b59a-9673-4f16-964e-4ea9f0636ef7\"\r\n\t\tdateCreated=\"2009-10-07T04:07:54Z\"\r\n\t\tdateModified=\"2009-10-07T04:10:34Z\"\r\n\t\tguid=\"03d4b59a-9673-4f16-964e-4ea9f0636ef7\">\r\n\t\t<lexical-unit>\r\n\t\t\t<form\r\n\t\t\t\tlang=\"nan\">\r\n\t\t\t\t<text>test</text>\r\n\t\t\t</form>\r\n\t\t</lexical-unit>\r\n\t\t<sense\r\n\t\t\tid=\"e6f93a8d-7883-4c1c-877e-e34db9f06cdc\">\r\n\t\t\t<definition>\r\n\t\t\t\t<form\r\n\t\t\t\t\tlang=\"en\">\r\n\t\t\t\t\t<text>difficult; slow</text>\r\n\t\t\t\t</form>\r\n\t\t\t</definition>\r\n\t\t</sense>\r\n\t</entry>\r\n\t<entry\r\n\t\tid=\"Xtest3_92f0c58a-9ad6-4715-ad9b-d56597217ac3\"\r\n\t\tdateCreated=\"2010-02-04T03:58:33Z\"\r\n\t\tdateModified=\"2010-02-04T03:58:40Z\"\r\n\t\tguid=\"92f0c58a-9ad6-4715-ad9b-d56597217ac3\">\r\n\t\t<lexical-unit>\r\n\t\t\t<form\r\n\t\t\t\tlang=\"v\">\r\n\t\t\t\t<text>Xtest3</text>\r\n\t\t\t</form>\r\n\t\t</lexical-unit>\r\n\t\t<sense\r\n\t\t\tid=\"4bc90f1e-1d4a-418f-a6e0-a4191b3e04f3\">\r\n\t\t\t<definition>\r\n\t\t\t\t<form\r\n\t\t\t\t\tlang=\"en\">\r\n\t\t\t\t\t<text>test3</text>\r\n\t\t\t\t</form>\r\n\t\t\t</definition>\r\n\t\t</sense>\r\n\t</entry>\r\n</lift>";
+            }
+        }
+        
+        private string FormattedXml2EntriesWithHeader
+        {
+            get
+            {
+                return
+                    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<lift\r\n\tversion=\"0.13\"\r\n\tproducer=\"WeSay.1Pt0Alpha\" xmlns:flex=\"http://fieldworks.sil.org\">\r\n\t<header>\r\n\t\t<description>\r\n\t\t\t<form\r\n\t\t\t\tlang=\"Nan\">\r\n\t\t\t\t<text>This Text Might Wreck Formatting</text>\r\n\t\t\t</form>\r\n\t\t</description>\r\n\t</header>\r\n\t<entry\r\n\t\tid=\"03d4b59a-9673-4f16-964e-4ea9f0636ef7\"\r\n\t\tdateCreated=\"2009-10-07T04:07:54Z\"\r\n\t\tdateModified=\"2009-10-07T04:10:34Z\"\r\n\t\tguid=\"03d4b59a-9673-4f16-964e-4ea9f0636ef7\">\r\n\t\t<lexical-unit>\r\n\t\t\t<form\r\n\t\t\t\tlang=\"nan\">\r\n\t\t\t\t<text>test</text>\r\n\t\t\t</form>\r\n\t\t</lexical-unit>\r\n\t\t<sense\r\n\t\t\tid=\"e6f93a8d-7883-4c1c-877e-e34db9f06cdc\">\r\n\t\t\t<definition>\r\n\t\t\t\t<form\r\n\t\t\t\t\tlang=\"en\">\r\n\t\t\t\t\t<text>difficult; slow</text>\r\n\t\t\t\t</form>\r\n\t\t\t</definition>\r\n\t\t</sense>\r\n\t</entry>\r\n\t<entry\r\n\t\tid=\"Xtest3_92f0c58a-9ad6-4715-ad9b-d56597217ac3\"\r\n\t\tdateCreated=\"2010-02-04T03:58:33Z\"\r\n\t\tdateModified=\"2010-02-04T03:58:40Z\"\r\n\t\tguid=\"92f0c58a-9ad6-4715-ad9b-d56597217ac3\">\r\n\t\t<lexical-unit>\r\n\t\t\t<form\r\n\t\t\t\tlang=\"v\">\r\n\t\t\t\t<text>Xtest3</text>\r\n\t\t\t</form>\r\n\t\t</lexical-unit>\r\n\t\t<sense\r\n\t\t\tid=\"4bc90f1e-1d4a-418f-a6e0-a4191b3e04f3\">\r\n\t\t\t<definition>\r\n\t\t\t\t<form\r\n\t\t\t\t\tlang=\"en\">\r\n\t\t\t\t\t<text>test3</text>\r\n\t\t\t\t</form>\r\n\t\t\t</definition>\r\n\t\t</sense>\r\n\t</entry>\r\n</lift>";
+            }
+        }
+
+        private void WriteLongSingleLineBaseFileWithWhiteSpaceAfterEntryOpenElement()
+        {
+            WriteFile(_baseLiftFileName, 
+@"<entry id=""03d4b59a-9673-4f16-964e-4ea9f0636ef7"" dateCreated=""2009-10-07T04:07:54Z"" dateModified=""2009-10-07T04:10:34Z"" guid=""03d4b59a-9673-4f16-964e-4ea9f0636ef7"">
+<lexical-unit><form lang=""nan""><text>test</text></form></lexical-unit><sense id=""e6f93a8d-7883-4c1c-877e-e34db9f06cdc""><definition><form lang=""en""><text>difficult; slow</text></form></definition></sense></entry>", _directory);
+        }
+
+        private void WriteLongSingleLineBaseFileWithWhiteSpaceMarkerAsSiblingOfEntryElements()
+        {
+            WriteFile(_baseLiftFileName, 
+@"<entry id=""03d4b59a-9673-4f16-964e-4ea9f0636ef7"" dateCreated=""2009-10-07T04:07:54Z"" dateModified=""2009-10-07T04:10:34Z"" guid=""03d4b59a-9673-4f16-964e-4ea9f0636ef7""><lexical-unit><form lang=""nan""><text>test</text></form></lexical-unit><sense id=""e6f93a8d-7883-4c1c-877e-e34db9f06cdc""><definition><form lang=""en""><text>difficult; slow</text></form></definition></sense></entry>
+<entry id=""03d4b59a-9673-4f16-964e-4ea9f0636ef8"" dateCreated=""2009-10-07T04:07:54Z"" dateModified=""2009-10-07T04:10:34Z"" guid=""03d4b59a-9673-4f16-964e-4ea9f0636ef8""><lexical-unit><form lang=""nan""><text>test</text></form></lexical-unit><sense id=""e6f93a8d-7883-4c1c-877e-e34db9f06cdd""><definition><form lang=""en""><text>difficult; slow</text></form></definition></sense></entry>", _directory);
+        }
+
+        [Test]
+        public void FormattedFragmentsWithWhiteSpaceAfterOpeningEntryelement_Merge_FormattedCorrectly()
+        {
+            WriteLongSingleLineBaseFileWithWhiteSpaceAfterEntryOpenElement();
+            WriteLongSingleLineFragment();
+            Merge(_directory);
+            Validator.CheckLiftWithPossibleThrow(Path.Combine(_directory, _baseLiftFileName));
+            Assert.AreEqual(FormattedXml2entries, ReadFileContentIntoString(Path.Combine(_directory, _baseLiftFileName)));
+        }
+
+        [Test]  //This test and the above are testing the same thing as it turns out
+        public void FormattedFragmentsWithWhiteSpaceAsSiblingOfToEntryElements_Merge_FormattedCorrectly()
+        {
+            WriteLongSingleLineBaseFileWithWhiteSpaceMarkerAsSiblingOfEntryElements();
+            WriteLongSingleLineFragment();
+            Merge(_directory);
+            Validator.CheckLiftWithPossibleThrow(Path.Combine(_directory, _baseLiftFileName));
+            Assert.AreEqual(FormattedXml3entries, ReadFileContentIntoString(Path.Combine(_directory, _baseLiftFileName)));
+        }
+
+        [Test]
         public void EdittedEntry_Updated()
         {
             WriteFile(_baseLiftFileName, "<entry id='one' guid='0ae89610-fc01-4bfd-a0d6-1125b7281dd1' greeting='hi'></entry><entry id='two' guid='0ae89610-fc01-4bfd-a0d6-1125b7281d22'></entry>", _directory);

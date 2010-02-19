@@ -259,6 +259,7 @@ namespace LiftIO.Merging
             settings.NewLineOnAttributes = true; //ugly, but great for merging with revision control systems
             settings.Indent = true;
             settings.IndentChars = "\t";
+            settings.CheckCharacters = false;
 
             // nb:  don't use XmlTextWriter.Create, that's broken. Ignores the indent setting
             using (XmlWriter writer = XmlWriter.Create(outputPath /*Console.Out*/, settings))
@@ -266,6 +267,7 @@ namespace LiftIO.Merging
                 //For each entry in the new guy, read through the whole base file
                 XmlReaderSettings readerSettings = new XmlReaderSettings();
                 readerSettings.CheckCharacters = false;//without this, we die if we simply encounter a (properly escaped) other-wise illegal unicode character, e.g. &#x1F;
+                readerSettings.IgnoreWhitespace = true; //if the reader returns whitespace, the writer ceases to format xml after that point
                 using (XmlReader olderReader = XmlTextReader.Create(olderFilePath, readerSettings))
                 {
                     //bool elementWasReplaced = false;
@@ -305,10 +307,7 @@ namespace LiftIO.Merging
                 writer.WriteAttributes(olderReader, true);
                 foreach(XmlNode n in newerDoc.SelectNodes("//entry")) 
                 {
-//worked, but died if there was an escaped unicode, like &#x1F;     writer.WriteNode(n.CreateNavigator(), true /*REVIEW*/);//REVIEW CreateNavigator
-
-                    writer.WriteRaw(n.OuterXml);
-
+                    writer.WriteNode(n.CreateNavigator(), true /*REVIEW*/);//REVIEW CreateNavigator
                 }
                 //write out the closing lift element
                 writer.WriteEndElement();
@@ -322,8 +321,7 @@ namespace LiftIO.Merging
             {
                 foreach (XmlNode n in newerDoc.SelectNodes("//entry")) //REVIEW CreateNavigator
                 {
-                    //worked, but died if there was an escaped unicode, like &#x1F;       writer.WriteNode(n.CreateNavigator(), true /*REVIEW*/);
-                    writer.WriteRaw(n.OuterXml);
+                    writer.WriteNode(n.CreateNavigator(), true /*REVIEW*/);
                 }
 
                 //write out the closing lift element
@@ -342,8 +340,7 @@ namespace LiftIO.Merging
                     if (match != null)
                     {
                         olderReader.Skip(); //skip the old one
-                        //worked, but died if there was an escaped unicode, like &#x1F;    writer.WriteNode(match.CreateNavigator(), true); //REVIEW CreateNavigator
-                        writer.WriteRaw(match.OuterXml);
+                        writer.WriteNode(match.CreateNavigator(), true); //REVIEW CreateNavigator
                         match.ParentNode.RemoveChild(match);
                     }
                     else
