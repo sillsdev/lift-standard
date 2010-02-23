@@ -168,8 +168,18 @@ namespace LiftIO.Tests.Merging
             Assert.AreEqual(FormattedXml2entries, ReadFileContentIntoString(Path.Combine(_directory, _baseLiftFileName)));
         }
 
-        [Test]  //This test and the above are testing the same thing as it turns out
+        [Test] 
         public void FormattedFragmentsWithWhiteSpaceAsSiblingOfToEntryElements_Merge_FormattedCorrectly()
+        {
+            WriteLongSingleLineBaseFileWithWhiteSpaceMarkerAsSiblingOfEntryElements();
+            WriteLongSingleLineFragment();
+            Merge(_directory);
+            Validator.CheckLiftWithPossibleThrow(Path.Combine(_directory, _baseLiftFileName));
+            Assert.AreEqual(FormattedXml3entries, ReadFileContentIntoString(Path.Combine(_directory, _baseLiftFileName)));
+        }
+
+        [Test] 
+        public void Merge_HasCarriageReturnLineFeedAsNewLineCharacters()
         {
             WriteLongSingleLineBaseFileWithWhiteSpaceMarkerAsSiblingOfEntryElements();
             WriteLongSingleLineFragment();
