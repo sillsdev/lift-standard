@@ -104,8 +104,6 @@
   <PropertyGroup>
     <PostBuildEvent>if exist "C:\wesay\lib\" copy "$(TargetDir)$(TargetName).dll" "C:\wesay\lib\"
 if exist "C:\wesay\lib\" copy "$(TargetDir)$(TargetName).pdb" "C:\wesay\lib\"
-REM if exist "C:\fw\Src\LexText\Extensions\Flex.LiftImport\lib" copy $(TargetPath) "C:\fw\Src\LexText\Extensions\Flex.LiftImport\lib"
-REM if exist "C:\fw\Src\LexText\Extensions\Flex.LiftImport\lib" copy $(TargetDir)$(TargetName).pdb "C:\fw\Src\LexText\Extensions\Flex.LiftImport\lib"
 if exist "%25FWROOT%25\DistFiles\xample.dll" copy "$(TargetPath)" "%25FWROOT%25\DistFiles"
 if exist "%25FWROOT%25\DistFiles\$(TargetFileName)" copy "$(TargetDir)$(TargetName).pdb" "%25FWROOT%25\DistFiles"
 </PostBuildEvent>
