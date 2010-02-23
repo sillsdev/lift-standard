@@ -260,6 +260,7 @@ namespace LiftIO.Merging
             settings.Indent = true;
             settings.IndentChars = "\t";
             settings.CheckCharacters = false;
+            settings.NewLineChars = "\r\n";
 
             // nb:  don't use XmlTextWriter.Create, that's broken. Ignores the indent setting
             using (XmlWriter writer = XmlWriter.Create(outputPath /*Console.Out*/, settings))
