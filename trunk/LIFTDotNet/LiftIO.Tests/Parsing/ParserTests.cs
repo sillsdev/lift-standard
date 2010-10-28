@@ -850,21 +850,7 @@ namespace LiftIO.Tests.Parsing
         }
 
 
-        [Test]
-        [ExpectedException(typeof(LiftFormatException))]
-        public void MultipleFieldsOnEntries_SameTag_Error()
-        {
-            ExpectEmptyEntry();
-            ExpectMergeInField(
-                Is.EqualTo("color"),
-                Is.EqualTo(default(DateTime)),
-                Is.EqualTo(default(DateTime)),
-                Has.Property("Count", Is.EqualTo(2)),
-                Has.Property("Count", Is.EqualTo(0))
-                );
-            ParseEntryAndCheck(
-                "<entry><field type='color'><form lang='en'><text>red</text></form><form lang='es'><text>roco</text></form></field><field type='color'><form lang='en'><text>free</text></form></field></entry>");
-        }
+
 
         [Test]
         public void DatesOnFields()
