@@ -453,11 +453,13 @@ namespace LiftIO.Parsing
             {
                 string fieldType = Utilities.GetStringAttribute(fieldNode, "type");
                 string priorFieldWithSameTag = String.Format("preceding-sibling::field[@type='{0}']", fieldType);
-                if(fieldNode.SelectSingleNode(priorFieldWithSameTag) != null)
-                {
+//    JH removed this Oct 2010... I can't figure out why this limitation, which is not supported logicall
+//                or by the schema, was in here.  It was preventing, for example, multiple variants.
+//                if(fieldNode.SelectSingleNode(priorFieldWithSameTag) != null)
+//                {
                     // a fatal error
-                    throw new LiftFormatException(String.Format("Field with same type ({0}) as sibling not allowed. Context:{1}", fieldType, fieldNode.ParentNode.OuterXml));
-                }
+//                    throw new LiftFormatException(String.Format("Field with same type ({0}) as sibling not allowed. Context:{1}", fieldType, fieldNode.ParentNode.OuterXml));
+//                }
                 this._merger.MergeInField(target,
                                           fieldType,
                                           GetOptionalDate(fieldNode, "dateCreated", default(DateTime)),
