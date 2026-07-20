@@ -42,7 +42,6 @@ The most recent published version is **0.13**:
 - [LIFT 0.13 Specification (PDF)](https://github.com/sillsdev/lift-standard/blob/master/lift_13.pdf)  
 - [LIFT 0.13 RelaxNG Schema (.rng)](https://github.com/sillsdev/lift-standard/blob/master/lift-0.13.rng)  
 
-
 ---
 
 ## Resources
@@ -50,3 +49,10 @@ The most recent published version is **0.13**:
 - [Archived Project Page](https://code.google.com/archive/p/lift-standard/)  
 - [Downloads](https://code.google.com/archive/p/lift-standard/downloads) — schema files and specification documents  
 
+---
+
+## License
+
+[MIT](LICENSE)
+
+The binaries under [`LIFTDotNet/lib/`](LIFTDotNet/lib/) are bundled third-party libraries under their own (permissive) upstream licenses.
