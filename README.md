@@ -20,6 +20,7 @@ LIFT has been designed to have a long life while being relatively easy to conver
 ## Programs that Support LIFT
 
 - **[FieldWorks Language Explorer (FLEx)](https://software.sil.org/fieldworks/)** — can import and export LIFT files.
+  - See [Technical Notes on LIFT used in FLEx](https://downloads.languagetechnology.org/fieldworks/Documentation/Technical%20Notes%20on%20LIFT%20used%20in%20FLEx.pdf) for FLEx-specific implementation details.
 - **[The Combine](https://thecombine.app)** — can import and export LIFT files.  
 - **[Lexique Pro](http://www.lexiquepro.com/)** — Can open LIFT documents for viewing, printing, and generating web pages. It can also save to LIFT format.  
 
