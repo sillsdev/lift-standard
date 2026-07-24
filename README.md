@@ -40,7 +40,8 @@ The LIFT standard may still evolve as developers work with it.
 
 The most recent published version is **0.13**:  
 - [LIFT 0.13 Specification (PDF)](https://github.com/sillsdev/lift-standard/blob/master/lift_13.pdf)  
-- [LIFT 0.13 RelaxNG Schema (.rng)](https://github.com/sillsdev/lift-standard/blob/master/lift-0.13.rng)  
+- [LIFT 0.13 RelaxNG Schema (.rng)](https://github.com/sillsdev/lift-standard/blob/master/LIFTDotNet/LiftIO/Validation/lift-0.13.rng)
+- [LIFT 0.13 Ranges (standalone .lift-ranges) RelaxNG Schema (.rng)](https://github.com/sillsdev/lift-standard/blob/master/LIFTDotNet/LiftIO/Validation/lift-ranges-0.13.rng)
 
 ---
 
