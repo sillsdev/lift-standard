@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  RELAX NG grammar for standalone .lift-ranges documents (LIFT 0.13).
+
+  The base LIFT 0.13 grammar has no root element for a ranges-only document,
+  yet such documents are written routinely in practice. The <define> blocks
+  below are copied verbatim from lift-0.13.rng in this directory, so the
+  content model is exactly the spec's; only the <lift-ranges> root is new.
+-->
+<grammar datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes"
+         xmlns="http://relaxng.org/ns/structure/1.0"
+         xmlns:sch="http://purl.oclc.org/dsdl/schematron">
+
+  <start>
+    <element name="lift-ranges">
+      <zeroOrMore>
+        <element name="range">
+          <ref name="range-content"/>
+        </element>
+      </zeroOrMore>
+    </element>
+  </start>
+
+  <define name="date.or.dateTime">
+    <choice>
+      <data type="date"/>
+      <data type="dateTime"/>
+    </choice>
+  </define>
+
+  <define name="span-content">
+    <interleave>
+      <text/>
+      <zeroOrMore>
+        <element name="span">
+          <ref name="inner-span-content"/>
+        </element>
+      </zeroOrMore>
+    </interleave>
+  </define>
+
+  <define name="inner-span-content">
+    <optional>
+      <!-- rfc 4646 -->
+      <attribute name="lang"/>
+    </optional>
+    <optional>
+      <attribute name="href">
+        <data type="anyURI"/>
+      </attribute>
+    </optional>
+    <optional>
+      <attribute name="class"/>
+    </optional>
+    <ref name="span-content"/>
+  </define>
+
+  <define name="form-content">
+    <attribute name="lang"/>
+    <!-- rfc 4646 -->
+    <ref name="form-no-lang-content"/>
+  </define>
+
+  <define name="form-no-lang-content">
+    <interleave>
+      <element name="text">
+        <ref name="span-content"/>
+      </element>
+      <zeroOrMore>
+        <element name="annotation">
+          <ref name="annotation-content"/>
+        </element>
+      </zeroOrMore>
+    </interleave>
+  </define>
+
+  <define name="multitext-content">
+    <zeroOrMore>
+      <element name="form">
+        <ref name="form-content"/>
+        <sch:rule context="form" >
+          <sch:assert test="not(preceding-sibling::form[@lang=current()/@lang])">
+            Forms should be in different langs.
+            There is only one form with a given lang allowed in any parent element.
+          </sch:assert>
+        </sch:rule>
+      </element>
+    </zeroOrMore>
+  </define>
+
+  <define name="annotation-content">
+    <ref name="multitext-content"/>
+    <attribute name="name"/>
+    <optional>
+      <attribute name="value"/>
+    </optional>
+    <optional>
+      <attribute name="who"/>
+    </optional>
+    <optional>
+      <attribute name="when">
+        <ref name="date.or.dateTime"/>
+      </attribute>
+    </optional>
+  </define>
+
+  <define name="range-content">
+    <attribute name="id"/>
+    <optional>
+      <attribute name="href">
+        <data type="anyURI"/>
+      </attribute>
+    </optional>
+    <optional>
+      <attribute name="guid"/>
+    </optional>
+    <interleave>
+      <optional>
+        <element name="description">
+          <ref name="multitext-content"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="label">
+          <ref name="multitext-content"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="abbrev">
+          <ref name="multitext-content"/>
+        </element>
+      </optional>
+      <zeroOrMore>
+        <element name="range-element">
+          <ref name="range-element-content"/>
+        </element>
+      </zeroOrMore>
+    </interleave>
+  </define>
+
+  <define name="range-element-content">
+    <attribute name="id"/>
+    <optional>
+      <!-- refers to another range-element's id -->
+      <attribute name="parent"/>
+    </optional>
+    <optional>
+      <attribute name="guid"/>
+    </optional>
+    <interleave>
+      <optional>
+        <element name="description">
+          <ref name="multitext-content"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="label">
+          <ref name="multitext-content"/>
+        </element>
+      </optional>
+      <optional>
+        <element name="abbrev">
+          <ref name="multitext-content"/>
+        </element>
+      </optional>
+    </interleave>
+  </define>
+
+</grammar>
